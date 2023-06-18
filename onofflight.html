@@ -1,0 +1,34 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matteronofflight',{
+        category: 'Matter',
+        color: '#6699ff',
+        icon: "font-awesome/fa-lightbulb-o",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+        },
+        label: function() {
+            return this.name||"On-Off Light";
+        },
+        paletteLabel: "On-Off Light"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matteronofflight">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matteronofflight">
+   A Bridged Simple light.
+
+</script>

@@ -1,0 +1,85 @@
+<script src="resources/@sammachin/node-red-matter-bridge/qrcode.min.js"></script>
+<script type="text/javascript">
+    RED.nodes.registerType('matterbridge',{
+        category: 'config',
+        defaults: {
+            name: {},
+            vendorId : {value: "0xFFF1"},
+            productId : {value: "0x8000"},
+            vendorName : {value: "Node-RED-Matter"},
+            productName : {value: "Node-RED-Bridge"},
+            networkInterface : {}
+        },
+        label: function() {
+            return this.name||"Bridge";
+        },
+        oneditprepare: function(){
+            var nodeid=this.id
+            var url = '_matterbridge/commisioning/'+nodeid;
+            $.get(url, function(r) {
+                if (r.state =='ready'){
+                    let status = document.getElementById('status')
+                    let mpc = r.manualPairingCode
+                    status.innerText = `Manual Pairing Code: ${mpc.slice(0,4)+'-'+mpc.slice(4,7)+"-"+mpc.slice(7,11)}`
+                    var qrcode = new QRCode(document.getElementById('qrcode'), {
+                    text: r.qrPairingCode,
+                    width: 250,
+                    height: 250,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.H,
+                    });
+                }
+                else if (r.state == 'commissioned'){
+                    let status = document.getElementById('status')
+                    status.innerText = `Bridge is Commissioned into a fabric`
+                }
+                console.log(r)
+            })
+            .error(function(e) {
+                console.log(e.status);
+            })
+        },
+        oneditsave: function(){
+            console.log(this)
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterbridge">
+    <div class="form-row">
+        <label for="node-config-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-config-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-vendorId">Vendor ID</label>
+        <input type="text" id="node-config-input-vendorId" placeholder="0xFFF1">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-vendorName">Vendor Name</label>
+        <input type="text" id="node-config-input-vendorName" placeholder="Node-RED-Matter">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-productId">Product ID</label>
+        <input type="text" id="node-config-input-productId" placeholder="0x8000">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-productName">Product Name</label>
+        <input type="text" id="node-config-input-productName" placeholder="Node-RED-Bridge">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-networkInterface">Network interface</label>
+        <input type="text" id="node-config-input-networkInterface">
+    </div>
+    <div class="form-row">
+        <div id="qrcode"></div>
+        <div id="status">
+            <p>The bridge node must be deployed before it can be commissioned</p>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matterbridge">
+   Config Node with the required parameters to setup a bridge
+
+</script>

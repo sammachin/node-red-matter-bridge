@@ -34,7 +34,7 @@ module.exports = function(RED) {
             this.status({fill:"green",shape:"dot",text:"ready"});
         })
         this.on('state', function(data){
-            console.log(data)
+            console.log(node.id, data)
             var msg = {};
             msg.payload=data
             node.send(msg);

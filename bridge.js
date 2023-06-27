@@ -28,7 +28,7 @@ module.exports = function(RED) {
         node.productId = +config.productId
         node.vendorName = config.vendorName
         node.productName = config.productName
-        node.networkInterface = undefined //config.networkInterface
+        node.networkInterface = config.networkInterface
         node.port = 5540
         node.passcode = genPasscode()
         node.discriminator = Math.floor(Math.random() * 4095).toString().padStart(4, '0')
@@ -73,11 +73,11 @@ module.exports = function(RED) {
             if (index > -1) { 
                 node.users.splice(index, 1); 
             }
-            child.onOffDevice =  new Device.OnOffLightDevice();
-            child.onOffDevice.addOnOffListener(on => { 
+            child.device =  new Device.OnOffLightDevice();
+            child.device.addOnOffListener(on => { 
                 child.emit('state', on)
             });
-            aggregator.addBridgedDevice(child.onOffDevice, {
+            aggregator.addBridgedDevice(child.device, {
                 nodeLabel: child.name,
                 serialNumber: `node-matter-${child.id}`,
                 reachable: true

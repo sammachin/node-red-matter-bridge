@@ -1,0 +1,38 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matteronoffsocket',{
+        category: 'Matter',
+        color: '#6699ff',
+        icon: "font-awesome/fa-plug",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+        },
+        label: function() {
+            return this.name||"On-Off Socket";
+        },
+        paletteLabel: "On-Off Socket"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matteronoffsocket">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matteronoffsocket">
+   A Bridged Simple Socket.
+
+   Turn the device on or off by sending either true/false, 1/0, on/off 
+   Toggle the device state by sending a `toggle`
+
+   Outputs true/false based on the state of the devoice
+</script>

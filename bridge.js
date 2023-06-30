@@ -73,10 +73,21 @@ module.exports = function(RED) {
             if (index > -1) { 
                 node.users.splice(index, 1); 
             }
-            child.device =  new Device.OnOffLightDevice();
-            child.device.addOnOffListener(on => { 
-                child.emit('state', on)
-            });
+            switch (child.type){
+                case 'matteronofflight':
+                    child.device =  new Device.OnOffLightDevice();
+                    child.device.addOnOffListener(on => { 
+                        child.emit('state', on)
+                    });
+                    break
+                case 'matteronoffsocket':
+                    child.device =  new Device.OnOffPluginUnitDevice();
+                    child.device.addOnOffListener(on => { 
+                        child.emit('state', on)
+                    });
+                    break
+            }
+            
             aggregator.addBridgedDevice(child.device, {
                 nodeLabel: child.name,
                 serialNumber: `node-matter-${child.id}`,

@@ -12,7 +12,8 @@
   "node-red": {
     "nodes": {
       "matter-bridge": "bridge.js",
-      "matter-onofflight": "onofflight.js"
+      "matter-onofflight": "onofflight.js",
+      "matter-onoffsocket": "onoffsocket.js"
     }
   }
 }

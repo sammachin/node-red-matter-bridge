@@ -1,0 +1,39 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matterdimmablelight',{
+        category: 'Matter',
+        color: '#6699ff',
+        icon: "font-awesome/fa-lightbulb-o",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+        },
+        label: function() {
+            return this.name||"Dimmable Light";
+        },
+        paletteLabel: "Dimmable Light"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterdimmablelight">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matterdimmablelight">
+   A Bridged Dimmable light.
+
+   Turn the device on or off by sending either true/false, 1/0, on/off 
+   Toggle the device state by sending a `toggle`
+   Set the level by sending a number between 0-100
+
+   Outputs  the state of the devoice
+</script>

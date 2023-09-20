@@ -8,13 +8,15 @@
             productId : {value: "0x8000"},
             vendorName : {value: "Node-RED-Matter"},
             productName : {value: "Node-RED-Bridge"},
-            networkInterface : {}
+            networkInterface : {},
+            logLevel: {value: "ERROR"}
         },
         label: function() {
             return this.name||"Bridge";
         },
         oneditprepare: function(){
             var nodeid=this.id
+            var selectedInterface = this.networkInterface
             var url = '_matterbridge/commisioning/'+nodeid;
             $.get(url, function(r) {
                 if (r.state =='ready'){
@@ -35,6 +37,21 @@
                     status.innerText = `Bridge is Commissioned into a fabric`
                 }
                 console.log(r)
+            })
+            .error(function(e) {
+                console.log(e.status);
+            })
+            $.get('_matterbridge/interfaces', function(r) {
+                let interfaces = document.getElementById('node-config-input-networkInterface');
+                r.forEach(i => {
+                    interfaces.add(new Option(i, i));
+                });
+                console.log(selectedInterface)
+                if (typeof selectedInterface !== 'undefined'){
+                    console.log('defined')
+                    interfaces.value = selectedInterface
+                }
+                
             })
             .error(function(e) {
                 console.log(e.status);
@@ -69,7 +86,17 @@
     </div>
     <div class="form-row">
         <label for="node-config-input-networkInterface">Network interface</label>
-        <input type="text" id="node-config-input-networkInterface">
+        <select type="text" id="node-config-input-networkInterface" style="width:50%;" >
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-logLevel">Log Level</label>
+        <select type="text" id="node-config-input-logLevel" style="width:50%;" >
+            <option value="INFO">Info</option>
+            <option value="WARN">Warn</option>
+            <option value="ERROR">Error</option>
+            <option value="FATAL">Fatal</option>
+        </select>
     </div>
     <div class="form-row">
         <div id="qrcode"></div>

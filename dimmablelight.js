@@ -1,6 +1,6 @@
 
 module.exports = function(RED) {
-    function MatterOnOffSocket(config) {
+    function MatterDimmableLight(config) {
         RED.nodes.createNode(this,config);
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
@@ -10,6 +10,8 @@ module.exports = function(RED) {
         this.on('input', function(msg) {
             if (typeof msg.payload == "boolean") {
                 node.device.onOff(msg.payload)
+            } else if (typeof(msg.payload) == 'number'){
+                node.device.setCurrentLevel(msg.payload)
             } else {
                 switch (msg.payload){
                     case '1':
@@ -36,7 +38,6 @@ module.exports = function(RED) {
         this.on('state', function(data){
             console.log(node.id, data)
             var msg = {};
-            msg.topic='state'
             msg.payload=data
             node.send(msg);
         })
@@ -50,5 +51,5 @@ module.exports = function(RED) {
         });
         node.bridge.emit('registerChild', node)
     }
-    RED.nodes.registerType("matteronoffsocket",MatterOnOffSocket);
+    RED.nodes.registerType("matterdimmablelight",MatterDimmableLight);
 }

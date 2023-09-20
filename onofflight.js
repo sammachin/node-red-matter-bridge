@@ -33,13 +33,18 @@ module.exports = function(RED) {
         this.on('serverReady', function() {
             this.status({fill:"green",shape:"dot",text:"ready"});
         })
+        
         this.on('state', function(data){
             console.log(node.id, data)
             var msg = {};
+            msg.topic='state'
             msg.payload=data
             node.send(msg);
         })
+
         this.on('close', function(removed, done) {
+            this.off('state')
+            this.off('serverReady')
             if (removed) {
                 // This node has been disabled/deleted
             } else {

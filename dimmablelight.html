@@ -8,6 +8,7 @@
         defaults: {
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
+            range: {value: "255"},
         },
         label: function() {
             return this.name||"Dimmable Light";
@@ -26,14 +27,66 @@
         <label for="node-config-input-bridge">Bridge</label>
         <input type="text" id="node-input-bridge" style="width:70%;">
     </div>
+    <div class="form-row">
+        <label for="node-input-range">Range</label>
+        <select type="text" id="node-input-range" style="width:50%;" >
+            <option value="100">0-100</option>
+            <option value="255">0-255</option>
+        </select>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="matterdimmablelight">
-   A Bridged Dimmable light.
+   <p>A Bridged Dimmable light</p>
 
-   Turn the device on or off by sending either true/false, 1/0, on/off 
-   Toggle the device state by sending a `toggle`
-   Set the level by sending a number between 0-100
-
-   Outputs  the state of the devoice
+   <h3>Inputs</h3>
+       <dl class="message-properties">
+            <dt class="optional">
+                payload.state         
+                <span class="property-type">
+                    string | bool | number
+                </span>
+            </dt>
+            <dd> 
+                Control the state of the light, accepts either true/fase, "on/off" or "0/1",<br>
+                You can also toggle the state by setting the value to "toggle"
+            </dd>
+           <dt class="optional">
+            payload.level         
+            <span class="property-type">
+                number
+            </span>
+            </dt>
+            <dd> 
+                Control the level of the light,<br>
+                either 0-100 or 0-255 depending on the configuration of the range property
+            </dd>
+       </dl>
+   
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>
+            payload.state         
+            <span class="property-type">
+                bool 
+            </span>
+        </dt>
+        <dd> 
+            State of the light, on is true, off is false
+        </dd>
+       <dt class="optional">
+        payload.level         
+        <span class="property-type">
+            number
+        </span>
+        </dt>
+        <dd> 
+            The level of the light,<br>
+            either 0-100 or 0-255 depending on the configuration of the range property
+        </dd>
+   </dl>
+   
+   <h3>Details</h3>
+       
+   
 </script>

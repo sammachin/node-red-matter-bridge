@@ -6,9 +6,14 @@ module.exports = function(RED) {
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
         node.range = config.range
+        node.pending = false
+        node.pendingmsg = null
+        node.passthrough = /^true$/i.test(config.passthrough)
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
+            node.pending = true
+            node.pendingmsg = msg
             if (msg.payload.state == undefined) {
                 msg.payload.state = node.device.getOnOff()
             }
@@ -46,13 +51,21 @@ module.exports = function(RED) {
         this.on('serverReady', function() {
             this.status({fill:"green",shape:"dot",text:"ready"});
         })
-        this.on('state', function(data){
-            console.log(node.id, data)
-            var msg = {payload : {}};
-            msg.payload.state = node.device.getOnOff()
-            msg.payload.level = node.device.getCurrentLevel()
-            if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-            node.send(msg);
+        this.on('state', function(data){                        
+            if ((node.pending && node.passthrough)) {
+                var msg = node.pendingmsg
+                msg.payload.state = node.device.getOnOff()
+                msg.payload.level = node.device.getCurrentLevel()
+                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
+                node.send(msg);
+            } else if (!node.pending){
+                var msg = {payload : {}};
+                msg.payload.state = node.device.getOnOff()
+                msg.payload.level = node.device.getCurrentLevel()
+                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
+                node.send(msg);
+            }
+            node.pending = false
         })
         this.on('close', function(removed, done) {
             this.off('state')

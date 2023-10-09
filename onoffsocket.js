@@ -5,9 +5,14 @@ module.exports = function(RED) {
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
+        node.pending = false
+        node.pendingmsg = null
+        node.passthrough = /^true$/i.test(config.passthrough)
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
+            node.pending = true
+            node.pendingmsg = msg
             if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                 msg.payload = state = {state: msg.payload}
             }
@@ -43,12 +48,18 @@ module.exports = function(RED) {
             this.status({fill:"green",shape:"dot",text:"ready"});
         })
         this.on('state', function(data){
-            console.log(node.id, data)
-            var msg = {};
-            var msg = {payload : {}};
-            msg.payload.state=data
-            node.send(msg);
+            if ((node.pending && node.passthrough)) {
+                var msg = node.pendingmsg
+                msg.payload.state=data
+                node.send(msg);
+            } else if (!node.pending){
+                var msg = {payload : {}};
+                msg.payload.state=data
+                node.send(msg);
+            }
+            node.pending = false
         })
+
         this.on('close', function(removed, done) {
             this.removeAllListeners('state')
             this.removeAllListeners('serverReady')

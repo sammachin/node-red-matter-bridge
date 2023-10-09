@@ -7,7 +7,12 @@ module.exports = function(RED) {
         node.name = config.name
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
+        node.pending = false
+        node.pendingmsg = null
+        node.passthrough = /^true$/i.test(config.passthrough)
         this.on('input', function(msg) {
+            node.pending = true
+            node.pendingmsg = msg
             if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                 msg.payload = state = {state: msg.payload}
             }
@@ -44,10 +49,19 @@ module.exports = function(RED) {
         })
         
         this.on('state', function(data){
-            console.log(node.id, data)
-            var msg = {payload : {}};
-            msg.payload.state=data
-            node.send(msg);
+            if ((node.pending && node.passthrough)) {
+                console.log('use existing msg')
+                var msg = node.pendingmsg
+                msg.payload.state=data
+                node.send(msg);
+            } else if (!node.pending){
+                console.log('new msg')
+                var msg = {payload : {}};
+                msg.payload.state=data
+                node.send(msg);
+            }
+            node.pending = false
+
         })
 
         this.on('close', function(removed, done) {

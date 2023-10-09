@@ -9,6 +9,7 @@
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
             range: {value: "254"},
+            passthrough: {value: true}
         },
         label: function() {
             return this.name||"Dimmable Light";
@@ -27,6 +28,12 @@
         <label for="node-config-input-bridge">Bridge</label>
         <input type="text" id="node-input-bridge" style="width:70%;">
     </div>
+    <div class="form-row">
+        <label for="node-input-passthrough">Passthrough Input msg to Output</label>
+        <select type="text" id="node-input-passthrough" style="width:50%;" >
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
     <div class="form-row">
         <label for="node-input-range">Range</label>
         <select type="text" id="node-input-range" style="width:50%;" >

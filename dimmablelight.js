@@ -7,16 +7,12 @@ module.exports = function(RED) {
         node.name = config.name
         node.range = config.range
         console.log(`Loading Device node ${node.id}`)
-        console.log(`Range set to  ${node.range}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            console.log(`Range set to  ${node.range}`)
             if (msg.payload.state == undefined) {
-                console.log('Setting to current state')
                 msg.payload.state = node.device.getOnOff()
             }
             if (msg.payload.level == undefined) {
-                console.log('Setting to current level')
                 msg.payload.level = node.device.getCurrentLevel()
             }
             else {
@@ -59,6 +55,9 @@ module.exports = function(RED) {
             node.send(msg);
         })
         this.on('close', function(removed, done) {
+            this.off('state')
+            this.off('serverReady')
+            this.off('state')
             if (removed) {
                 // This node has been disabled/deleted
             } else {

@@ -29,10 +29,36 @@
 </script>
 
 <script type="text/x-red" data-help-name="matteronoffsocket">
-   A Bridged Simple Socket.
+    <p>A Bridged on/off Socket</p>
 
-   Turn the device on or off by sending either true/false, 1/0, on/off 
-   Toggle the device state by sending a `toggle`
-
-   Outputs true/false based on the state of the devoice
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload.state         
+                 <span class="property-type">
+                     string | bool | number
+                 </span>
+             </dt>
+             <dd> 
+                 Control the state of the socket, accepts either true/fase, "on/off" or "0/1",<br>
+                 You can also toggle the state by setting the value to "toggle"
+             </dd>
+            
+        </dl>
+    
+     <h3>Outputs</h3>
+     <dl class="message-properties">
+         <dt>
+             payload.state         
+             <span class="property-type">
+                 bool 
+             </span>
+         </dt>
+         <dd> 
+             State of the socket, on is true, off is false
+         </dd>
+        
+    </dl>
+    
+    <h3>Details</h3>
 </script>

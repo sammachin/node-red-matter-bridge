@@ -8,8 +8,6 @@ module.exports = function(RED) {
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            console.log(msg.payload.state)
-            console.log(typeof(msg.payload))
             if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                 msg.payload = state = {state: msg.payload}
             }
@@ -53,8 +51,9 @@ module.exports = function(RED) {
         })
 
         this.on('close', function(removed, done) {
-            this.off('state')
-            this.off('serverReady')
+            this.removeAllListeners('state')
+            this.removeAllListeners('serverReady')
+            this.removeAllListeners('state')
             if (removed) {
                 // This node has been disabled/deleted
             } else {

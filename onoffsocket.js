@@ -8,21 +8,30 @@ module.exports = function(RED) {
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            if (typeof msg.payload == "boolean") {
-                node.device.onOff(msg.payload)
+            if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
+                msg.payload = state = {state: msg.payload}
+            }
+            if (typeof msg.payload.state == "boolean") {
+                node.device.setOnOff(msg.payload.state)
             } else {
-                switch (msg.payload){
+                switch (msg.payload.state){
                     case '1':
-                        node.device.onOff(true)
+                        node.device.setOnOff(true)
                         break
                     case '0':
-                        node.device.onOff(false)
+                        node.device.setOnOff(false)
+                        break
+                    case 1:
+                        node.device.setOnOff(true)
+                        break
+                    case 0:
+                        node.device.setOnOff(false)
                         break
                     case 'on':
-                        node.device.onOff(true)
+                        node.device.setOnOff(true)
                         break
                     case 'off':
-                        node.device.onOff(false)
+                        node.device.setOnOff(false)
                         break
                     case 'toggle':
                         node.device.toggle()
@@ -36,11 +45,14 @@ module.exports = function(RED) {
         this.on('state', function(data){
             console.log(node.id, data)
             var msg = {};
-            msg.topic='state'
-            msg.payload=data
+            var msg = {payload : {}};
+            msg.payload.state=data
             node.send(msg);
         })
         this.on('close', function(removed, done) {
+            this.removeAllListeners('state')
+            this.removeAllListeners('serverReady')
+            this.removeAllListeners('state')
             if (removed) {
                 // This node has been disabled/deleted
             } else {

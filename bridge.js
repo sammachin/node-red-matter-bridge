@@ -37,6 +37,9 @@ module.exports = function(RED) {
                 break;
             case "INFO":
                 Log.Logger.defaultLogLevel = Log.Level.INFO;
+                break;1
+            case "DEBUG":
+                Log.Logger.defaultLogLevel = Log.Level.DEBUG;
                 break;
         }
         console.log(`Loading Bridge node ${node.id}`)
@@ -59,7 +62,8 @@ module.exports = function(RED) {
             node.deviceStorage = storageManager.createContext("Device")
         node.serverReady = false;
         //Servers
-        node.matterServer = new Matter.MatterServer(storageManager, node.networkInterface);
+        console.log(node.networkInterface)
+        node.matterServer = new Matter.MatterServer(storageManager, {"mdnsAnnounceInterface": node.networkInterface});
         node.commissioningServer = new Matter.CommissioningServer({
             port : node.port,
             deviceName : node.name,

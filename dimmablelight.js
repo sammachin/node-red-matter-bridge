@@ -15,37 +15,48 @@ module.exports = function(RED) {
             node.pending = true
             node.pendingmsg = msg
             if (msg.payload.state == undefined) {
-                msg.payload.state = node.device.getOnOff()
+                msg.payload.state = node.device.state.onOff.onOff
             }
             if (msg.payload.level == undefined) {
-                msg.payload.level = node.device.getCurrentLevel()
+                msg.payload.level = node.device.state.levelControl.currentLevel
             }
             else {
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
             }
-            node.device.setCurrentLevel(msg.payload.level)
+            node.device.set({
+                levelControl: {
+                    currentLevel: msg.payload.level
+                }
+            })
             switch (msg.payload.state){
                 case '1':
-                    node.device.setOnOff(true)
+                case 1:
+                case 'on':
+                case true:
+                    node.device.set({
+                        onOff: {
+                            onOff: true,
+                        }
+                    })
                     break
                 case '0':
-                    node.device.setOnOff(false)
-                    break
-                case 'on':
-                    node.device.setOnOff(true)
-                    break
+                case 0:
                 case 'off':
-                    node.device.setOnOff(false)
+                case false:
+                    node.device.set({
+                        onOff: {
+                            onOff: false,
+                        }
+                    })
                     break
                 case 'toggle':
-                    node.device.toggle()
+                    node.device.set({
+                        onOff: {
+                                    onOff: !node.device.state.onOff.onOff,
+                                }
+                    })
                     break
-                case false:
-                    node.device.setOnOff(false)
-                    break
-                case true:
-                    node.device.setOnOff(true)
-                    break
+                
             }
         });
         this.on('serverReady', function() {
@@ -54,23 +65,32 @@ module.exports = function(RED) {
         this.on('state', function(data){                        
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
-                msg.payload.state = node.device.getOnOff()
-                msg.payload.level = node.device.getCurrentLevel()
+                msg.payload.state = node.device.state.onOff.onOff
+                msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
-                msg.payload.state = node.device.getOnOff()
-                msg.payload.level = node.device.getCurrentLevel()
+                msg.payload.state = node.device.state.onOff.onOff
+                msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
                 node.send(msg);
             }
             node.pending = false
         })
+        this.on('identify', function(data){
+            if (data){
+                this.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                this.status({fill:"green",shape:"dot",text:"ready"});
+            }
+            
+        })
+
         this.on('close', function(removed, done) {
             this.off('state')
             this.off('serverReady')
-            this.off('state')
+            this.off('identify')
             if (removed) {
                 // This node has been disabled/deleted
             } else {
@@ -78,7 +98,16 @@ module.exports = function(RED) {
             }
             done();
         });
-        node.bridge.emit('registerChild', node)
+        //Wait till server is started
+        function waitforserver(node) {
+            if (!node.bridge.serverReady) {
+              setTimeout(waitforserver, 100, node)
+            } else {
+                console.log('Registering Child......')
+                node.bridge.emit('registerChild', node)
+            }
+        }
+        waitforserver(node)
     }
     RED.nodes.registerType("matterdimmablelight",MatterDimmableLight);
 }

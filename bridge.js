@@ -1,10 +1,14 @@
-const Matter = require("@project-chip/matter-node.js");
-const Device = require("@project-chip/matter-node.js/device"); 
-const DataType = require("@project-chip/matter-node.js/datatype"); 
-const Log = require("@project-chip/matter-node.js/log"); 
-const Storage = require("@project-chip/matter-node.js/storage"); 
-const Cluster = require("@project-chip/matter.js/cluster")
-const Interaction = require("@project-chip/matter.js/interaction")
+require("@project-chip/matter-node.js");
+const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
+const  VendorId  = require("@project-chip/matter.js/datatype").VendorId;
+const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
+const  OnOffPlugInUnitDevice = require( "@project-chip/matter.js/devices/OnOffPlugInUnitDevice").OnOffPlugInUnitDevice;
+const  DimmableLightDevice   = require("@project-chip/matter.js/devices/DimmableLightDevice").DimmableLightDevice
+const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
+const  AggregatorEndpoint  = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
+const  MatterEnvironment   = require("@project-chip/matter.js/environment").Environment;
+const  ServerNode  = require("@project-chip/matter.js/node").ServerNode;
+const  Logger  = require("@project-chip/matter.js/log").Logger; 
 const os = require('os')
 
 function genPasscode(){
@@ -13,33 +17,33 @@ function genPasscode(){
     if (invalid.includes(x)){
         x += 1
     }
-    return x.toString().padStart(8, '0')
+    let xx =  x.toString().padStart(8, '0')
+    return +xx
 }
 
-module.exports = function(RED) {
+module.exports =  function(RED) {
     function MatterBridge(config) {
         RED.nodes.createNode(this, config);
         var node = this;
         if (node.restart){
-            console.log('RESTARTED')
+            console.log('Bridge Node Restarted')
         }
         node.restart = false
-        //const logger = Log.Logger.get("Device");
         switch (config.logLevel) {
             case "FATAL":
-                Log.Logger.defaultLogLevel = Log.Level.FATAL;
+                Logger.defaultLogLevel = 5;
                 break;
             case "ERROR":
-                Log.Logger.defaultLogLevel = Log.Level.ERROR;
+                Logger.defaultLogLevel = 4;
                 break;
             case "WARN":
-                Log.Logger.defaultLogLevel = Log.Level.WARN;
+                Logger.defaultLogLevel = 3;
                 break;
             case "INFO":
-                Log.Logger.defaultLogLevel = Log.Level.INFO;
+                Logger.defaultLogLevel = 1;
                 break;1
             case "DEBUG":
-                Log.Logger.defaultLogLevel = Log.Level.DEBUG;
+                Logger.defaultLogLevel = 0;
                 break;
         }
         console.log(`Loading Bridge node ${node.id}`)
@@ -53,46 +57,60 @@ module.exports = function(RED) {
         node.networkInterface = config.networkInterface 
         node.port = 5540
         node.passcode = genPasscode()
-        node.discriminator = Math.floor(Math.random() * 4095).toString().padStart(4, '0')
-        node.deviceType = Device.DeviceTypes.AGGREGATOR.code;
-        //Storage TODO: Refactor to use nodes storage
-        node.storage= new Storage.StorageBackendDisk("storage-"+node.id)
-        const storageManager = new Storage.StorageManager(node.storage);
-        storageManager.initialize().then(() => {
-            node.deviceStorage = storageManager.createContext("Device")
-        node.serverReady = false;
-        //Servers
-        console.log(node.networkInterface)
-        node.matterServer = new Matter.MatterServer(storageManager, {"mdnsAnnounceInterface": node.networkInterface});
-        node.commissioningServer = new Matter.CommissioningServer({
-            port : node.port,
-            deviceName : node.name,
-            deviceType : node.deviceType,
-            passcode : node.passcode,
-            discriminator : node.discriminator,
-            basicInformation: {
-                vendorName : node.vendorName,
-                vendorId: node.vendorId,
-                productLabel: node.productName,
-                productId: node.productId,
-                serialNumber: `node-matter-${node.id}`
-            }
-        });
+        node.discriminator = +Math.floor(Math.random() * 4095).toString().padStart(4, '0')
+        //Storage TODO: Refactor to use node-red node storage
+        //node.storage= new Storage.StorageBackendDisk("storage-"+node.id)
+        //const storageManager = new Storage.StorageManager(node.storage);
+        //storageManager.initialize().then(() => {
+        //    node.deviceStorage = storageManager.createContext("Device")
 
-        console.log("Bridge Created, awaiting child nodes")
-        node.serverReady = true
+        node.serverReady = false;
+        MatterEnvironment.default.vars.set('mdns.networkInterface', node.networkInterface);
+        //Servers
+        ServerNode.create({
+            id: node.id,
+            network: {
+                port: node.port,
+            },
+            commissioning: {
+                passcode: node.passcode,
+                discriminator :  node.discriminator
+            },
+            productDescription: {
+                name: node.name,
+                deviceType: AggregatorEndpoint.deviceType,
+            },
+            basicInformation: {
+                vendorName : 'Node-RED Matter Bridge',
+                vendorId: VendorId(node.vendorId),
+                nodeLabel: node.name,
+                productName: node.name,
+                productLabel: node.name,
+                productId: node.productId,
+                serialNumber: `noderedmatter-${node.id}`,
+                uniqueId : node.id
+            },
+        })
+        .then((matterServer) =>{
+            node.aggregator = new Endpoint(AggregatorEndpoint, { id: "aggregator" });
+            node.matterServer = matterServer
+            node.matterServer.add(node.aggregator);
+            console.log("Bridge Created, awaiting child nodes")
+            console.log('Server Ready')
+            node.serverReady = true
+        })
+        console.log('Trying')
         if (node.users.length == 0 && node.serverReady){
-            node.commissioningServer.addDevice(aggregator);
-            node.matterServer.addCommissioningServer(node.commissioningServer);
+            console.log('Starting Bridge')
             node.matterServer.start();
             node.registered.forEach(x => {
-                console.log(x.id)
                 x.emit('serverReady')
             });
+        } else {
+            console.log('Not Starting yet, more devices to load')
         }
 
-        })
-        const aggregator = new Device.Aggregator();
+        
 
         node.registered = []
 
@@ -105,66 +123,114 @@ module.exports = function(RED) {
             }
             switch (child.type){
                 case 'matteronofflight':
-                    child.device =  new Device.OnOffLightDevice();
-                    child.device.addOnOffListener(on => { 
-                        child.emit('state', on)
+                    child.device =  new Endpoint(
+                        OnOffLightDevice.with(BridgedDeviceBasicInformationServer),
+                        {
+                            id: child.id,
+                            bridgedDeviceBasicInformation: {
+                                nodeLabel: child.name,
+                                productName: child.name,
+                                productLabel: child.name,
+                                serialNumber: child.id,
+                                reachable: true,
+                            },
+                    });
+                    child.device.events.onOff.onOff$Changed.on(value => {
+                        child.emit('state', value)
+                    });
+                    child.device.events.identify.startIdentifying.on(() => {
+                        child.emit('identify', true)
+                    });
+                    child.device.events.identify.stopIdentifying.on(() => {
+                        child.emit('identify', false)
                     });
                     break
                 case 'matteronoffsocket':
-                    child.device =  new Device.OnOffPluginUnitDevice();
-                    child.device.addOnOffListener(on => { 
-                        child.emit('state', on)
+                    child.device =  new Endpoint(
+                        OnOffPlugInUnitDevice.with(BridgedDeviceBasicInformationServer),
+                        {
+                            id: child.id,
+                            bridgedDeviceBasicInformation: {
+                                nodeLabel: child.name,
+                                productName: child.name,
+                                productLabel: child.name,
+                                serialNumber: child.id,
+                                reachable: true,
+                            },
+                    });
+                    child.device.events.onOff.onOff$Changed.on(value => {
+                        child.emit('state', value)
+                    });
+                    child.device.events.identify.startIdentifying.on(() => {
+                        child.emit('identify', true)
+                    });
+                    child.device.events.identify.stopIdentifying.on(() => {
+                        child.emit('identify', false)
                     });
                     break
                 case 'matterdimmablelight':
-                    child.device =  new Device.DimmableLightDevice();
-                    child.device.addCurrentLevelListener(on => { 
-                        child.emit('state', on)
+                    child.device =  new Endpoint(
+                        DimmableLightDevice.with(BridgedDeviceBasicInformationServer),
+                        {
+                            id: child.id,
+                            bridgedDeviceBasicInformation: {
+                                nodeLabel: child.name,
+                                productName: child.name,
+                                productLabel: child.name,
+                                serialNumber: child.id,
+                                reachable: true,
+                            },
                     });
-                    child.device.addOnOffListener(on => { 
-                        child.emit('state', on)
+                    child.device.events.onOff.onOff$Changed.on(value => {
+                        child.emit('state', value)
+                    });
+                    child.device.events.levelControl.currentLevel$Changed.on(value => {
+                        child.emit('state', value)
+                    })
+                    child.device.events.identify.startIdentifying.on(() => {
+                        child.emit('identify', true)
+                    });
+                    child.device.events.identify.stopIdentifying.on(() => {
+                        child.emit('identify', false)
                     });
                     break
             }
-            
-            aggregator.addBridgedDevice(child.device, {
-                nodeLabel: child.name,
-                productName: child.name,
-                productLabel: child.name,
-                serialNumber: `node-matter-${child.id}`,
-                reachable: true
-            });
+ 
+            console.log("adding device to aggregator")
+            node.aggregator.add(child.device);
+            console.log('Trying')
             if (node.users.length == 0 && node.serverReady){
-                node.commissioningServer.addDevice(aggregator);
-                node.matterServer.addCommissioningServer(node.commissioningServer);
+                console.log('Starting Bridge')
                 node.matterServer.start();
                 node.registered.forEach(x => {
-                    console.log(x.id)
                     x.emit('serverReady')
                 });
+            } else {
+                console.log('Not Starting yet, , more devices to load')
             }
         })
 
         this.on('close', function(removed, done) {
             if (removed) {
                 console.log("Bridge Removed")
-                node.matterServer.stop()
+                node.matterServer.close()
             } else {
                 console.log("Bridge Restarted")
                 node.restart = true
-                node.matterServer.stop()
+                node.matterServer.close()
             }
             done();
         });
     }
+
     RED.nodes.registerType("matterbridge",MatterBridge);
 
     RED.httpAdmin.get('/_matterbridge/commisioning/:id', RED.auth.needsPermission('admin.write'), function(req,res){
         let target_node = RED.nodes.getNode(req.params.id)
         if (target_node){
-            if (!target_node.commissioningServer.isCommissioned()) {
-                const pairingData = target_node.commissioningServer.getPairingCode();
-                const { qrCode, qrPairingCode, manualPairingCode } = pairingData;
+            if (!target_node.matterServer.lifecycle.isCommissioned) {
+                const pairingData = target_node.matterServer.state.commissioning.pairingCodes;
+                const { qrPairingCode, manualPairingCode } = pairingData;
                 response = {state : 'ready', qrPairingCode : qrPairingCode, manualPairingCode: manualPairingCode}
             }
             else {

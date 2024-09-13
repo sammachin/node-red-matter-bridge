@@ -87,3 +87,6 @@ typings/
 .dynamodb/
 
 # End of https://www.gitignore.io/api/node
+ 
+repl_test.js
+cli_test.js

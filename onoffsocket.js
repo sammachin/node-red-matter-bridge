@@ -17,29 +17,37 @@ module.exports = function(RED) {
                 msg.payload = state = {state: msg.payload}
             }
             if (typeof msg.payload.state == "boolean") {
-                node.device.setOnOff(msg.payload.state)
+                node.device.set({
+                    onOff: {
+                        onOff: msg.payload.state,
+                    }
+                })
             } else {
                 switch (msg.payload.state){
                     case '1':
-                        node.device.setOnOff(true)
+                    case 1:
+                    case 'on':
+                        node.device.set({
+                            onOff: {
+                                onOff: true,
+                            }
+                        })
                         break
                     case '0':
-                        node.device.setOnOff(false)
-                        break
-                    case 1:
-                        node.device.setOnOff(true)
-                        break
                     case 0:
-                        node.device.setOnOff(false)
-                        break
-                    case 'on':
-                        node.device.setOnOff(true)
-                        break
-                    case 'off':
-                        node.device.setOnOff(false)
+                        case 'off':
+                        node.device.set({
+                            onOff: {
+                                onOff: false,
+                            }
+                        })
                         break
                     case 'toggle':
-                        node.device.toggle()
+                        node.device.set({
+                            onOff: {
+                                     onOff: !node.device.state.onOff.onOff,
+                                    }
+                      })
                         break
                 }
             }
@@ -59,11 +67,20 @@ module.exports = function(RED) {
             }
             node.pending = false
         })
+        
+        this.on('identify', function(data){
+            if (data){
+                this.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                this.status({fill:"green",shape:"dot",text:"ready"});
+            }
+            
+        })
 
         this.on('close', function(removed, done) {
             this.removeAllListeners('state')
             this.removeAllListeners('serverReady')
-            this.removeAllListeners('state')
+            this.removeAllListeners('identify')
             if (removed) {
                 // This node has been disabled/deleted
             } else {
@@ -71,7 +88,16 @@ module.exports = function(RED) {
             }
             done();
         });
-        node.bridge.emit('registerChild', node)
+        //Wait till server is started
+        function waitforserver(node) {
+            if (!node.bridge.serverReady) {
+              setTimeout(waitforserver, 100, node)
+            } else {
+                console.log('Registering Child......')
+                node.bridge.emit('registerChild', node)
+            }
+        }
+        waitforserver(node)
     }
     RED.nodes.registerType("matteronoffsocket",MatterOnOffSocket);
 }

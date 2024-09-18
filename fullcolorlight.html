@@ -1,0 +1,130 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matterfullcolorlight',{
+        category: 'Matter',
+        color: '#6699ff',
+        icon: "font-awesome/fa-lightbulb-o",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            range: {value: "254"},
+            passthrough: {value: true},
+            gamut: {value: "default"}
+        },
+        label: function() {
+            return this.name||"Color Light";
+        },
+        paletteLabel: "Color Light"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterfullcolorlight">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-passthrough">Passthrough Input msg to Output</label>
+        <select type="text" id="node-input-passthrough" style="width:50%;" >
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-range">Range</label>
+        <select type="text" id="node-input-range" style="width:50%;" >
+            <option value="100">0-100</option>
+            <option value="254">0-254</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-gamut">Color Gamut</label>
+        <select type="text" id="node-input-gamut" style="width:50%;" >
+            <option value="default">Default</option>
+            <option value="a">A</option>
+            <option value="b">B</option>
+            <option value="c">C</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matterfullcolorlight">
+   <p>A Bridged Dimmable light</p>
+
+   <h3>Inputs</h3>
+       <dl class="message-properties">
+            <dt class="optional">
+                payload.state         
+                <span class="property-type">
+                    string | bool | number
+                </span>
+            </dt>
+            <dd> 
+                Control the state of the light, accepts either true/fase, "on/off" or "0/1",<br>
+                You can also toggle the state by setting the value to "toggle"
+            </dd>
+           <dt class="optional">
+            payload.level         
+            <span class="property-type">
+                number
+            </span>
+            </dt>
+            <dd> 
+                Control the level of the light,<br>
+                either 0-100 or 0-254 depending on the configuration of the range property
+            </dd>
+       </dl>
+   
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>
+            payload.state         
+            <span class="property-type">
+                bool 
+            </span>
+        </dt>
+        <dd> 
+            State of the light, on is true, off is false
+        </dd>
+       <dt class="optional">
+        payload.level         
+        <span class="property-type">
+            number
+        </span>
+        </dt>
+        <dd> 
+            The level of the light,<br>
+            either 0-100 or 0-254 depending on the configuration of the range property
+        </dd>
+        <dt class="optional">
+            payload.rgb         
+            <span class="property-type">
+                array
+            </span>
+            </dt>
+            <dd> 
+                Red Green & Blue values as an array,<br>
+                value 0-254 for each.
+            </dd>
+   </dl>
+   
+   <h3>Details</h3>
+   Passthrough will control the behaviour of the node in regards to an input, 
+   if set to True then the inout msg wil be output with the new state in the payload.
+   If set to False then the output will be suppressed.
+   Where the devices state is updated by an external matter controller a new msg object will always be output. 
+   <br><br>
+   Gamut is the adjustment of the bulbs Color Gamut, RGB values are converted to CIE 1931 x,y 
+   Default is between 0-1 for all of Red, Green, Blue.
+   Option A is red: 0.704 - 0.296, green: 0.2151 - 0.7106,	blue: 0.138 - 0.08<br>
+   Option B is red: 0.675 - 0.322, green: 0.409 - 0.518,	blue: 0.167 - 0.04<br>
+   Option C is red: 0.692 - 0.308, green: 0.17 - 0.7,	blue: 0.153 - 0.048<br>
+
+
+</script>

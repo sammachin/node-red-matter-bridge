@@ -4,6 +4,8 @@ const  VendorId  = require("@project-chip/matter.js/datatype").VendorId;
 const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
 const  OnOffPlugInUnitDevice = require( "@project-chip/matter.js/devices/OnOffPlugInUnitDevice").OnOffPlugInUnitDevice;
 const  DimmableLightDevice   = require("@project-chip/matter.js/devices/DimmableLightDevice").DimmableLightDevice
+const { ColorControlServer,  } = await import( "@project-chip/matter.js/behavior/definitions/color-control");
+const { ColorControl } = await import( "@project-chip/matter.js/cluster"); 
 const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
 const  AggregatorEndpoint  = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
 const  MatterEnvironment   = require("@project-chip/matter.js/environment").Environment;
@@ -194,6 +196,46 @@ module.exports =  function(RED) {
                         child.emit('identify', false)
                     });
                     break
+                case 'matterfullcolorlight':
+                    child.device =  new Endpoint(
+                        ExtendedColorLightDevice.with(BridgedDeviceBasicInformationServer, ColorControlServer.with(
+                            ColorControl.Feature.HueSaturation,
+                            ColorControl.Feature.Xy,
+                            ColorControl.Feature.ColorTemperature,
+                        )),{
+                            id: child.id,
+                            bridgedDeviceBasicInformation: {
+                                nodeLabel: child.name,
+                                productName: child.name,
+                                productLabel: child.name,
+                                serialNumber: child.id,
+                                reachable: true,
+                            },
+                            colorControl: {
+                                coupleColorTempToLevelMinMireds: 0x00FA,
+                                startUpColorTemperatureMireds: 0x00FA,
+                            }
+                        }
+                        )
+                        child.device.events.onOff.onOff$Changed.on(value => {
+                            child.emit('state', value)
+                        });
+                        child.device.events.levelControl.currentLevel$Changed.on(value => {
+                            child.emit('state', value)
+                        })
+                        child.device.events.identify.startIdentifying.on(() => {
+                            child.emit('identify', true)
+                        });
+                        child.device.events.identify.stopIdentifying.on(() => {
+                            child.emit('identify', false)
+                        });
+                        child.events.colorControl.currentHue$Changed.on(value => {
+                            child.emit('color', value)
+                        });
+                        child.events.colorControl.currentSat$Changed.on(value => {
+                            child.emit('color', value)
+                        });
+                        break
             }
  
             console.log("adding device to aggregator")

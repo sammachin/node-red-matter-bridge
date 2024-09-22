@@ -23,7 +23,8 @@
       "matter-onofflight": "onofflight.js",
       "matter-onoffsocket": "onoffsocket.js",
       "matter-dimmablelight": "dimmablelight.js",
-      "matter-fullcolorlight": "fullcolorlight.js"
-    }
+      "matter-fullcolorlight": "fullcolorlight.js",
+      "matter-colortemplight" : "colortemplight.js"
   }
+}
 }

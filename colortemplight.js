@@ -21,39 +21,21 @@ module.exports = function(RED) {
             if (msg.payload.level == undefined) {
                 msg.payload.level = node.device.state.levelControl.currentLevel
             }
-            else {
-                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
-            }
-            if ((msg.payload.hue || msg.payload.sat) && msg.payload.temp) {
-                node.error("Can't set Colour Temp and Hue/Sat at same time")
-            } else {
-                if (msg.payload.hue || msg.payload.sat){
-                    msg.payload.hue = msg.payload.hue ? msg.payload.hue : node.device.state.colorControl.currentHue
-                    msg.payload.sat = msg.payload.sat ? msg.payload.sat : node.device.state.colorControl.currentSaturation
-                    newcolor = {
-                        colorMode: 0,
-                        currentHue: msg.payload.hue,
-                        currentSaturation: msg.payload.sat
-                    }
-                }
-                else if (msg.payload.temp) {
-                    newcolor = {
-                        colorMode: 2,
-                        colorTemperatureMireds : 1000000/msg.payload.temp
-                    }
-                }
-                else {
-                    console.log('NO COLOR SET')
-                    newcolor = {colorMode: node.device.colorControl.colorMode}
-                }
+            if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
+            if (msg.payload.temp) {
+                var mireds = 1000000/msg.payload.temp
+            }  else {
+                var mireds = node.device.state.colorControl.colorTemperatureMireds
             }
             node.device.set({
                 levelControl: {
                     currentLevel: msg.payload.level
                 },
-                colorControl: newcolor
+                colorControl: {
+                    colorTemperatureMireds : mireds
+                }
             })
-            
+
             switch (msg.payload.state){
                 case '1':
                 case 1:
@@ -95,31 +77,14 @@ module.exports = function(RED) {
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-                if (node.device.colorControl.colorMode == 0){
-                    msg.payload.hue = node.device.state.colorControl.currentHue
-                    msg.payload.sat = node.device.state.colorControl.currentSaturation
-                }
-                else if (node.device.colorControl.colorMode == 2){
-                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
-                } else {
-                    node.error(`Unknown color mode: ${node.device.state.colorControl.colorMode}`)
-                }
+                msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-                if (node.device.state.colorControl.colorMode == 0){
-                    msg.payload.hue = node.device.state.colorControl.currentHue
-                    msg.payload.sat = node.device.state.colorControl.currentSaturation
-                }
-                else if (node.device.state.colorControl.colorMode == 2){
-                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
-                } else {
-                    node.error(`Unknown color mode: ${node.device.state.colorControl.colorMode}`)
-                }
-                
+                msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
                 node.send(msg);
             }
             node.pending = false

@@ -7,19 +7,23 @@
   "license": "MIT",
   "repository": "https://github.com/sammachin/node-red-matter-bridge",
   "dependencies": {
-    "@project-chip/matter-node.js": "^0.10.0"
+    "@project-chip/matter-node.js": "^0.10.0",
+    "color-convert": "^2.0.1"
   },
   "engines": {
-      "node": ">=18.0.0"
+    "node": ">=18.0.0"
   },
-  "keywords": [ "node-red" ],
+  "keywords": [
+    "node-red"
+  ],
   "node-red": {
     "version": ">=3.0.0",
     "nodes": {
       "matter-bridge": "bridge.js",
       "matter-onofflight": "onofflight.js",
       "matter-onoffsocket": "onoffsocket.js",
-      "matter-dimmablelight": "dimmablelight.js"
+      "matter-dimmablelight": "dimmablelight.js",
+      "matter-fullcolorlight": "fullcolorlight.js"
     }
   }
 }

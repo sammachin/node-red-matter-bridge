@@ -1,7 +1,7 @@
 
 
 module.exports = function(RED) {
-    function MatterFullColorLight(config) {
+    function MatterColorTempLight(config) {
         RED.nodes.createNode(this,config);
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
@@ -35,14 +35,16 @@ module.exports = function(RED) {
                         currentHue: msg.payload.hue,
                         currentSaturation: msg.payload.sat
                     }
-                } else if (msg.payload.temp) {
+                }
+                else if (msg.payload.temp) {
                     newcolor = {
                         colorMode: 2,
                         colorTemperatureMireds : 1000000/msg.payload.temp
                     }
                 }
                 else {
-                        newcolor = {colorMode: node.device.state.colorControl.colorMode}
+                    console.log('NO COLOR SET')
+                    newcolor = {colorMode: node.device.colorControl.colorMode}
                 }
             }
             node.device.set({
@@ -93,11 +95,11 @@ module.exports = function(RED) {
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-                if (node.device.state.colorControl.colorMode == 0){
+                if (node.device.colorControl.colorMode == 0){
                     msg.payload.hue = node.device.state.colorControl.currentHue
                     msg.payload.sat = node.device.state.colorControl.currentSaturation
                 }
-                else if (node.device.state.colorControl.colorMode == 2){
+                else if (node.device.colorControl.colorMode == 2){
                     msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
                 } else {
                     node.error(`Unknown color mode: ${node.device.state.colorControl.colorMode}`)
@@ -156,5 +158,5 @@ module.exports = function(RED) {
         
 
     }
-    RED.nodes.registerType("matterfullcolorlight",MatterFullColorLight);
+    RED.nodes.registerType("mattercolortemplight",MatterColorTempLight);
 }

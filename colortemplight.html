@@ -1,5 +1,5 @@
 <script type="text/javascript">
-    RED.nodes.registerType('matterfullcolorlight',{
+    RED.nodes.registerType('mattercolortemplight',{
         category: 'Matter',
         color: '#6699ff',
         icon: "font-awesome/fa-lightbulb-o",
@@ -13,14 +13,14 @@
             
         },
         label: function() {
-            return this.name||"Color Light";
+            return this.name||"Color Temp Light";
         },
-        paletteLabel: "Color Light"
+        paletteLabel: "Color Temp Light"
 
     });
 </script>
 
-<script type="text/x-red" data-template-name="matterfullcolorlight">
+<script type="text/x-red" data-template-name="mattercolortemplight">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -45,7 +45,7 @@
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="matterfullcolorlight">
+<script type="text/x-red" data-help-name="mattercolortemplight">
    <p>A Bridged Dimmable light</p>
 
    <h3>Inputs</h3>
@@ -94,24 +94,6 @@
             either 0-100 or 0-254 depending on the configuration of the range property
         </dd>
         <dt class="optional">
-            payload.hue         
-            <span class="property-type">
-                number
-            </span>
-            </dt>
-            <dd> 
-                Hue value in the range 0-254, Hue in degress 
-            </dd>
-            <dt class="optional">
-                payload.sat         
-                <span class="property-type">
-                    number
-                </span>
-                </dt>
-                <dd> 
-                    Saturation value in the range 0-254
-                </dd>
-             <dt class="optional">
             payload.temp         
             <span class="property-type">
                 number
@@ -121,7 +103,7 @@
                 The color temperature in Kelvin
             </dd>
    </dl>
-   <i>Note: Color Temp cannot be set at the same time as Hue or Saturation</i>
+   
    <h3>Details</h3>
    Passthrough will control the behaviour of the node in regards to an input, 
    if set to True then the inout msg wil be output with the new state in the payload.

@@ -3,9 +3,10 @@ const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/b
 const  VendorId  = require("@project-chip/matter.js/datatype").VendorId;
 const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
 const  OnOffPlugInUnitDevice = require( "@project-chip/matter.js/devices/OnOffPlugInUnitDevice").OnOffPlugInUnitDevice;
+const  ExtendedColorLightDevice = require( "@project-chip/matter.js/devices/ExtendedColorLightDevice").ExtendedColorLightDevice;
 const  DimmableLightDevice   = require("@project-chip/matter.js/devices/DimmableLightDevice").DimmableLightDevice
-const { ColorControlServer,  } = await import( "@project-chip/matter.js/behavior/definitions/color-control");
-const { ColorControl } = await import( "@project-chip/matter.js/cluster"); 
+const  ColorControlServer = require( "@project-chip/matter.js/behavior/definitions/color-control").ColorControlServer
+const  ColorControl  = require( "@project-chip/matter.js/cluster").ColorControl
 const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
 const  AggregatorEndpoint  = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
 const  MatterEnvironment   = require("@project-chip/matter.js/environment").Environment;
@@ -214,6 +215,7 @@ module.exports =  function(RED) {
                             colorControl: {
                                 coupleColorTempToLevelMinMireds: 0x00FA,
                                 startUpColorTemperatureMireds: 0x00FA,
+                                colorMode: 0
                             }
                         }
                         )
@@ -221,7 +223,8 @@ module.exports =  function(RED) {
                             child.emit('state', value)
                         });
                         child.device.events.levelControl.currentLevel$Changed.on(value => {
-                            child.emit('state', value)
+                            let data = {level: value}
+                            child.emit('state', data)
                         })
                         child.device.events.identify.startIdentifying.on(() => {
                             child.emit('identify', true)
@@ -229,11 +232,17 @@ module.exports =  function(RED) {
                         child.device.events.identify.stopIdentifying.on(() => {
                             child.emit('identify', false)
                         });
-                        child.events.colorControl.currentHue$Changed.on(value => {
-                            child.emit('color', value)
+                        child.device.events.colorControl.currentHue$Changed.on(value => {
+                            let data = {hue: value}
+                            child.emit('state', data)
                         });
-                        child.events.colorControl.currentSat$Changed.on(value => {
-                            child.emit('color', value)
+                        child.device.events.colorControl.currentSaturation$Changed.on(value => {
+                            let data = {sat: value}
+                            child.emit('state', data)
+                        });
+                        child.device.events.colorControl.colorTemperatureMireds$Changed.on(value => {
+                            let data = {temp: value}
+                            child.emit('state', data)
                         });
                         break
             }

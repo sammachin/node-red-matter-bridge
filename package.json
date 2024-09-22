@@ -24,7 +24,9 @@
       "matter-onoffsocket": "onoffsocket.js",
       "matter-dimmablelight": "dimmablelight.js",
       "matter-fullcolorlight": "fullcolorlight.js",
-      "matter-colortemplight" : "colortemplight.js"
+      "matter-colortemplight" : "colortemplight.js",
+      "matter-contactsensor": "contactsensor.js"
+
   }
 }
 }

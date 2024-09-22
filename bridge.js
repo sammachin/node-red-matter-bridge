@@ -13,6 +13,8 @@ const  AggregatorEndpoint  = require( "@project-chip/matter.js/endpoints/Aggrega
 const  MatterEnvironment   = require("@project-chip/matter.js/environment").Environment;
 const  ServerNode  = require("@project-chip/matter.js/node").ServerNode;
 const  Logger  = require("@project-chip/matter.js/log").Logger; 
+const  ContactSensorDevice  =  require( "@project-chip/matter.js/devices/ContactSensorDevice").ContactSensorDevice;
+const  BooleanState  =  require( "@project-chip/matter.js/cluster").BooleanState; 
 const os = require('os')
 
 function genPasscode(){
@@ -283,6 +285,29 @@ module.exports =  function(RED) {
                             child.emit('state', data)
                         });
                         break
+                    case 'mattercontactsensor':
+                        child.device =  new Endpoint(
+                            ContactSensorDevice.with(BridgedDeviceBasicInformationServer),{
+                                id: child.id,
+                                bridgedDeviceBasicInformation: {
+                                    nodeLabel: child.name,
+                                    productName: child.name,
+                                    productLabel: child.name,
+                                    serialNumber: child.id,
+                                    reachable: true,
+                                },
+                                booleanState: {
+                                    stateValue: child.initial
+                                }
+                            }
+                            )
+                            child.device.events.identify.startIdentifying.on(() => {
+                                child.emit('identify', true)
+                            });
+                            child.device.events.identify.stopIdentifying.on(() => {
+                                child.emit('identify', false)
+                            });
+                            break
             }
  
             console.log("adding device to aggregator")

@@ -1,0 +1,65 @@
+<script type="text/javascript">
+    RED.nodes.registerType('mattercontactsensor',{
+        category: 'Matter',
+        color: '#669999',
+        icon: "font-awesome/fa-check-square-o",
+        inputs:1,
+        outputs:0,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            initial: {value: true}
+        },
+        label: function() {
+            return this.name||"Contact Sensor";
+        },
+        paletteLabel: "Contact Sensor"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mattercontactsensor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-initial">Initial State</label>
+        <select type="text" id="node-input-initial" style="width:50%;" >
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mattercontactsensor">
+    <p>A Bridged Contact Sensor</p>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload         
+                 <span class="property-type">
+                      bool 
+                 </span>
+             </dt>
+             <dd> 
+                 The state of the sensor    
+                 <code>True</code> would be treated as the sensor being "Open"
+                 <code>False</code> would be treated as the sensor being "Closed"
+             </dd>
+            
+        </dl>
+
+        
+    </dl>
+    
+    <h3>Details</h3>
+    Initial state is how the Matter controller will see the sensor on startup.
+
+    As this is a sensor it cannot be updated by the Matter controller and as such has no output only input.
+</script>

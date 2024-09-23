@@ -1,0 +1,67 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matterpressuresensor',{
+        category: 'Matter',
+        color: '#669999',
+        icon: "font-awesome/fa-thermometer-full",
+        inputs:1,
+        outputs:0,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            minlevel: {value: -3276.7},
+            maxlevel: {value: 3276.7}
+        },
+        label: function() {
+            return this.name||"Pressure Sensor";
+        },
+        paletteLabel: "Pressure Sensor"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterpressuresensor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-minlevel">Min Level (kPa)</label>
+        <input type="text" id="node-input-minlevel" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-minlevel">Max Level (kPa)</label>
+        <input type="text" id="node-input-maxlevel" style="width:70%;">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matterpressuresensor">
+    <p>A Bridged Light Sensor</p>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload         
+                 <span class="property-type">
+                      number 
+                 </span>
+             </dt>
+             <dd> 
+                 The pressue in kPa centrigrate between the configured min and max values.
+                 Matter supports up to 1 decmimal place of precision.
+
+             </dd>
+            
+        </dl>
+
+        
+    </dl>
+    
+    <h3>Details</h3>
+    The sensor node should be configured with min and max values for the sensor, between -3276.7kPa & 3276.7kPa if not set these will be used as default values.
+
+    As this is a sensor it cannot be updated by the Matter controller and as such has no output only input.
+</script>

@@ -1,0 +1,68 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matteroccupancysensor',{
+        category: 'Matter',
+        color: '#669999',
+        icon: "font-awesome/fa-user",
+        inputs:1,
+        outputs:0,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            sensorType: {value: 1}
+        },
+        label: function() {
+            return this.name||"Occupancy Sensor";
+        },
+        paletteLabel: "Occupancy Sensor"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matteroccupancysensor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-sensorType">Sensor Type</label>
+        <select type="text" id="node-input-range" style="width:50%;" >
+            <option value=1>PIR</option>
+            <option value=2>Ultrasonic</option>
+            <option value=3>PIR & Ultrasonic</option>
+            <option value=4>Physical Contact</option>
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matteroccupancysensor">
+    <p>A Bridged Occupancy Sensor</p>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload         
+                 <span class="property-type">
+                      boolean 
+                 </span>
+             </dt>
+             <dd> 
+                 The state of occupancy, 
+                 <code>True</code> Indicates occupied,
+                 <code>False</code> Indicates unoccupied,
+
+             </dd>
+            
+        </dl>
+
+        
+    </dl>
+    
+    <h3>Details</h3>
+    The  node should be configured the relevent sensor ype 
+
+    As this is a sensor it cannot be updated by the Matter controller and as such has no output only input.
+</script>

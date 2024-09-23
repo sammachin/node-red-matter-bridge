@@ -25,7 +25,10 @@
       "matter-dimmablelight": "dimmablelight.js",
       "matter-fullcolorlight": "fullcolorlight.js",
       "matter-colortemplight" : "colortemplight.js",
-      "matter-contactsensor": "contactsensor.js"
+      "matter-contactsensor": "contactsensor.js",
+      "matter-lightsensor": "lightsensor.js",
+      "matter-temperaturesensor": "temperaturesensor.js",
+      "matter-occupancysensor": "occupancysensor.js"
 
   }
 }

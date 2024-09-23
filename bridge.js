@@ -1,21 +1,23 @@
 require("@project-chip/matter-node.js");
+const os = require('os');
+const occupancysensor = require("./devices/occupancysensor").occupancysensor;
+const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
 const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
 const  VendorId  = require("@project-chip/matter.js/datatype").VendorId;
-const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
-const  OnOffPlugInUnitDevice = require( "@project-chip/matter.js/devices/OnOffPlugInUnitDevice").OnOffPlugInUnitDevice;
 const  ExtendedColorLightDevice = require( "@project-chip/matter.js/devices/ExtendedColorLightDevice").ExtendedColorLightDevice;
-const  DimmableLightDevice   = require("@project-chip/matter.js/devices/DimmableLightDevice").DimmableLightDevice
-const  ColorTemperatureLightDevice  = require( "@project-chip/matter.js/devices/ColorTemperatureLightDevice").ColorTemperatureLightDevice;
-const  ColorControlServer = require( "@project-chip/matter.js/behavior/definitions/color-control").ColorControlServer
-const  ColorControl  = require( "@project-chip/matter.js/cluster").ColorControl
 const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
 const  AggregatorEndpoint  = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
 const  MatterEnvironment   = require("@project-chip/matter.js/environment").Environment;
 const  ServerNode  = require("@project-chip/matter.js/node").ServerNode;
 const  Logger  = require("@project-chip/matter.js/log").Logger; 
-const  ContactSensorDevice  =  require( "@project-chip/matter.js/devices/ContactSensorDevice").ContactSensorDevice;
-const  BooleanState  =  require( "@project-chip/matter.js/cluster").BooleanState; 
-const os = require('os')
+const contactsensor = require("./devices/contactsensor").contactsensor
+const colortemplight = require("./devices/colortemplight").colortemplight
+const fullcolorlight = require("./devices/fullcolorlight").fullcolorlight;
+const dimmablelight = require("./devices/dimmablelight").dimmablelight;
+const onoffsocket = require("./devices/onoffsocket").onoffsocket;
+const onofflight = require("./devices/onofflight").onofflight;
+const lightsensor = require("./devices/lightsensor").lightsensor;
+
 
 function genPasscode(){
     let x = Math.floor(Math.random() * (99999998-1) +1)
@@ -129,187 +131,33 @@ module.exports =  function(RED) {
             }
             switch (child.type){
                 case 'matteronofflight':
-                    child.device =  new Endpoint(
-                        OnOffLightDevice.with(BridgedDeviceBasicInformationServer),
-                        {
-                            id: child.id,
-                            bridgedDeviceBasicInformation: {
-                                nodeLabel: child.name,
-                                productName: child.name,
-                                productLabel: child.name,
-                                serialNumber: child.id,
-                                reachable: true,
-                            },
-                    });
-                    child.device.events.onOff.onOff$Changed.on(value => {
-                        child.emit('state', value)
-                    });
-                    child.device.events.identify.startIdentifying.on(() => {
-                        child.emit('identify', true)
-                    });
-                    child.device.events.identify.stopIdentifying.on(() => {
-                        child.emit('identify', false)
-                    });
+                    child.device =  onofflight(child)
                     break
                 case 'matteronoffsocket':
-                    child.device =  new Endpoint(
-                        OnOffPlugInUnitDevice.with(BridgedDeviceBasicInformationServer),
-                        {
-                            id: child.id,
-                            bridgedDeviceBasicInformation: {
-                                nodeLabel: child.name,
-                                productName: child.name,
-                                productLabel: child.name,
-                                serialNumber: child.id,
-                                reachable: true,
-                            },
-                    });
-                    child.device.events.onOff.onOff$Changed.on(value => {
-                        child.emit('state', value)
-                    });
-                    child.device.events.identify.startIdentifying.on(() => {
-                        child.emit('identify', true)
-                    });
-                    child.device.events.identify.stopIdentifying.on(() => {
-                        child.emit('identify', false)
-                    });
+                    child.device =  onoffsocket(child)
                     break
                 case 'matterdimmablelight':
-                    child.device =  new Endpoint(
-                        DimmableLightDevice.with(BridgedDeviceBasicInformationServer),
-                        {
-                            id: child.id,
-                            bridgedDeviceBasicInformation: {
-                                nodeLabel: child.name,
-                                productName: child.name,
-                                productLabel: child.name,
-                                serialNumber: child.id,
-                                reachable: true,
-                            },
-                    });
-                    child.device.events.onOff.onOff$Changed.on(value => {
-                        child.emit('state', value)
-                    });
-                    child.device.events.levelControl.currentLevel$Changed.on(value => {
-                        child.emit('state', value)
-                    })
-                    child.device.events.identify.startIdentifying.on(() => {
-                        child.emit('identify', true)
-                    });
-                    child.device.events.identify.stopIdentifying.on(() => {
-                        child.emit('identify', false)
-                    });
+                    child.device =  dimmablelight(child)
                     break
                 case 'matterfullcolorlight':
-                    child.device =  new Endpoint(
-                        ExtendedColorLightDevice.with(BridgedDeviceBasicInformationServer, ColorControlServer.with(
-                            ColorControl.Feature.HueSaturation,
-                            ColorControl.Feature.Xy,
-                            ColorControl.Feature.ColorTemperature,
-                        )),{
-                            id: child.id,
-                            bridgedDeviceBasicInformation: {
-                                nodeLabel: child.name,
-                                productName: child.name,
-                                productLabel: child.name,
-                                serialNumber: child.id,
-                                reachable: true,
-                            },
-                            colorControl: {
-                                coupleColorTempToLevelMinMireds: 0x00FA,
-                                startUpColorTemperatureMireds: 0x00FA,
-                                colorMode: 0
-                            }
-                        }
-                        )
-                        child.device.events.onOff.onOff$Changed.on(value => {
-                            child.emit('state', value)
-                        });
-                        child.device.events.levelControl.currentLevel$Changed.on(value => {
-                            let data = {level: value}
-                            child.emit('state', data)
-                        })
-                        child.device.events.identify.startIdentifying.on(() => {
-                            child.emit('identify', true)
-                        });
-                        child.device.events.identify.stopIdentifying.on(() => {
-                            child.emit('identify', false)
-                        });
-                        child.device.events.colorControl.currentHue$Changed.on(value => {
-                            let data = {hue: value}
-                            child.emit('state', data)
-                        });
-                        child.device.events.colorControl.currentSaturation$Changed.on(value => {
-                            let data = {sat: value}
-                            child.emit('state', data)
-                        });
-                        child.device.events.colorControl.colorTemperatureMireds$Changed.on(value => {
-                            let data = {temp: value}
-                            child.emit('state', data)
-                        });
-                        break
+                    child.device = fullcolorlight(child)
+                    break
                 case 'mattercolortemplight':
-                    child.device =  new Endpoint(
-                        ColorTemperatureLightDevice.with(BridgedDeviceBasicInformationServer, ColorControlServer.with(
-                            ColorControl.Feature.ColorTemperature,
-                        )),{
-                            id: child.id,
-                            bridgedDeviceBasicInformation: {
-                                nodeLabel: child.name,
-                                productName: child.name,
-                                productLabel: child.name,
-                                serialNumber: child.id,
-                                reachable: true,
-                            },
-                            colorControl: {
-                                coupleColorTempToLevelMinMireds: 0x00FA,
-                                startUpColorTemperatureMireds: 0x00FA,
-                            }
-                        }
-                        )
-                        child.device.events.onOff.onOff$Changed.on(value => {
-                            child.emit('state', value)
-                        });
-                        child.device.events.levelControl.currentLevel$Changed.on(value => {
-                            let data = {level: value}
-                            child.emit('state', data)
-                        })
-                        child.device.events.identify.startIdentifying.on(() => {
-                            child.emit('identify', true)
-                        });
-                        child.device.events.identify.stopIdentifying.on(() => {
-                            child.emit('identify', false)
-                        });
-                        child.device.events.colorControl.colorTemperatureMireds$Changed.on(value => {
-                            let data = {temp: value}
-                            child.emit('state', data)
-                        });
-                        break
-                    case 'mattercontactsensor':
-                        child.device =  new Endpoint(
-                            ContactSensorDevice.with(BridgedDeviceBasicInformationServer),{
-                                id: child.id,
-                                bridgedDeviceBasicInformation: {
-                                    nodeLabel: child.name,
-                                    productName: child.name,
-                                    productLabel: child.name,
-                                    serialNumber: child.id,
-                                    reachable: true,
-                                },
-                                booleanState: {
-                                    stateValue: child.initial
-                                }
-                            }
-                            )
-                            child.device.events.identify.startIdentifying.on(() => {
-                                child.emit('identify', true)
-                            });
-                            child.device.events.identify.stopIdentifying.on(() => {
-                                child.emit('identify', false)
-                            });
-                            break
+                    child.device = colortemplight(child)
+                    break
+                case 'mattercontactsensor':
+                    child.device = contactsensor(child)
+                    break
+                case 'matterlightsensor':
+                    child.device = lightsensor(child)
+                    break
+                case 'mattertemperaturesensor':
+                    child.device = temperaturesensor(child)
+                    break
+                case 'matteroccupancysensor':
+                    child.device = occupancysensor(child)
+                    break
             }
- 
             console.log("adding device to aggregator")
             node.aggregator.add(child.device);
             console.log('Trying')

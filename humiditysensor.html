@@ -1,25 +1,25 @@
 <script type="text/javascript">
-    RED.nodes.registerType('matterpressuresensor',{
+    RED.nodes.registerType('matterhumiditysensor',{
         category: 'Matter',
         color: '#669999',
-        icon: "font-awesome/fa-arrow-circle-down",
+        icon: "font-awesome/fa-tint",
         inputs:1,
         outputs:0,
         defaults: {
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
-            minlevel: {value: -3276.7},
-            maxlevel: {value: 3276.7}
+            minlevel: {value: 0},
+            maxlevel: {value: 100}
         },
         label: function() {
-            return this.name||"Pressure Sensor";
+            return this.name||"Humidity Sensor";
         },
-        paletteLabel: "Pressure Sensor"
+        paletteLabel: "Humidity Sensor"
 
     });
 </script>
 
-<script type="text/x-red" data-template-name="matterpressuresensor">
+<script type="text/x-red" data-template-name="matterhumiditysensor">
     <div class="form-row">
         <label for="node-input-name"><i class="icon-tag"></i> Name</label>
         <input type="text" id="node-input-name" placeholder="Name">
@@ -29,16 +29,16 @@
         <input type="text" id="node-input-bridge" style="width:70%;">
     </div>
     <div class="form-row">
-        <label for="node-input-minlevel">Min Level (kPa)</label>
+        <label for="node-input-minlevel">Min Level (%)</label>
         <input type="text" id="node-input-minlevel" style="width:70%;">
     </div>
     <div class="form-row">
-        <label for="node-input-minlevel">Max Level (kPa)</label>
+        <label for="node-input-minlevel">Max Level (%)</label>
         <input type="text" id="node-input-maxlevel" style="width:70%;">
     </div>
 </script>
 
-<script type="text/x-red" data-help-name="matterpressuresensor">
+<script type="text/x-red" data-help-name="matterhumiditysensor">
     <p>A Bridged Light Sensor</p>
 
     <h3>Inputs</h3>
@@ -50,8 +50,8 @@
                  </span>
              </dt>
              <dd> 
-                 The pressue in kPa centrigrate between the configured min and max values.
-                 Matter supports up to 1 decmimal place of precision.
+                 The humidity in percent  between the configured min and max values.
+                 Matter supports up to 2 decmimal places of precision.
 
              </dd>
             
@@ -61,7 +61,7 @@
     </dl>
     
     <h3>Details</h3>
-    The sensor node should be configured with min and max values for the sensor, between -3276.7kPa & 3276.7kPa if not set these will be used as default values.
+    The sensor node should be configured with min and max values for the sensor, between 0% & 100%, if not set these will be used as default values.
 
     As this is a sensor it cannot be updated by the Matter controller and as such has no output only input.
 </script>

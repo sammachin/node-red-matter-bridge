@@ -1,5 +1,7 @@
 require("@project-chip/matter-node.js");
 const os = require('os');
+const humiditysensor = require("./devices/humiditysensor").humiditysensor;
+const pressuresensor = require("./devices/pressuresensor").pressuresensor;
 const occupancysensor = require("./devices/occupancysensor").occupancysensor;
 const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
 const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
@@ -157,6 +159,11 @@ module.exports =  function(RED) {
                 case 'matteroccupancysensor':
                     child.device = occupancysensor(child)
                     break
+                case 'matterpressuresensor':
+                    child.device = pressuresensor(child)
+                    break
+                case 'matterhumiditysensor':
+                    child.device = humiditysensor(child)
             }
             console.log("adding device to aggregator")
             node.aggregator.add(child.device);

@@ -28,7 +28,9 @@
       "matter-contactsensor": "contactsensor.js",
       "matter-lightsensor": "lightsensor.js",
       "matter-temperaturesensor": "temperaturesensor.js",
-      "matter-occupancysensor": "occupancysensor.js"
+      "matter-occupancysensor": "occupancysensor.js",
+      "matter-pressuresensor": "pressuresensor.js",
+      "matter-humiditysensor": "humiditysensor.js"
 
   }
 }

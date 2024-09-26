@@ -1,0 +1,84 @@
+<script type="text/javascript">
+    RED.nodes.registerType('mattergenericswitch',{
+        category: 'Matter',
+        color: '#669999',
+        icon: "font-awesome/fa-toggle-on",
+        inputs:1,
+        outputs:0,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            switchtype: {value: "momentary"},
+            positions: {value: 2},
+            multiPressMax: {value: 2},
+            longPressDelay: {value: 50},
+            multiPressDelay: {value: 50}
+        },
+        label: function() {
+            return this.name||"Generic Switch";
+        },
+        paletteLabel: "Generic Switch"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="mattergenericswitch">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-switchtype">Switch Type</label>
+        <select type="text" id="node-input-switchtype" style="width:50%;" >
+            <option value=momentary>Momentary Switch</option>
+            <option value=latched>Latched Switch</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-positions">Number of Positions</label>
+        <input type="text" id="node-input-positions" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-multiPressMax">Maximum Multiple Presses</label>
+        <input type="text" id="node-input-multiPressMax" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-longPressDelay">Long Press Delay (ms)</label>
+        <input type="text" id="node-input-longPressDelay" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-multiPressDelay">Multi Press Delay (ms)</label>
+        <input type="text" id="node-input-multiPressDelay" style="width:70%;">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="mattergenericswitch">
+    <p>A Bridged Generic Momentary Switch (Button)</p>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload         
+                 <span class="property-type">
+                      number 
+                 </span>
+             </dt>
+             <dd> 
+                 The temperature in Degrees centrigrate between the configured min and max values.
+                 Matter supports up to 2 decmimal places of precision.
+
+             </dd>
+            
+        </dl>
+
+        
+    </dl>
+    
+    <h3>Details</h3>
+
+    As this is a user input device it cannot be updated by the Matter controller and as such has no output only input.
+</script>

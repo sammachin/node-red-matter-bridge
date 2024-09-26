@@ -19,7 +19,7 @@ const dimmablelight = require("./devices/dimmablelight").dimmablelight;
 const onoffsocket = require("./devices/onoffsocket").onoffsocket;
 const onofflight = require("./devices/onofflight").onofflight;
 const lightsensor = require("./devices/lightsensor").lightsensor;
-
+const genericswitch = require("./devices/genericswitch").genericswitch;
 
 function genPasscode(){
     let x = Math.floor(Math.random() * (99999998-1) +1)
@@ -164,6 +164,10 @@ module.exports =  function(RED) {
                     break
                 case 'matterhumiditysensor':
                     child.device = humiditysensor(child)
+                    break
+                case 'mattergenericswitch':
+                    child.device = genericswitch(child)
+                    break
             }
             console.log("adding device to aggregator")
             node.aggregator.add(child.device);

@@ -30,7 +30,8 @@
       "matter-temperaturesensor": "temperaturesensor.js",
       "matter-occupancysensor": "occupancysensor.js",
       "matter-pressuresensor": "pressuresensor.js",
-      "matter-humiditysensor": "humiditysensor.js"
+      "matter-humiditysensor": "humiditysensor.js",
+      "matter-genercswitch": "genericswitch.js"
 
   }
 }

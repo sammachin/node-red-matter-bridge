@@ -91,3 +91,4 @@ typings/
 repl_test.js
 cli_test.js
 repldevice.js
+repl_composed_bridged_switch.js

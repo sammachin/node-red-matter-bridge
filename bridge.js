@@ -1,17 +1,12 @@
 require("@project-chip/matter-node.js");
+
+const VendorId = require("@project-chip/matter.js/datatype").VendorId;
+const Endpoint = require("@project-chip/matter.js/endpoint").Endpoint;
+const AggregatorEndpoint = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
+const MatterEnvironment = require("@project-chip/matter.js/environment").Environment;
+const ServerNode = require("@project-chip/matter.js/node").ServerNode;
+const Logger = require("@project-chip/matter.js/log").Logger;
 const os = require('os');
-const humiditysensor = require("./devices/humiditysensor").humiditysensor;
-const pressuresensor = require("./devices/pressuresensor").pressuresensor;
-const occupancysensor = require("./devices/occupancysensor").occupancysensor;
-const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
-const  VendorId  = require("@project-chip/matter.js/datatype").VendorId;
-const  ExtendedColorLightDevice = require( "@project-chip/matter.js/devices/ExtendedColorLightDevice").ExtendedColorLightDevice;
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  AggregatorEndpoint  = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
-const  MatterEnvironment   = require("@project-chip/matter.js/environment").Environment;
-const  ServerNode  = require("@project-chip/matter.js/node").ServerNode;
-const  Logger  = require("@project-chip/matter.js/log").Logger; 
 const contactsensor = require("./devices/contactsensor").contactsensor
 const colortemplight = require("./devices/colortemplight").colortemplight
 const fullcolorlight = require("./devices/fullcolorlight").fullcolorlight;
@@ -20,6 +15,11 @@ const onoffsocket = require("./devices/onoffsocket").onoffsocket;
 const onofflight = require("./devices/onofflight").onofflight;
 const lightsensor = require("./devices/lightsensor").lightsensor;
 const genericswitch = require("./devices/genericswitch").genericswitch;
+const windowcovering = require("./devices/windowcovering").windowcovering;
+const humiditysensor = require("./devices/humiditysensor").humiditysensor;
+const pressuresensor = require("./devices/pressuresensor").pressuresensor;
+const occupancysensor = require("./devices/occupancysensor").occupancysensor;
+const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
 
 function genPasscode(){
     let x = Math.floor(Math.random() * (99999998-1) +1)
@@ -167,6 +167,9 @@ module.exports =  function(RED) {
                     break
                 case 'mattergenericswitch':
                     child.device = genericswitch(child)
+                    break
+                case 'matterwindowcovering':
+                    child.device = windowcovering(child)
                     break
             }
             console.log("adding device to aggregator")

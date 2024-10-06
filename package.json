@@ -31,7 +31,8 @@
       "matter-occupancysensor": "occupancysensor.js",
       "matter-pressuresensor": "pressuresensor.js",
       "matter-humiditysensor": "humiditysensor.js",
-      "matter-genercswitch": "genericswitch.js"
+      "matter-genercswitch": "genericswitch.js",
+      "matter-windowcovering": "windowcovering.js"
 
   }
 }

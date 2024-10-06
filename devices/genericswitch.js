@@ -10,12 +10,16 @@ const  Switch = require( "@project-chip/matter.js/cluster").Switch;
 
 module.exports = {
     genericswitch: function(child) {
+        let features = [
+            child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitch : Switch.Feature.LatchingSwitch,
+            child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchLongPress : null, 
+            child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchRelease : null, 
+            child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchMultiPress : null
+        ]
+        features = features.filter(Boolean)
         const device = new Endpoint(
             GenericSwitchDevice.with(BridgedDeviceBasicInformationServer, SwitchServer.with(
-                child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitch : Switch.Feature.LatchingSwitch,
-                child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchLongPress : null, 
-                child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchRelease : null, 
-                child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchMultiPress : null
+                ...features
             )),{
                 id: child.id,
                 bridgedDeviceBasicInformation: {

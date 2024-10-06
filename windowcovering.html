@@ -1,0 +1,124 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matterwindowcovering',{
+        category: 'Matter',
+        color: '#669999',
+        icon: "font-awesome/fa-window-maximize",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            tilt: {value: ""},
+            lift: {value: ""},
+            coveringType: {value: 0},
+            productType: {value: 0},
+        },
+        label: function() {
+            return this.name||"Window Covering";
+        },
+        paletteLabel: "Window Covering"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterwindowcovering">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-Lift">Lift</label>
+        <select type="text" id="node-input-lift" style="width:50%;" >
+            <option value="">None</option>
+            <option value="lift">Lift</option>
+            <option value="pos">Position Aware Lift</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-tilt">Tilt</label>
+        <select type="text" id="node-input-tilt" style="width:50%;" >
+            <option value="">None</option>
+            <option value="tilt">Tilt</option>
+            <option value="pos">Position Aware Tilt</option>
+        </select>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-coveringType">Type</label>
+        <select type="text" id="node-input-coveringType" style="width:50%;" >
+            <option value=0>Roller Shade</option>
+            <option value=1>Roller Shade 2 Motor</option>
+            <option value=2>Roller Shade Exterior</option>
+            <option value=3>Roller Shade Exterior 2 Motor</option>
+            <option value=4>Curtain</option>
+            <option value=5>Awning</option>
+            <option value=6>Shutter</option>
+            <option value=7>Tilt Blind</option>
+            <option value=8>Lift and Tilt Blind Shade</option>
+            <option value=9>Projector Screen</option>
+            <option value=255>Unknown</option>
+        </select>
+
+    <div class="form-row">
+        <label for="node-input-productType">Product Type </label>
+        <select type="text" id="node-input-productType" style="width:50%;" >
+            <option value=0>SimpleRoller Shade</option>
+            <option value=1>Roman Shade</option>
+            <option value=2>Balloon Shade</option>
+            <option value=3>Woven Wood</option>
+            <option value=4>Pleated Shade</option>
+            <option value=5>Cellular Shade</option>
+            <option value=6>Layered Shade</option>
+            <option value=7>Layered Shade 2D</option>
+            <option value=8>Sheer Shade</option>
+            <option value=9>Tilt only Interior Blind</option>
+            <option value=10>Interior Blind</option>
+            <option value=11>Vertical Blind Strip Curtain</option>
+            <option value=12>Interior Venetian Blind</option>
+            <option value=13>Exterior Venetian Blind</option>
+            <option value=14>Left Curtain</option>
+            <option value=15>Right Curtain</option>
+            <option value=16>Central Curtain</option>
+            <option value=17>Roller Shutter</option>
+            <option value=18>Exterior Virtical Screen</option>
+            <option value=19>Awning Terrace</option>
+            <option value=20>Awning Vertical Screen</option>
+            <option value=21>Tilt Only Pergola</option>
+            <option value=22>Swinging Shutter</option>
+            <option value=23>Sliding Shutter</option>
+            <option value=255>Unknown</option>
+
+        </select>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matterwindowcovering">
+    <p>A Bridged Window Covering</p>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload         
+                 <span class="property-type">
+                      number 
+                 </span>
+             </dt>
+             <dd> 
+                 The temperature in Degrees centrigrate between the configured min and max values.
+                 Matter supports up to 2 decmimal places of precision.
+
+             </dd>
+            
+        </dl>
+
+        
+    </dl>
+    
+    <h3>Details</h3>
+
+    As this is a user input device it cannot be updated by the Matter controller and as such has no output only input.
+</script>

@@ -1,6 +1,6 @@
 {
   "name": "@sammachin/node-red-matter-bridge",
-  "version": "0.0.10",
+  "version": "0.0.10-beta",
   "description": "Node red package for implementing a matter bridge",
   "main": "index.js",
   "author": "Sam Machin",
@@ -33,7 +33,6 @@
       "matter-humiditysensor": "humiditysensor.js",
       "matter-genercswitch": "genericswitch.js",
       "matter-windowcovering": "windowcovering.js"
-
   }
 }
 }

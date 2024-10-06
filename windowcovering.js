@@ -64,11 +64,10 @@ module.exports = function(RED) {
             }
             node.pending = false
         })
-        this.on('move', function(action){
+        this.on('moveUp', function(){
             switch (action){
                 case 'tilt':
                     data = {'action' : 'tilt', 'direction' : null}
-                    console.log(node.device.state.windowCovering.operationalStatus.tilt)
                     switch (node.device.state.windowCovering.operationalStatus.tilt) {
                         case 1:
                             data.direction = 'open'

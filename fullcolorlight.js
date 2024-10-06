@@ -85,7 +85,6 @@ module.exports = function(RED) {
         });
         this.on('serverReady', function() {
             this.status({fill:"green",shape:"dot",text:"ready"});
-            console.log('READY')
         })
         this.on('state', function(data){
             if ((node.pending && node.passthrough)) {

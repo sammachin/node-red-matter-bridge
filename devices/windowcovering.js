@@ -12,27 +12,31 @@ const Observable = require("@project-chip/matter.js/util").Observable
 
 
 class Events extends WindowCoveringServer.Events {
-    movementUp = new Observable();
-    movementDown = new Observable();
+    liftMovement = new Observable();
+    tiltMovement = new Observable();
+
 }
 WindowCoveringServer.Events = Events
 
 class EventWindowCoveringServer extends WindowCoveringServer {
     async handleMovement(type, reversed, direction, targetPercent100ths) {
-        console.log('MovementEvent:', type, reversed, direction)
-        if (direction == 0){
-            if (reversed){
-                this.events.movementDown.emit()
-            } else {
-                this.events.movementUp.emit()
-            }
+        console.log('MovementEvent:', type, reversed, direction, targetPercent100ths)
+        let d
+        if (reversed) {
+            d = direction ^ 1 ? 'down' : 'up' // xor with 1 to invert direction, up is 0 down is 1
+        } else {
+            d = direction ? 'down' : 'up' // up is 0 down is 1
         }
-        if (direction == 1){
-            if (reversed){
-                this.events.movementUp.emit()
-            } else {
-                this.events.movementDown.emit()
-            }
+        if (!targetPercent100ths) {
+            targetPercent100ths = direction * 10000
+        }
+        switch (type) {
+            case 0: //lift
+                this.events.liftMovement.emit(d)
+                break;
+            case 1: //tilt
+                this.events.tiltMovement.emit(d)
+                break;
         }
         // Updates the position
         await super.handleMovement(type, reversed, direction, targetPercent100ths);
@@ -59,7 +63,7 @@ module.exports = {
         let params = {
             type: child.coveringType,
             endProductType: child.productType,
-            configStatus : {liftMovementReversed : child.reverseMotor}
+            configStatus : {liftMovementReversed : child.reversed}
         }
         child.tilt === 'pos' ? params.currentPositionTiltPercent100ths = 0 : null
         child.lift === 'pos' ? params.currentPositionLiftPercent100ths = 0 : null
@@ -96,13 +100,11 @@ module.exports = {
             }
 
             if (child.tilt == 'tilt'){
-                device.events.windowCovering.movementDown.on(() => {child.emit('tiltDown')})
-                device.events.windowCovering.movementUp.on(() => {child.emit('tiltUp')})
+                device.events.windowCovering.tiltMovement.on((direction) => {child.emit('tiltMovement', direction)})
             }
 
             if (child.lift == 'lift'){
-                device.events.windowCovering.movementDown.on(() => {child.emit('tiltDown')})
-                device.events.windowCovering.movementUp.on(() => {child.emit('tiltUp')})
+                device.events.windowCovering.liftMovement.on((direction) => {child.emit('liftMovement', direction)})
             }   
 
             return device;

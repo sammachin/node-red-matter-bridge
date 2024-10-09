@@ -20,7 +20,6 @@ WindowCoveringServer.Events = Events
 
 class EventWindowCoveringServer extends WindowCoveringServer {
     async handleMovement(type, reversed, direction, targetPercent100ths) {
-        console.log('MovementEvent:', type, reversed, direction, targetPercent100ths)
         let d
         if (reversed) {
             d = direction ^ 1 ? 'down' : 'up' // xor with 1 to invert direction, up is 0 down is 1

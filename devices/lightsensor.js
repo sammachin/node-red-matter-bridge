@@ -17,8 +17,8 @@ module.exports = {
                     reachable: true,
                 },
                 illuminanceMeasurement: {
-                    minMeasuredValue: child.minlevel,
-                    maxMeasuredValue: child.maxlevel
+                    minMeasuredValue: Math.floor(10000*Math.log10(child.minlevel) +1),
+                    maxMeasuredValue: Math.floor(10000*Math.log10(child.maxlevel) +1)
 
                 }
             }

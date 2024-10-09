@@ -1,4 +1,6 @@
-const { IlluminanceMeasurement } = require("@project-chip/matter-node.js/cluster");
+const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
+const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+
 
 module.exports = function(RED) {
     function MatterLightSensor(config) {
@@ -14,7 +16,19 @@ module.exports = function(RED) {
 
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            node.device.set({illuminanceMeasurement: {measuredValue: msg.payload}})
+            if (msg.topic == 'state'){
+                msg.payload = node.device.state
+                node.send(msg)
+                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
+            } else {
+                let value
+                if (msg.payload == 0) {
+                    value = 0
+                } else {
+                    value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
+                }
+                node.device.set({illuminanceMeasurement: {measuredValue: value }})
+            }
         });
         this.on('serverReady', function() {
             this.status({fill:"green",shape:"dot",text:"ready"});

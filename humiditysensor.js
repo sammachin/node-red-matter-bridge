@@ -1,3 +1,5 @@
+const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
+const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
 
 module.exports = function(RED) {
     function MatterHumiditySensor(config) {
@@ -11,7 +13,14 @@ module.exports = function(RED) {
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            node.device.set({relativeHumidityMeasurement: {measuredValue: msg.payload*100}})
+            if (msg.topic == 'state'){
+                msg.payload = node.device.state
+                node.send(msg)
+                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
+            } else {
+                node.device.set({relativeHumidityMeasurement: {measuredValue: msg.payload*100}})
+            }
+            
         });
         this.on('serverReady', function() {
             this.status({fill:"green",shape:"dot",text:"ready"});

@@ -1,3 +1,5 @@
+const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
+const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
 
 module.exports = function(RED) {
     function MatterOnOffSocket(config) {
@@ -11,44 +13,50 @@ module.exports = function(RED) {
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            node.pending = true
-            node.pendingmsg = msg
-            if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
-                msg.payload = state = {state: msg.payload}
-            }
-            if (typeof msg.payload.state == "boolean") {
-                node.device.set({
-                    onOff: {
-                        onOff: msg.payload.state,
-                    }
-                })
+            if (msg.topic == 'state'){
+                msg.payload = node.device.state
+                node.send(msg)
+                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
-                switch (msg.payload.state){
-                    case '1':
-                    case 1:
-                    case 'on':
-                        node.device.set({
-                            onOff: {
-                                onOff: true,
-                            }
+                node.pending = true
+                node.pendingmsg = msg
+                if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
+                    msg.payload = state = {state: msg.payload}
+                }
+                if (typeof msg.payload.state == "boolean") {
+                    node.device.set({
+                        onOff: {
+                            onOff: msg.payload.state,
+                        }
+                    })
+                } else {
+                    switch (msg.payload.state){
+                        case '1':
+                        case 1:
+                        case 'on':
+                            node.device.set({
+                                onOff: {
+                                    onOff: true,
+                                }
+                            })
+                            break
+                        case '0':
+                        case 0:
+                            case 'off':
+                            node.device.set({
+                                onOff: {
+                                    onOff: false,
+                                }
+                            })
+                            break
+                        case 'toggle':
+                            node.device.set({
+                                onOff: {
+                                        onOff: !node.device.state.onOff.onOff,
+                                        }
                         })
-                        break
-                    case '0':
-                    case 0:
-                        case 'off':
-                        node.device.set({
-                            onOff: {
-                                onOff: false,
-                            }
-                        })
-                        break
-                    case 'toggle':
-                        node.device.set({
-                            onOff: {
-                                     onOff: !node.device.state.onOff.onOff,
-                                    }
-                      })
-                        break
+                            break
+                    }
                 }
             }
         });

@@ -1,3 +1,5 @@
+const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
+const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
 
 module.exports = function(RED) {
     function MatterGenericSwitch(config) {
@@ -14,29 +16,35 @@ module.exports = function(RED) {
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            ep = node.device
-            let t
-            switch (msg.payload.type.toLowerCase()) {
-                case "single":
-                    t = ep.state.switch.longPressDelay/2
-                    press(ep, 1)
-                    setTimeout(press, t, ep, 0)
-                    break
-                case "double":
-                    t = ep.state.switch.longPressDelay/4
-                    press(ep, 1)
-                    setTimeout(press, t, ep, 0)
-                    setTimeout(press, t*2, ep, 1)
-                    setTimeout(press, t*3, ep, 0)
-                    break            
-                case "long":
-                    t = ep.state.switch.multiPressDelay*1.5
-                    press(ep, 1)
-                    setTimeout(press, t, ep, 0)
-                    break
-                case "position":
-                    ep.set({switch : {currentPosition: msg.payload.position}})
-                    break
+            if (msg.topic == 'state'){
+                msg.payload = node.device.state
+                node.send(msg)
+                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
+            } else {
+                ep = node.device
+                let t
+                switch (msg.payload.type.toLowerCase()) {
+                    case "single":
+                        t = ep.state.switch.longPressDelay/2
+                        press(ep, 1)
+                        setTimeout(press, t, ep, 0)
+                        break
+                    case "double":
+                        t = ep.state.switch.longPressDelay/4
+                        press(ep, 1)
+                        setTimeout(press, t, ep, 0)
+                        setTimeout(press, t*2, ep, 1)
+                        setTimeout(press, t*3, ep, 0)
+                        break            
+                    case "long":
+                        t = ep.state.switch.multiPressDelay*1.5
+                        press(ep, 1)
+                        setTimeout(press, t, ep, 0)
+                        break
+                    case "position":
+                        ep.set({switch : {currentPosition: msg.payload.position}})
+                        break
+                }
             }
         });
         

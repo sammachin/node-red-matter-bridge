@@ -8,8 +8,8 @@
         defaults: {
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
-            minlevel: {value: 1},
-            maxlevel: {value: 65534}
+            minlevel: {value: 0},
+            maxlevel: {value: 3576000}
         },
         label: function() {
             return this.name||"Light Sensor";
@@ -59,7 +59,8 @@
     </dl>
     
     <h3>Details</h3>
-    The sensor node should be configured with min and max values for the sensor, between 1 & 65534, if not set these will be used as default values.
+    The sensor node should be configured with min and max values for the sensor, between 0 & 3,576,000 in Lux, if not set these will be used as default values.
+    Note: 100,000 lux is bright sunlight 
 
     As this is a sensor it cannot be updated by the Matter controller and as such has no output only input.
 </script>

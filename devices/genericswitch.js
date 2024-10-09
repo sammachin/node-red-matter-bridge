@@ -2,7 +2,7 @@ const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cl
 const temperaturesensor = require("../temperaturesensor");
 
 const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
+const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
 const  GenericSwitchDevice = require("@project-chip/matter.js/devices/GenericSwitchDevice").GenericSwitchDevice
 const  SwitchServer = require( "@project-chip/matter.js/behavior/definitions/switch").SwitchServer
 const  Switch = require( "@project-chip/matter.js/cluster").Switch; 

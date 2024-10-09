@@ -1,5 +1,5 @@
 const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
+const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
 const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
 
 
@@ -26,6 +26,6 @@ module.exports = {
         device.events.identify.stopIdentifying.on(() => {
             child.emit('identify', false)
         });
-            return device;
+        return device;
     }
  }

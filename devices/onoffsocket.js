@@ -1,5 +1,5 @@
 const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationBehavior;
+const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
 const  OnOffPlugInUnitDevice = require( "@project-chip/matter.js/devices/OnOffPlugInUnitDevice").OnOffPlugInUnitDevice;
 
 

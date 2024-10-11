@@ -1,0 +1,75 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matterthermostat',{
+        category: 'Matter',
+        color: '#996666',
+        icon: "font-awesome/fa-thermometer-empty",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            mode: {value: "heat"},
+           
+            passthrough: {value: true}
+        },
+        label: function() {
+            return this.name||"Thermostat";
+        },
+        paletteLabel: "Thermostat"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterthermostat">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-mode">Mode</label>
+        <select type="text" id="node-input-mode" style="width:50%;" >
+            <option value="heat">Heat</option>
+            <option value="cool">Cool</option>
+            <option value="heatcool">Heat & Cool</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-passthrough">Passthrough Input msg to Output</label>
+        <select type="text" id="node-input-passthrough" style="width:50%;" >
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
+    </div>
+
+</script>
+
+<script type="text/x-red" data-help-name="matterthermostat">
+    <p>A Bridged Thermostat</p>
+
+    <h3>Inputs</h3>
+        <dl class="message-properties">
+             <dt>
+                 payload.temperature         
+                 <span class="property-type">
+                      number 
+                 </span>
+             </dt>
+             <dd> 
+                 Value between 0 - 10000 representing the percentage value of open in steps of 0.01%
+                 1
+
+             </dd>
+            
+        </dl>
+
+        
+    </dl>
+    
+    <h3>Details</h3>
+
+    As this is a user input device it cannot be updated by the Matter controller and as such has no output only input.
+</script>

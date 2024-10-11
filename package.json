@@ -32,7 +32,8 @@
       "matter-pressuresensor": "pressuresensor.js",
       "matter-humiditysensor": "humiditysensor.js",
       "matter-genercswitch": "genericswitch.js",
-      "matter-windowcovering": "windowcovering.js"
+      "matter-windowcovering": "windowcovering.js",
+      "matter-thermostat": "thermostat.js"
   }
 }
 }

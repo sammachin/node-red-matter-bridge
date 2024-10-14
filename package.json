@@ -33,7 +33,8 @@
       "matter-humiditysensor": "humiditysensor.js",
       "matter-genercswitch": "genericswitch.js",
       "matter-windowcovering": "windowcovering.js",
-      "matter-thermostat": "thermostat.js"
+      "matter-thermostat": "thermostat.js",
+      "matter-doorlock": "doorlock.js"
   }
 }
 }

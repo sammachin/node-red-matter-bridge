@@ -7,6 +7,7 @@ const MatterEnvironment = require("@project-chip/matter.js/environment").Environ
 const ServerNode = require("@project-chip/matter.js/node").ServerNode;
 const Logger = require("@project-chip/matter.js/log").Logger;
 const os = require('os');
+const doorlock = require("./devices/doorlock").doorlock;
 const thermostat = require("./devices/thermostat").thermostat;
 const contactsensor = require("./devices/contactsensor").contactsensor
 const colortemplight = require("./devices/colortemplight").colortemplight
@@ -176,6 +177,10 @@ module.exports =  function(RED) {
                     break
                 case 'matterthermostat':
                     child.device = thermostat(child)
+                    break
+                case 'matterdoorlock':
+                    child.device = doorlock(child)
+                    break
             }
             console.log("adding device to aggregator")
             node.aggregator.add(child.device);

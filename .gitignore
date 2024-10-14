@@ -95,4 +95,5 @@ repl_composed_bridged_switch.js
 repl.js
 replblind.js
 replthermostat.js
-*.js
+repllock.js
+repllightdevice.js

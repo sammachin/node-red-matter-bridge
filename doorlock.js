@@ -14,6 +14,9 @@ module.exports = function(RED) {
         node.passthrough = /^true$/i.test(config.passthrough)
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
+                if (msg.payload){
+                    node.device.set(msg.payload)
+                }
                 msg.payload = node.device.state
                 node.send(msg)
                 logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))

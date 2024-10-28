@@ -23,7 +23,8 @@ module.exports = {
                 },
                 doorLock: {
                     lockType: 2,
-                    actuatorEnabled: true
+                    actuatorEnabled: true,
+                    lockState: child.lockState ? child.lockState : 1
                 }
             })
 

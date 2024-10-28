@@ -11,6 +11,8 @@ module.exports = function(RED) {
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.pendingmsg = null
+        node.ctx =  this.context().global;
+        node.lockState = node.ctx.get(node.id+"-lockState") || null
         node.passthrough = /^true$/i.test(config.passthrough)
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
@@ -25,7 +27,7 @@ module.exports = function(RED) {
                 node.pendingmsg = msg
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
-                } 
+                let lockState 
                 switch (msg.payload.state){
                     case '1':
                     case 1:
@@ -37,6 +39,7 @@ module.exports = function(RED) {
                                 lockState: 1,
                             }
                         })
+                        lockState = 1
                         break
                     case '0':
                     case 0:
@@ -48,10 +51,13 @@ module.exports = function(RED) {
                                 lockState: 2,
                             }
                         })
+                        lockState = 2
                         break
                 }
+                node.ctx.set(node.id+"-lockState",  lockState)
+                node.lockState = lockState
+                }
             }
-            
         });
         this.on('serverReady', function() {
             this.status({fill:"green",shape:"dot",text:"ready"});

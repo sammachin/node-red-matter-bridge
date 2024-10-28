@@ -18,7 +18,8 @@ module.exports = {
                 },
                 occupancySensing: {
                     occupancySensorType : child.sensorType,
-                    occupancySensorTypeBitmap: child.sensorTypeBitmap
+                    occupancySensorTypeBitmap: child.sensorTypeBitmap,
+                    occupancy: {occupied: child.occupied}
                 }
             });
 

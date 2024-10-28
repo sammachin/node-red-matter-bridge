@@ -18,8 +18,8 @@ module.exports = {
                 },
                 illuminanceMeasurement: {
                     minMeasuredValue: Math.floor(10000*Math.log10(child.minlevel) +1),
-                    maxMeasuredValue: Math.floor(10000*Math.log10(child.maxlevel) +1)
-
+                    maxMeasuredValue: Math.floor(10000*Math.log10(child.maxlevel) +1),
+                    measuredValue : child.measuredValue ? child.measuredValue : 0
                 }
             }
             )
@@ -32,3 +32,4 @@ module.exports = {
             return device;
     }
  }
+

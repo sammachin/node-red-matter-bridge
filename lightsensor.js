@@ -4,16 +4,15 @@ const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServe
 
 module.exports = function(RED) {
     function MatterLightSensor(config) {
-        RED.nodes.createNode(this,config);
-
+        RED.nodes.createNode(this, config);
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
         node.minlevel = config.minlevel 
         node.maxlevel = config.maxlevel
+        node.ctx =  this.context().global;
+        node.measuredValue = node.ctx.get(node.id+"-measuredValue") || null
         console.log(`Loading Device node ${node.id}`)
-        console.log(`INITIAL STATE: ${config.initial}`)
-
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
@@ -28,6 +27,8 @@ module.exports = function(RED) {
                     value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
                 }
                 node.device.set({illuminanceMeasurement: {measuredValue: value }})
+                node.ctx.set(node.id+"-measuredValue",  value)
+                node.measuredValue = value
             }
         });
         this.on('serverReady', function() {
@@ -50,8 +51,11 @@ module.exports = function(RED) {
             this.removeAllListeners('identify')
             if (removed) {
                 // This node has been disabled/deleted
+                console.log('Node Removed')
             } else {
                 // This node is being restarted
+                console.log('Node Restarted')
+                console.log(node.measuredValue)
             }
             done();
         });

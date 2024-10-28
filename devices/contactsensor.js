@@ -16,7 +16,7 @@ module.exports = {
                     reachable: true,
                 },
                 booleanState: {
-                    stateValue: child.initial
+                    stateValue: child.stateValue ? child.stateValue : child.initial
                 }
             }
             )

@@ -12,7 +12,8 @@ module.exports = function(RED) {
         node.initial = config.initial == "true";
         console.log(`Loading Device node ${node.id}`)
         console.log(`INITIAL STATE: ${config.initial}`)
-
+        node.ctx =  this.context().global;
+        node.stateValue = node.ctx.get(node.id+"-stateValue") || null
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
@@ -21,6 +22,8 @@ module.exports = function(RED) {
                 logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
                 node.device.set({booleanState: {stateValue: msg.payload}})
+                node.ctx.set(node.id+"-stateValue",  msg.payload)
+                node.stateValue = msg.payload
             }
         });
         this.on('serverReady', function() {

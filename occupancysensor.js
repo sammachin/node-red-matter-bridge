@@ -17,6 +17,8 @@ module.exports = function(RED) {
         node.name = config.name
         node.sensorType = Number(config.sensorType)-1
         node.sensorTypeBitmap = typeToBitmap(config.sensorType)
+        node.ctx =  this.context().global;
+        node.occupied = node.ctx.get(node.id+"-occupied") || null
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
@@ -25,7 +27,10 @@ module.exports = function(RED) {
                 node.send(msg)
                 logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
-                node.device.set({occupancySensing: {occupancy: {occupied: msg.payload}}})
+                value = msg.payload
+                node.device.set({occupancySensing: {occupancy: {occupied: value}}})
+                node.ctx.set(node.id+"-occupied",  value)
+                node.occupied = value
             }
         });
         this.on('serverReady', function() {

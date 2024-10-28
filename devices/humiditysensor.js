@@ -18,8 +18,8 @@ module.exports = {
                 },
                 relativeHumidityMeasurement: {
                     minMeasuredValue: child.minlevel,
-                    maxMeasuredValue: child.maxlevel
-
+                    maxMeasuredValue: child.maxlevel,
+                    measuredValue : child.measuredValue ? child.measuredValue : 0
                 }
             }
             )

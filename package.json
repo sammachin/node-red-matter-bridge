@@ -8,8 +8,7 @@
   "repository": "https://github.com/sammachin/node-red-matter-bridge",
   "dependencies": {
     "@project-chip/matter-node.js": "^0.10.0",
-    "@project-chip/matter.js": "^0.10.0",
-    "color-convert": "^2.0.1"
+    "@project-chip/matter.js": "^0.10.0"
   },
   "engines": {
     "node": ">=18.0.0"

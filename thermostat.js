@@ -9,6 +9,10 @@ module.exports = function(RED) {
         node.mode = config.mode
         node.heat = (config.mode == 'heat' || 'heatcool')
         node.cool = (config.mode == 'cool' || 'heatcool')
+        node.ctx =  this.context().global;
+        node.values = node.ctx.get(node.id+"-values") || null
+        node.temperature = node.ctx.get(node.id+"-temperature") || null
+
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
@@ -46,9 +50,13 @@ module.exports = function(RED) {
                     node.device.set({
                         thermostat: values
                     })
+                    node.ctx.set(node.id+"-values",  values)
+                    node.values = values
                 }
                 if (msg.payload.temperature){
                     node.device.set({thermostat : {localTemperature : msg.payload.temperature}})
+                    node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
+                    node.temperature = msg.payload.temperature
                 }
             }
             

@@ -20,8 +20,8 @@ module.exports = {
             features.push(Thermostat.Feature.Cooling)
         }
         let params = {
-                systemMode: 0,
-                localTemperature: 1800,
+                systemMode: child.values ? child.values.systemMode : 0,
+                localTemperature: child.temperature ? child.temperature : 0,
         }
         if (child.cool && !child.heat) {
             params.controlSequenceOfOperation = 0
@@ -38,10 +38,11 @@ module.exports = {
         child.cool ? params.absMinCoolSetpointLimit = 0 : null
         child.cool ? params.maxCoolSetpointLimit = 2100 : null
         child.cool ? params.absMaxCoolSetpointLimit = 2100 : null
-
-
-
-
+        if (params.systemMode == 4){
+            params.occupiedHeatingSetpoint = child.values.occupiedHeatingSetpoint
+        } else if (params.systemMode == 3){
+            params.occupiedCoolingSetpoint = child.values.occupiedCoolingSetpoint
+        } 
         const device = new Endpoint(ThermostatDevice.with(BridgedDeviceBasicInformationServer, ThermostatServer.with(
              ...features    
             )),{
@@ -67,16 +68,20 @@ module.exports = {
 
             
             device.events.thermostat.systemMode$Changed.on((value) => {
+                child.values ? child.values.systemMode=value : child.values={systemMode:value}
                 child.emit('mode', value)
+                
             });
 
             if (child.heat){
-                device.events.thermostat.occupiedHeatingSetpoint$Changed.on((value) => 
-                    {child.emit('temp', 'heat', value)})
+                device.events.thermostat.occupiedHeatingSetpoint$Changed.on((value) => {
+                    child.values ? child.values.occupiedHeatingSetpoint=value : child.values={occupiedHeatingSetpoint:value}
+                    child.emit('temp', 'heat', value)})
             }
             if (child.cool){
-                device.events.thermostat.occupiedCoolingSetpoint$Changed.on((value) => 
-                    {child.emit('temp', 'cool', value)})
+                device.events.thermostat.occupiedCoolingSetpoint$Changed.on((value) => {
+                    child.values ? child.values.occupiedCoolingSetpoint=value : child.values={occupiedCoolingSetpoint:value}
+                    child.emit('temp', 'cool', value)})
             }
 
             return device;

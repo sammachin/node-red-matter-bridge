@@ -37,6 +37,7 @@ module.exports = {
 
             device.events.doorLock.lockState$Changed.on((value) => {
                 let states = {0 :'unlocked', 1 : 'locked', 2 : 'unlocked'}
+                child.lockState = value
                 child.emit('state', states[value])
             });
 

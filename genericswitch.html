@@ -62,15 +62,15 @@
     <h3>Inputs</h3>
         <dl class="message-properties">
              <dt>
-                 payload         
+                 payload.type         
                  <span class="property-type">
-                      number 
+                      enum 
                  </span>
              </dt>
              <dd> 
-                 The temperature in Degrees centrigrate between the configured min and max values.
-                 Matter supports up to 2 decmimal places of precision.
-
+                 <code>single</code> <code>double</code> or <code>long</code> will produce the coresponding events based on the timers set.
+                 Alternativly you can set this to <code>position</code> and then  specifiy the position of the switch/button in <code>payload.postion</code>
+                 To create the events manually.
              </dd>
             
         </dl>
@@ -79,6 +79,18 @@
     </dl>
     
     <h3>Details</h3>
-
     As this is a user input device it cannot be updated by the Matter controller and as such has no output only input.
+
+    Switch Type allows you to select either a momentary "push button" type of switch or a latching switch that has a number of positions.
+    Note: that most ecosystems today only support the momntary switch.
+
+    Number of Positions is 2 for a momentary or 2 or more for a latching switch
+    Maximum Multiple Presses applies only to momentary switches, again most ecosystems only support single and double press today
+
+    Long Press delay is the time that a momentary switch should remain in the on position for the long press event to be sent.
+
+    Multi Press delay is the time between events for a double press event.
+
+
+
 </script>

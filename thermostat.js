@@ -78,9 +78,9 @@ module.exports = function(RED) {
             let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
             data = {'mode' : modes[value]}
             if (value == 4){
-                data.setpoint = node.device.state.thermostat.occupiedHeatingSetpoint
+                data.setPoint = node.device.state.thermostat.occupiedHeatingSetpoint
             } else if (value == 3){
-                data.setpoint = node.device.state.thermostat.occupiedCoolingSetpoint
+                data.setPoint = node.device.state.thermostat.occupiedCoolingSetpoint
             }
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg

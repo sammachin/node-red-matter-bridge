@@ -49,9 +49,9 @@
 
 <script type="text/x-red" data-help-name="matterthermostat">
     <p>A Bridged Thermostat</p>
-    The Thermostat device has mulitple functions, it records the local temperature from a temperature sensor, it allows you to select a mode, heating or cooling and has setPoints (eg the desired temperature) for each of the modes.
+    The Thermostat device has mulitple functions, it tracks the local temperature, it allows you to select a mode, heating or cooling and has setPoints (eg the desired temperature) for each of the modes.
 
-    Not that the Thermostat device does not currently control the call for heat/cool it simple tracks the temperature and setPoint, any control of heating or cooling devices needs to be implemented in your flow.
+    Note that the Thermostat device does not currently control the call for heat/cool it simple tracks the temperature and setPoint, any control of heating or cooling devices needs to be implemented in your flow.
 
     <h3>Inputs</h3>
         <dl class="message-properties">
@@ -65,12 +65,53 @@
                  Value between -27315 - 32767 representing the temperature in degrees celsuius in steps of  0.01 degree (eg 18C would be represented as 1800), 
             
              </dd>
-            
+            <dt>
+                payload.setPoint         
+                <span class="property-type">
+                     number 
+                </span>
+            </dt>
+            <dd> 
+                Value between 0 - 3500 representing the desired temperature in degrees celsuius in steps of  0.01 degree (eg 18C would be represented as 1800), 
+                Note the device will hold different setPoints for heat and cool mode, if the mode is not in the payload then the current mode will be used.
+            </dd>
+            <dt>
+                payload.mode         
+                <span class="property-type">
+                     string 
+                </span>
+            </dt>
+            <dd> 
+                The current mode, either <code>heat</code> <code>cool</code> or <code>off</code>
+            </dd>
         </dl>
 
         
     </dl>
-    
+
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>
+            payload.setPoint         
+            <span class="property-type">
+                 number 
+            </span>
+        </dt>
+        <dd> 
+            Value between 0 - 3500 representing the desired temperature in degrees celsuius in steps of  0.01 degree (eg 18C would be represented as 1800), 
+            Note the device will hold different setPoints for heat and cool mode, whenever either value is updates both mode and setPoint are output
+        <dt>
+            payload.mode         
+            <span class="property-type">
+                 string 
+            </span>
+        </dt>
+        <dd> 
+            The current mode, either <code>heat</code> <code>cool</code> or <code>off</code>
+        </dd>
+    </dl>
+
+</dl>    
     <h3>Details</h3>
 
 </script>

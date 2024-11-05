@@ -49,6 +49,9 @@
 
 <script type="text/x-red" data-help-name="matterthermostat">
     <p>A Bridged Thermostat</p>
+    The Thermostat device has mulitple functions, it records the local temperature from a temperature sensor, it allows you to select a mode, heating or cooling and has setPoints (eg the desired temperature) for each of the modes.
+
+    Not that the Thermostat device does not currently control the call for heat/cool it simple tracks the temperature and setPoint, any control of heating or cooling devices needs to be implemented in your flow.
 
     <h3>Inputs</h3>
         <dl class="message-properties">
@@ -59,9 +62,8 @@
                  </span>
              </dt>
              <dd> 
-                 Value between 0 - 10000 representing the percentage value of open in steps of 0.01%
-                 1
-
+                 Value between -27315 - 32767 representing the temperature in degrees celsuius in steps of  0.01 degree (eg 18C would be represented as 1800), 
+            
              </dd>
             
         </dl>
@@ -71,5 +73,4 @@
     
     <h3>Details</h3>
 
-    As this is a user input device it cannot be updated by the Matter controller and as such has no output only input.
 </script>

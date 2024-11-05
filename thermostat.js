@@ -22,7 +22,7 @@ module.exports = function(RED) {
                 msg.payload = node.device.state
                 node.send(msg)
             } else {
-                if (msg.payload.mode){
+                if (msg.payload.mode || msg.payload.setPoint){
                     node.pending = true
                     node.pendingmsg = msg
                     let systemMode 
@@ -35,21 +35,20 @@ module.exports = function(RED) {
                             break;
                         case 'off':
                             systemMode = 0
+                            break
                         default:
-                            systemMode =  node.devicestate.thermostat.systemMode
+                            systemMode =  node.device.state.thermostat.systemMode
                             break;
                     }
                     let values = {systemMode: systemMode}
-                    if (msg.payload.setpoint){
+                    if (msg.payload.setPoint){
                         if (systemMode == 4){
-                            values.occupiedHeatingSetpoint = msg.payload.setpoint
+                            values.occupiedHeatingSetpoint = msg.payload.setPoint
                         } else if (systemMode == 3){
-                            values.occupiedCoolingSetpoint = msg.payload.setpoint
+                            values.occupiedCoolingSetpoint = msg.payload.setPoint
                         } 
                     }
-                    node.device.set({
-                        thermostat: values
-                    })
+                    node.device.set({thermostat: values})
                     node.ctx.set(node.id+"-values",  values)
                     node.values = values
                 }
@@ -59,8 +58,6 @@ module.exports = function(RED) {
                     node.temperature = msg.payload.temperature
                 }
             }
-            
-
         });
         
         this.on('serverReady', function() {

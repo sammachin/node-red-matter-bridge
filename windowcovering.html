@@ -123,16 +123,78 @@
              </dt>
              <dd> 
                  Value between 0 - 10000 representing the percentage value of open in steps of 0.01%
-                 1
-
+                 
              </dd>
-            
+             <dt>
+                payload.tiltPosition         
+                <span class="property-type">
+                     number 
+                </span>
+            </dt>
+            <dd> 
+                Value between 0 - 10000 representing the percentage value of open in steps of 0.01%
+
+            </dd>
         </dl>
 
-        
     </dl>
+    <h3>Outputs</h3>
+        Position Aware actuators will output their Position.
+        <dl class="message-properties">
+             <dt>
+                 payload.liftPosition         
+                 <span class="property-type">
+                      number 
+                 </span>
+             </dt>
+             <dd> 
+                 Value between 0 - 10000 representing the percentage value of open in steps of 0.01%
+                 
+             </dd>
+             <dt>
+                payload.tiltPosition         
+                <span class="property-type">
+                     number 
+                </span>
+            </dt>
+            <dd> 
+                Value between 0 - 10000 representing the percentage value of open in steps of 0.01%
+
+            </dd>
+        </dl>
+        <br>
+        Whereas Simple Actuators wil output the actuator and direction only
+        <dl class="message-properties">
+            <dt>
+                payload.action         
+                <span class="property-type">
+                     string 
+                </span>
+            </dt>
+            <dd> 
+                either <code>lift</code> or <code>tilt</code> inducating the actuator
+                
+            </dd>
+            <dt>
+               payload.direction         
+               <span class="property-type">
+                    string 
+               </span>
+           </dt>
+           <dd> 
+            either <code>up</code> or <code>down</code> inducating the direction
+           </dd>
+       </dl>
+       <br>
+    
+
     
     <h3>Details</h3>
+    A Window Covering can be in one of 2 modes, Simple or Position Aware, and can then have 2 actuators Lift and Tilt.
 
-    As this is a user input device it cannot be updated by the Matter controller and as such has no output only input.
+    Position aware actuators communicate their position between 0-100% back to the fabric, whereas simple just have basic Up & Down commands.
+
+    Only poistiion aware actuators can accept input. Simple is purely an output node.
+
+    
 </script>

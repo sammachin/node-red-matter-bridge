@@ -1,6 +1,7 @@
 
 const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
 const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const { hasProperty, isNumber } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -32,10 +33,10 @@ module.exports = function(RED) {
                 else {
                     if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 }
-                if ((msg.payload.hue || msg.payload.sat) && msg.payload.temp) {
+                if ((hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')) && hasProperty(msg.payload, 'temp')) {
                     node.error("Can't set Colour Temp and Hue/Sat at same time")
                 } else {
-                    if (msg.payload.hue || msg.payload.sat){
+                    if (hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')){
                         msg.payload.hue = msg.payload.hue ? msg.payload.hue : node.device.state.colorControl.currentHue
                         msg.payload.sat = msg.payload.sat ? msg.payload.sat : node.device.state.colorControl.currentSaturation
                         newcolor = {
@@ -43,7 +44,7 @@ module.exports = function(RED) {
                             currentHue: msg.payload.hue,
                             currentSaturation: msg.payload.sat
                         }
-                    } else if (msg.payload.temp) {
+                    } else if (hasProperty(msg.payload, 'temp')) {
                         newcolor = {
                             colorMode: 2,
                             colorTemperatureMireds : 1000000/msg.payload.temp

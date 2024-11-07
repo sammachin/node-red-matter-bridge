@@ -1,5 +1,6 @@
 const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
 const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const { hasProperty, isNumber } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -29,7 +30,7 @@ module.exports = function(RED) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
-                if (msg.payload.temp) {
+                if (hasProperty(msg.payload, 'temp')) {
                     var mireds = 1000000/msg.payload.temp
                 }  else {
                     var mireds = node.device.state.colorControl.colorTemperatureMireds

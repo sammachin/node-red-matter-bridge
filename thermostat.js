@@ -1,4 +1,5 @@
 const thermostat = require("./devices/thermostat");
+const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {
     function MatterThermostat(config) {
@@ -22,7 +23,7 @@ module.exports = function(RED) {
                 msg.payload = node.device.state
                 node.send(msg)
             } else {
-                if (msg.payload.mode || msg.payload.setPoint){
+                if (hasProperty(msg.payload, 'mode') || (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint))){
                     node.pending = true
                     node.pendingmsg = msg
                     let systemMode 
@@ -41,7 +42,7 @@ module.exports = function(RED) {
                             break;
                     }
                     let values = {systemMode: systemMode}
-                    if (msg.payload.setPoint){
+                    if (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint)) {
                         if (systemMode == 4){
                             values.occupiedHeatingSetpoint = msg.payload.setPoint
                         } else if (systemMode == 3){
@@ -52,7 +53,7 @@ module.exports = function(RED) {
                     node.ctx.set(node.id+"-values",  values)
                     node.values = values
                 }
-                if (msg.payload.temperature){
+                if (hasProperty(msg.payload, 'temperature') && isNumber(msg.payload.temperature)) {
                     node.device.set({thermostat : {localTemperature : msg.payload.temperature}})
                     node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
                     node.temperature = msg.payload.temperature

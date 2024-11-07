@@ -1,3 +1,4 @@
+const { temperature } = require("@project-chip/matter.js/elements");
 const thermostat = require("./devices/thermostat");
 const { hasProperty, isNumber } = require('./utils');
 
@@ -54,9 +55,14 @@ module.exports = function(RED) {
                     node.values = values
                 }
                 if (hasProperty(msg.payload, 'temperature') && isNumber(msg.payload.temperature)) {
+                    node.pending = true
+                    node.pendingmsg = msg
                     node.device.set({thermostat : {localTemperature : msg.payload.temperature}})
                     node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
                     node.temperature = msg.payload.temperature
+                    if (!hasProperty(msg.payload, 'setPoint') && !hasProperty(msg.payload, 'mode')){
+                        this.emit('temp', msg.payload.temperature)
+                    }
                 }
             }
         });
@@ -77,7 +83,8 @@ module.exports = function(RED) {
 
         this.on('mode', function(value){
             let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
-            data = {'mode' : modes[value]}
+            let temp = node.device.state.thermostat.localTemperature
+            data = {'mode' : modes[value], temperature : temp}
             if (value == 4){
                 data.setPoint = node.device.state.thermostat.occupiedHeatingSetpoint
             } else if (value == 3){
@@ -95,8 +102,9 @@ module.exports = function(RED) {
             node.pending = false
         })
         
-        this.on('temp', function(mode, value){
-            data = {'mode' : mode, setPoint : value}
+        this.on('setpoint', function(mode, value){
+            let temp = node.device.state.thermostat.localTemperature
+            data = {'mode' : mode, setPoint : value, temperature: temp}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
                 msg.payload = data
@@ -109,11 +117,28 @@ module.exports = function(RED) {
             node.pending = false
         })
 
+        this.on('temp', function(value){
+            let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
+            let mode = node.device.state.thermostat.systemMode
+            data = {'mode' : modes[mode], 'temperature' : value}
+            if (mode == 4){
+                data.setPoint = node.device.state.thermostat.occupiedHeatingSetpoint
+            } else if (mode == 3){
+                data.setPoint = node.device.state.thermostat.occupiedCoolingSetpoint
+            }
+            if ((node.pending && node.passthrough)) {
+                var msg = node.pendingmsg
+                msg.payload = data
+                node.send(msg);
+            }
+            node.pending = false
+        })
         this.on('close', function(removed, done) {
             this.removeAllListeners('serverReady')
             this.removeAllListeners('identify')
             this.removeAllListeners('mode')
             this.removeAllListeners('temp')
+            this.removeAllListeners('setpoint')
 
 
             if (removed) {

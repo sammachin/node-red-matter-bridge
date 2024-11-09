@@ -43,7 +43,6 @@ module.exports = {
         } else if (params.systemMode == 3){
             params.occupiedCoolingSetpoint = child.values.occupiedCoolingSetpoint
         } 
-        console.log(params)
         const device = new Endpoint(ThermostatDevice.with(BridgedDeviceBasicInformationServer, ThermostatServer.with(
              ...features    
             )),{

@@ -13,6 +13,7 @@ module.exports = function(RED) {
         node.pending = false
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.tempformat = config.tempformat || "kelvin" //Default to kelvin for legacy
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
@@ -31,7 +32,11 @@ module.exports = function(RED) {
                 }
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'temp')) {
-                    var mireds = 1000000/msg.payload.temp
+                    if (node.tempformat == 'kelvin'){
+                        var mireds = 1000000/msg.payload.temp
+                    } else {
+                        var mireds = msg.payload.temp
+                    } 
                 }  else {
                     var mireds = node.device.state.colorControl.colorTemperatureMireds
                 }
@@ -68,8 +73,8 @@ module.exports = function(RED) {
                     case 'toggle':
                         node.device.set({
                             onOff: {
-                                        onOff: !node.device.state.onOff.onOff,
-                                    }
+                                onOff: !node.device.state.onOff.onOff,
+                            }
                         })
                         break
                     
@@ -94,7 +99,12 @@ module.exports = function(RED) {
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-                msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
+                if (node.tempformat == 'kelvin'){
+                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
+                } else {
+                    msg.payload.temp = node.device.state.colorControl.colorTemperatureMireds
+                }
+                    
                 node.send(msg);
             }
             node.pending = false

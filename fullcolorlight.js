@@ -14,6 +14,7 @@ module.exports = function(RED) {
         node.pending = false
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.tempformat = config.tempformat || "kelvin" //Default to kelvin for legacy
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
@@ -45,9 +46,14 @@ module.exports = function(RED) {
                             currentSaturation: msg.payload.sat
                         }
                     } else if (hasProperty(msg.payload, 'temp')) {
+                        if (node.tempformat == 'kelvin'){
+                            var mireds = 1000000/msg.payload.temp
+                        } else {
+                            var mireds = msg.payload.temp
+                        } 
                         newcolor = {
                             colorMode: 2,
-                            colorTemperatureMireds : 1000000/msg.payload.temp
+                            colorTemperatureMireds : mireds
                         }
                     }
                     else {
@@ -107,7 +113,11 @@ module.exports = function(RED) {
                     msg.payload.sat = node.device.state.colorControl.currentSaturation
                 }
                 else if (node.device.state.colorControl.colorMode == 2){
-                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
+                    if (node.tempformat == 'kelvin'){
+                        msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
+                    } else {
+                        msg.payload.temp = node.device.state.colorControl.colorTemperatureMireds
+                    } 
                 } else {
                     node.error(`Unknown color mode: ${node.device.state.colorControl.colorMode}`)
                 }

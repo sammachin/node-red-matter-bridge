@@ -9,8 +9,8 @@
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
             range: {value: "254"},
-            passthrough: {value: true}
-            
+            passthrough: {value: true},
+            tempformat: {value: "kelvin"}
         },
         label: function() {
             return this.name||"Color Temp Light";
@@ -41,6 +41,13 @@
         <select type="text" id="node-input-range" style="width:50%;" >
             <option value="100">0-100</option>
             <option value="254">0-254</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-tempformat">Color Temperature Units</label>
+        <select type="text" id="node-input-tempformat" style="width:50%;" >
+            <option value="kelvin">Kelvin</option>
+            <option value="mired">Mired</option>
         </select>
     </div>
 </script>

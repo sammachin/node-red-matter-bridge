@@ -116,10 +116,14 @@ module.exports =  function(RED) {
         console.log('Trying')
         if (node.users.length == 0 && node.serverReady){
             console.log('Starting Bridge')
-            node.matterServer.start();
-            node.registered.forEach(x => {
-                x.emit('serverReady')
-            });
+            node.matterServer.start().then(() => {
+                node.registered.forEach(x => {
+                    x.emit('serverReady')
+                });
+                console.log('Server Started')
+            }).catch((err) => {
+                console.error('An error occurred while starting the server:', err);
+            })
         } else {
             console.log('Not Starting yet, more devices to load')
         }
@@ -187,12 +191,16 @@ module.exports =  function(RED) {
             console.log('Trying')
             if (node.users.length == 0 && node.serverReady){
                 console.log('Starting Bridge')
-                node.matterServer.start();
-                node.registered.forEach(x => {
-                    x.emit('serverReady')
-                });
+                node.matterServer.start().then(() => {
+                    node.registered.forEach(x => {
+                        x.emit('serverReady')
+                    });
+                    console.log('Server Started')
+                }).catch((err) => {
+                    console.error('An error occurred while starting the server:', err);
+                })
             } else {
-                console.log('Not Starting yet, , more devices to load')
+                console.log('Not Starting yet, more devices to load')
             }
         })
 

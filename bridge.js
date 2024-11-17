@@ -35,7 +35,18 @@ function genPasscode(){
     return +xx
 }
 
+
+
 module.exports =  function(RED) {
+    function removeDisabledNodes(users){
+        for (id in users){
+            if (RED.nodes.getNode(users[id]) == null){
+                users.splice(id, 1)
+            }
+        }
+        return users
+    }
+
     function MatterBridge(config) {
         RED.nodes.createNode(this, config);
         var node = this;
@@ -62,7 +73,7 @@ module.exports =  function(RED) {
         }
         console.log(`Loading Bridge node ${node.id}`)
         //Params
-        node.users = config._users
+        node.users = removeDisabledNodes(config._users)
         node.name = config.name
         node.vendorId = +config.vendorId
         node.productId = +config.productId

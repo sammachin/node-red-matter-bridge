@@ -35,18 +35,25 @@ function genPasscode(){
     return +xx
 }
 
-
-
-module.exports =  function(RED) {
-    function removeDisabledNodes(users){
-        for (id in users){
-            if (RED.nodes.getNode(users[id]) == null){
-                users.splice(id, 1)
+function removeDisabledNodes(RED, nodes){
+    console.log(nodes)
+    for (id in nodes){
+        n = RED.nodes.getNode(nodes[id])
+        if (n){
+            console.log('Node ID '+nodes[id]+ 'is ENABLED')
+        } else{
+            console.log('Node ID '+nodes[id]+ 'is DISABLED')
+            let index = nodes.indexOf(nodes[id]);
+            if (index > -1) { 
+                nodes.splice(index, 1); 
             }
         }
-        return users
     }
+    console.log(nodes)
+    return nodes
+}
 
+module.exports =  function(RED) {
     function MatterBridge(config) {
         RED.nodes.createNode(this, config);
         var node = this;
@@ -73,7 +80,7 @@ module.exports =  function(RED) {
         }
         console.log(`Loading Bridge node ${node.id}`)
         //Params
-        node.users = removeDisabledNodes(config._users)
+        node.users = config._users
         node.name = config.name
         node.vendorId = +config.vendorId
         node.productId = +config.productId
@@ -139,8 +146,7 @@ module.exports =  function(RED) {
             console.log('Not Starting yet, more devices to load')
         }
 
-        
-
+       
         node.registered = []
 
         this.on('registerChild', function(child){
@@ -229,6 +235,7 @@ module.exports =  function(RED) {
     }
 
     RED.nodes.registerType("matterbridge",MatterBridge);
+    
 
     RED.httpAdmin.get('/_matterbridge/commisioning/:id', RED.auth.needsPermission('admin.write'), function(req,res){
         let target_node = RED.nodes.getNode(req.params.id)

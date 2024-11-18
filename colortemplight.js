@@ -14,6 +14,7 @@ module.exports = function(RED) {
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
         node.tempformat = config.tempformat || "kelvin" //Default to kelvin for legacy
+        node.levelstep = Number(config.levelstep)
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
@@ -26,6 +27,12 @@ module.exports = function(RED) {
                 node.pendingmsg = msg
                 if (msg.payload.state == undefined) {
                     msg.payload.state = node.device.state.onOff.onOff
+                }
+                if (hasProperty(msg.payload, 'increaseLevel')){
+                    msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+                }
+                if (hasProperty(msg.payload, 'decreaseLevel')){
+                    msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
                 }
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
@@ -42,7 +49,7 @@ module.exports = function(RED) {
                 }
                 node.device.set({
                     levelControl: {
-                        currentLevel: msg.payload.level
+                        currentLevel: Math.max(2, Math.min(254, msg.payload.level))
                     },
                     colorControl: {
                         colorTemperatureMireds : mireds

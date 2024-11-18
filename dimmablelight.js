@@ -1,5 +1,6 @@
 const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
 const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const { hasProperty, isNumber } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -9,6 +10,7 @@ module.exports = function(RED) {
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
         node.range = config.range
+        node.levelstep = Number(config.levelstep)
         node.pending = false
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
@@ -25,6 +27,12 @@ module.exports = function(RED) {
                 if (msg.payload.state == undefined) {
                     msg.payload.state = node.device.state.onOff.onOff
                 }
+                if (hasProperty(msg.payload, 'increaseLevel')){
+                    msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+                }
+                if (hasProperty(msg.payload, 'decreaseLevel')){
+                    msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
+                }
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
@@ -33,7 +41,7 @@ module.exports = function(RED) {
                 }
                 node.device.set({
                     levelControl: {
-                        currentLevel: msg.payload.level
+                        currentLevel: Math.max(2, Math.min(254, msg.payload.level))
                     }
                 })
                 switch (msg.payload.state){

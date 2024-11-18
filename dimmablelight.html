@@ -9,7 +9,8 @@
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
             range: {value: "254"},
-            passthrough: {value: true}
+            passthrough: {value: true},
+            levelstep: {value: 1}
         },
         label: function() {
             return this.name||"Dimmable Light";
@@ -42,6 +43,10 @@
             <option value="254">0-254</option>
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-levelstep">Value for Level Step Change</label>
+        <input type="text" id="node-input-levelstep" placeholder="1">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="matterdimmablelight">
@@ -68,6 +73,20 @@
             <dd> 
                 Control the level of the light,<br>
                 either 0-100 or 0-254 depending on the configuration of the range property
+            </dd>
+            <dt class="optional">
+                payload.increaseLevel         
+ 
+            </dt>
+            <dd> 
+                If set this will increase the level by the value defined in the Level Step config
+            </dd>
+            <dt class="optional">
+                payload.decreaseLevel         
+ 
+            </dt>
+            <dd> 
+                If set this will decrease the level by the value defined in the Level Step config
             </dd>
        </dl>
    

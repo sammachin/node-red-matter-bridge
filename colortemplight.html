@@ -10,7 +10,9 @@
             bridge: { value: "", type: "matterbridge", required: true },
             range: {value: "254"},
             passthrough: {value: true},
-            tempformat: {value: "kelvin"}
+            tempformat: {value: "kelvin"},
+            levelstep: {value: 1}
+
         },
         label: function() {
             return this.name||"Color Temp Light";
@@ -50,6 +52,10 @@
             <option value="mired">Mired</option>
         </select>
     </div>
+    <div class="form-row">
+        <label for="node-input-levelstep">Value for Level Step Change</label>
+        <input type="text" id="node-input-levelstep" placeholder="1">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mattercolortemplight">
@@ -76,6 +82,20 @@
             <dd> 
                 Control the level of the light,<br>
                 either 0-100 or 0-254 depending on the configuration of the range property
+            </dd>
+            <dt class="optional">
+                payload.increaseLevel         
+ 
+            </dt>
+            <dd> 
+                If set this will increase the level by the value defined in the Level Step config
+            </dd>
+            <dt class="optional">
+                payload.decreaseLevel         
+ 
+            </dt>
+            <dd> 
+                If set this will decrease the level by the value defined in the Level Step config
             </dd>
        </dl>
    
@@ -107,7 +127,7 @@
             </span>
             </dt>
             <dd> 
-                The color temperature in Kelvin
+                The color temperature 
             </dd>
    </dl>
    
@@ -116,6 +136,6 @@
    if set to True then the inout msg wil be output with the new state in the payload.
    If set to False then the output will be suppressed.
    Where the devices state is updated by an external matter controller a new msg object will always be output. 
-
+   Color Temperature Units can be set to Kelvin or Mireds, the same scale will be used for both input and output 
 
 </script>

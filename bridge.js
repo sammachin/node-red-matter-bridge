@@ -35,23 +35,6 @@ function genPasscode(){
     return +xx
 }
 
-function removeDisabledNodes(RED, nodes){
-    console.log(nodes)
-    for (id in nodes){
-        n = RED.nodes.getNode(nodes[id])
-        if (n){
-            console.log('Node ID '+nodes[id]+ 'is ENABLED')
-        } else{
-            console.log('Node ID '+nodes[id]+ 'is DISABLED')
-            let index = nodes.indexOf(nodes[id]);
-            if (index > -1) { 
-                nodes.splice(index, 1); 
-            }
-        }
-    }
-    console.log(nodes)
-    return nodes
-}
 
 module.exports =  function(RED) {
     function MatterBridge(config) {
@@ -232,11 +215,28 @@ module.exports =  function(RED) {
             }
             done();
         });
-    }
+
+        //Remove disabled nodes (and nodes on disabled tabs) from the users list so server isn't waiting for them to start.
+        RED.events.on("flows:started", function(flow) {
+            let disabledflows = []
+            flow.config.flows.forEach(x => {
+                if (x.type =='tab' && x.disabled){
+                    disabledflows.push(x.id)
+                }
+                if (x.d || disabledflows.includes(x.z)){
+                    console.log('Skipping Disabled Node: '+x.id)
+                    let index = node.users.indexOf(x.id);
+                    if (index > -1) { 
+                        node.users.splice(index, 1); 
+                    }
+                }
+            })
+        })
+    }  
 
     RED.nodes.registerType("matterbridge",MatterBridge);
-    
 
+    
     RED.httpAdmin.get('/_matterbridge/commisioning/:id', RED.auth.needsPermission('admin.write'), function(req,res){
         let target_node = RED.nodes.getNode(req.params.id)
         if (target_node){

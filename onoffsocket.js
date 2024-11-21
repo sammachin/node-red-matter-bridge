@@ -18,46 +18,40 @@ module.exports = function(RED) {
                 node.send(msg)
                 logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
-                node.pending = true
-                node.pendingmsg = msg
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
                 }
-                if (typeof msg.payload.state == "boolean") {
+                if (typeof msg.payload.state != "boolean") {
+                    switch (msg.payload.state){
+                        case '1':
+                        case 1:
+                        case 'on':
+                            msg.payload.state = true
+                            break
+                        case '0':
+                        case 0:
+                        case 'off':
+                            msg.payload.state = false
+                            break
+                        case 'toggle':
+                            msg.payload.state = !node.device.state.onOff.onOff
+                            break
+                    }
+                }
+                if (msg.payload.state != node.device.state.onOff.onOff){
+                    node.pending = true
+                    node.pendingmsg = msg
                     node.device.set({
                         onOff: {
                             onOff: msg.payload.state,
                         }
                     })
-                } else {
-                    switch (msg.payload.state){
-                        case '1':
-                        case 1:
-                        case 'on':
-                            node.device.set({
-                                onOff: {
-                                    onOff: true,
-                                }
-                            })
-                            break
-                        case '0':
-                        case 0:
-                            case 'off':
-                            node.device.set({
-                                onOff: {
-                                    onOff: false,
-                                }
-                            })
-                            break
-                        case 'toggle':
-                            node.device.set({
-                                onOff: {
-                                        onOff: !node.device.state.onOff.onOff,
-                                        }
-                        })
-                            break
+                } else{
+                    if (node.passthrough){
+                        node.send(msg);
                     }
                 }
+                
             }
         });
         this.on('serverReady', function() {

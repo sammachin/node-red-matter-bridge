@@ -1,8 +1,8 @@
 const temperaturesensor = require("../temperaturesensor");
 
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  TemperatureSensorDevice = require("@project-chip/matter.js/devices/TemperatureSensorDevice").TemperatureSensorDevice
+const  Endpoint  = require("@matter/main/endpoint").Endpoint;
+const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const  TemperatureSensorDevice = require("@matter/main/devices/TemperatureSensorDevice").TemperatureSensorDevice
 
 module.exports = {
     temperaturesensor: function(child) {

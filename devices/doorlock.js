@@ -1,10 +1,10 @@
 
-const Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const Endpoint  = require("@matter/main/endpoint").Endpoint;
+const BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
 
-const DoorLockDevice = require("@project-chip/matter.js/devices/DoorLockDevice").DoorLockDevice
-//const DoorLock = require( "@project-chip/matter.js/cluster").DoorLock; 
-//const DoorLockServer = require( "@project-chip/matter.js/behavior/definitions/door-lock").DoorLockServer
+const DoorLockDevice = require("@matter/main/devices/DoorLockDevice").DoorLockDevice
+//const DoorLock = require( "@matter/main/cluster").DoorLock; 
+//const DoorLockServer = require( "@matter/main/behavior/definitions/door-lock").DoorLockServer
 
 
 

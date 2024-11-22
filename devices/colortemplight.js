@@ -1,8 +1,8 @@
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  ColorTemperatureLightDevice  = require( "@project-chip/matter.js/devices/ColorTemperatureLightDevice").ColorTemperatureLightDevice;
-const  ColorControlServer = require( "@project-chip/matter.js/behavior/definitions/color-control").ColorControlServer
-const  ColorControl  = require( "@project-chip/matter.js/cluster").ColorControl
+const  Endpoint  = require("@matter/main/endpoint").Endpoint;
+const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const  ColorTemperatureLightDevice  = require( "@matter/main/devices/ColorTemperatureLightDevice").ColorTemperatureLightDevice;
+const  ColorControlServer = require( "@matter/main/behavior/definitions/color-control").ColorControlServer
+const  ColorControl  = require( "@matter/main/cluster").ColorControl
 
 module.exports = {
     colortemplight: function(child) {

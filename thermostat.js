@@ -1,4 +1,4 @@
-const { temperature } = require("@project-chip/matter.js/elements");
+const { temperature } = require("@matter/main/elements");
 const thermostat = require("./devices/thermostat");
 const { hasProperty, isNumber } = require('./utils');
 

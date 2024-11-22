@@ -1,10 +1,10 @@
 
-const Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const Endpoint  = require("@matter/main/endpoint").Endpoint;
+const BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
 
-const ThermostatDevice = require("@project-chip/matter.js/devices/ThermostatDevice").ThermostatDevice
-const Thermostat = require( "@project-chip/matter.js/cluster").Thermostat; 
-const ThermostatServer = require( "@project-chip/matter.js/behavior/definitions/thermostat").ThermostatServer
+const ThermostatDevice = require("@matter/main/devices/ThermostatDevice").ThermostatDevice
+const Thermostat = require( "@matter/main/cluster").Thermostat; 
+const ThermostatServer = require( "@matter/main/behavior/definitions/thermostat").ThermostatServer
 
 
 

@@ -1,6 +1,6 @@
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
+const  Endpoint  = require("@matter/main/endpoint").Endpoint;
+const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const  OnOffLightDevice  = require("@matter/main/devices/OnOffLightDevice").OnOffLightDevice;
 
 
 module.exports = {

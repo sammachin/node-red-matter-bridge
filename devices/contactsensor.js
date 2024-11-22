@@ -1,7 +1,7 @@
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  ContactSensorDevice  =  require( "@project-chip/matter.js/devices/ContactSensorDevice").ContactSensorDevice;
-const  BooleanState  =  require( "@project-chip/matter.js/cluster").BooleanState; 
+const  Endpoint  = require("@matter/main/endpoint").Endpoint;
+const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const  ContactSensorDevice  =  require( "@matter/main/devices/ContactSensorDevice").ContactSensorDevice;
+const  BooleanState  =  require( "@matter/main/cluster").BooleanState; 
 
 module.exports = {
     contactsensor: function(child) {

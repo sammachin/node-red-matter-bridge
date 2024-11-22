@@ -1,5 +1,5 @@
-const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
-const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const logEndpoint = require( "@matter/main/device").logEndpoint;
+const EndpointServer = require("@matter/main/endpoint").EndpointServer;
 
 module.exports = function(RED) {
     function MatterGenericSwitch(config) {

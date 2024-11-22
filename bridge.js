@@ -1,12 +1,12 @@
-require("@project-chip/matter-node.js");
 
-const VendorId = require("@project-chip/matter.js/datatype").VendorId;
-const Endpoint = require("@project-chip/matter.js/endpoint").Endpoint;
-const AggregatorEndpoint = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
-const MatterEnvironment = require("@project-chip/matter.js/environment").Environment;
-const ServerNode = require("@project-chip/matter.js/node").ServerNode;
-const Logger = require("@project-chip/matter.js/log").Logger;
+const VendorId = require("@matter/main/datatype").VendorId;
+const Endpoint = require("@matter/main/endpoint").Endpoint;
+const AggregatorEndpoint = require( "@matter/main/endpoints/AggregatorEndpoint").AggregatorEndpoint;
+const MatterEnvironment = require("@matter/main/environment").Environment;
+const ServerNode = require("@matter/main/node").ServerNode;
+const Logger = require("@matter/main/log").Logger;
 const os = require('os');
+
 const doorlock = require("./devices/doorlock").doorlock;
 const thermostat = require("./devices/thermostat").thermostat;
 const contactsensor = require("./devices/contactsensor").contactsensor

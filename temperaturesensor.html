@@ -9,7 +9,8 @@
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
             minlevel: {value: -27315},
-            maxlevel: {value: 32767}
+            maxlevel: {value: 32767},
+            battery: {value: false}
         },
         label: function() {
             return this.name||"Temperature Sensor";
@@ -27,6 +28,13 @@
     <div class="form-row">
         <label for="node-config-input-bridge">Bridge</label>
         <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-battery">Device has battery</label>
+        <select type="text" id="node-input-battery" style="width:50%;" >
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
     </div>
     <div class="form-row">
         <label for="node-input-minlevel">Min Level (°C)</label>

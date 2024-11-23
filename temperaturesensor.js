@@ -1,3 +1,6 @@
+const { hasParameter } = require("@project-chip/matter-node.js/util");
+const { PowerSource } = require("@project-chip/matter.js/cluster");
+
 const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
 const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
 
@@ -8,6 +11,7 @@ module.exports = function(RED) {
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
+        node.battery = config.battery
         node.minlevel = config.minlevel*100
         node.maxlevel = config.maxlevel*100
         node.ctx =  this.context().global;
@@ -24,6 +28,9 @@ module.exports = function(RED) {
                 node.device.set({temperatureMeasurement: {measuredValue: value}})
                 node.ctx.set(node.id+"-measuredValue",  value)
                 node.measuredValue = value
+            }
+            if (hasParameter(msg, 'battery') && node.battery){
+                node.device.set({powerSource: {batt: value}})
             }
         });
         this.on('serverReady', function() {

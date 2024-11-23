@@ -1,10 +1,5 @@
-
-const VendorId = require("@matter/main/datatype").VendorId;
-const Endpoint = require("@matter/main/endpoint").Endpoint;
-const AggregatorEndpoint = require( "@matter/main/endpoints/AggregatorEndpoint").AggregatorEndpoint;
-const MatterEnvironment = require("@matter/main/environment").Environment;
-const ServerNode = require("@matter/main/node").ServerNode;
-const Logger = require("@matter/main/log").Logger;
+const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
+const AggregatorEndpoint = require( "@matter/main/endpoints/aggregator").AggregatorEndpoint;
 const os = require('os');
 
 const doorlock = require("./devices/doorlock").doorlock;
@@ -80,7 +75,7 @@ module.exports =  function(RED) {
         //    node.deviceStorage = storageManager.createContext("Device")
 
         node.serverReady = false;
-        MatterEnvironment.default.vars.set('mdns.networkInterface', node.networkInterface);
+        Environment.default.vars.set('mdns.networkInterface', node.networkInterface);
         //Servers
         ServerNode.create({
             id: node.id,

@@ -1,8 +1,9 @@
-const  Endpoint  = require("@matter/main/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  ColorTemperatureLightDevice  = require( "@matter/main/devices/ColorTemperatureLightDevice").ColorTemperatureLightDevice;
-const  ColorControlServer = require( "@matter/main/behavior/definitions/color-control").ColorControlServer
-const  ColorControl  = require( "@matter/main/cluster").ColorControl
+const  { Endpoint }  = require("@matter/main");
+const  { BridgedDeviceBasicInformationServer }  = require("@matter/main/behaviors")
+const  { ColorTemperatureLightDevice }  = require( "@matter/main/devices")
+const  { ColorControlServer } = require( "@matter/main/behaviors")
+const  { ColorControl }  = require( "@matter/main/clusters")
+
 
 module.exports = {
     fullcolorlight: function(child) {

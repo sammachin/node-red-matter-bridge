@@ -1,5 +1,4 @@
-const logEndpoint = require( "@matter/main/device").logEndpoint;
-const EndpointServer = require("@matter/main/endpoint").EndpointServer;
+const {logEndpoint, EndpointServer} = require( "@matter/main")
 
 
 function typeToBitmap(value){

@@ -1,5 +1,5 @@
-const { temperature } = require("@matter/main/elements");
-const thermostat = require("./devices/thermostat");
+const {logEndpoint, EndpointServer} = require( "@matter/main")
+
 const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {

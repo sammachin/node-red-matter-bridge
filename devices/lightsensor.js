@@ -1,8 +1,6 @@
-const lightsensor = require("../lightsensor");
-
-const  Endpoint  = require("@matter/main/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  LightSensorDevice = require("@matter/main/devices/LightSensorDevice").LightSensorDevice
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {LightSensorDevice} = require("@matter/main/devices")
 
 module.exports = {
     lightsensor: function(child) {

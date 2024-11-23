@@ -1,3 +1,5 @@
+const {logEndpoint, EndpointServer} = require( "@matter/main")
+
 
 module.exports = function(RED) {
     function MatterWindowCovering(config) {

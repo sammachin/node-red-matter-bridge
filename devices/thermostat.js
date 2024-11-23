@@ -1,11 +1,8 @@
-
-const Endpoint  = require("@matter/main/endpoint").Endpoint;
-const BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-
-const ThermostatDevice = require("@matter/main/devices/ThermostatDevice").ThermostatDevice
-const Thermostat = require( "@matter/main/cluster").Thermostat; 
-const ThermostatServer = require( "@matter/main/behavior/definitions/thermostat").ThermostatServer
-
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const {ThermostatDevice} = require("@matter/main/devices")
+const {Thermostat} = require( "@matter/main/clusters")
+const {ThermostatServer} = require( "@matter/main/behaviors")
 
 
 

@@ -1,11 +1,9 @@
-const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cluster");
-const temperaturesensor = require("../temperaturesensor");
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
 
-const  Endpoint  = require("@matter/main/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  GenericSwitchDevice = require("@matter/main/devices/GenericSwitchDevice").GenericSwitchDevice
-const  SwitchServer = require( "@matter/main/behavior/definitions/switch").SwitchServer
-const  Switch = require( "@matter/main/cluster").Switch; 
+const  {GenericSwitchDevice} = require("@matter/main/devices")
+const  {SwitchServer} = require( "@matter/main/behaviors")
+const  {Switch} = require( "@matter/main/clusters") 
 
 
 module.exports = {

@@ -1,10 +1,8 @@
 
-const Endpoint  = require("@matter/main/endpoint").Endpoint;
-const BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
+const {Endpoint}  = require("@matter/main")
+const {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors")
+const {DoorLockDevice} = require("@matter/main/devices")
 
-const DoorLockDevice = require("@matter/main/devices/DoorLockDevice").DoorLockDevice
-//const DoorLock = require( "@matter/main/cluster").DoorLock; 
-//const DoorLockServer = require( "@matter/main/behavior/definitions/door-lock").DoorLockServer
 
 
 

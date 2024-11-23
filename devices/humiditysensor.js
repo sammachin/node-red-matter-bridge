@@ -1,8 +1,6 @@
-const temperaturesensor = require("../temperaturesensor");
-
-const  Endpoint  = require("@matter/main/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  HumiditySensorDevice = require("@matter/main/devices/HumiditySensorDevice").HumiditySensorDevice
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {HumiditySensorDevice} = require("@matter/main/devices")
 
 module.exports = {
     humiditysensor: function(child) {

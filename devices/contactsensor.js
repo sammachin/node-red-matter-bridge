@@ -1,7 +1,6 @@
-const  Endpoint  = require("@matter/main/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  ContactSensorDevice  =  require( "@matter/main/devices/ContactSensorDevice").ContactSensorDevice;
-const  BooleanState  =  require( "@matter/main/cluster").BooleanState; 
+const  {Endpoint}  = require("@matter/main")
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {ContactSensorDevice}  =  require( "@matter/main/devices")
 
 module.exports = {
     contactsensor: function(child) {

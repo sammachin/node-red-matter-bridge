@@ -1,11 +1,9 @@
-const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cluster");
+const {Endpoint, Observable}  = require("@matter/main");
+const {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
 
-const Endpoint  = require("@matter/main/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@matter/main/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const WindowCoveringDevice = require("@matter/main/devices/WindowCoveringDevice").WindowCoveringDevice
-const WindowCoveringServer = require( "@matter/main/behavior/definitions/window-covering").WindowCoveringServer
-const WindowCovering = require( "@matter/main/cluster").WindowCovering; 
-const Observable = require("@matter/main/util").Observable
+const {WindowCoveringDevice} = require("@matter/main/devices")
+const {WindowCoveringServer} = require( "@matter/main/behaviors")
+const {WindowCovering} = require( "@matter/main/clusters")
 
 
 

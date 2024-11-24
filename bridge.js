@@ -250,7 +250,14 @@ module.exports =  function(RED) {
     })
 
     RED.httpAdmin.get('/_matterbridge/interfaces', RED.auth.needsPermission('admin.write'), function(req,res){
-        let interfaces = Object.keys(os.networkInterfaces())
-        res.send(interfaces)
+        let interfaces = os.networkInterfaces()
+        let output = []
+        for (let i in interfaces) {
+            for (let i2 in interfaces[i]) {
+                if (!interfaces[i][i2].internal && interfaces[i][i2].family == "IPv6")
+                    output.push(i)
+            }
+        }
+        res.send(output)
     })
 }

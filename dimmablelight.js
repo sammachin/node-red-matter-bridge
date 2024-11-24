@@ -108,13 +108,14 @@ module.exports = function(RED) {
             
         })
 
-        this.on('close', function(done) {
+	this.on('close', function(removed, done) {
+            console.log("Closing device "+this.id)
             this.off('state')
             this.off('serverReady')
             this.off('identify')
-            console.log("Closing device "+this.id)
-            this.device.close()
-            done();
+            this.device.close().then(() => {
+                done();
+            })
         });
 
         //Wait till server is started

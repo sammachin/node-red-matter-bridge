@@ -120,12 +120,9 @@ module.exports = function(RED) {
             this.removeAllListeners('tiltMovement')
             this.removeAllListeners('move')
 
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
-            done();
+            this.device.close().then(() => {
+                done();
+            });
         });
         //Wait till server is started
         function waitforserver(node) {

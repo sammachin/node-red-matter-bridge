@@ -158,16 +158,15 @@ module.exports = function(RED) {
         })
 
         this.on('close', function(removed, done) {
+            console.log("Closing device "+this.id)
             this.off('state')
             this.off('serverReady')
             this.off('identify')
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
-            done();
+            this.device.close().then(() => {
+                done();
+            })
         });
+        
         //Wait till server is started
         function waitforserver(node) {
             if (!node.bridge.serverReady) {

@@ -139,14 +139,9 @@ module.exports = function(RED) {
             this.removeAllListeners('mode')
             this.removeAllListeners('temp')
             this.removeAllListeners('setpoint')
-
-
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
-            done();
+            this.device.close().then(() => {
+                done();
+            });
         });
         //Wait till server is started
         function waitforserver(node) {

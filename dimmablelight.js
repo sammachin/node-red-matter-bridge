@@ -108,7 +108,7 @@ module.exports = function(RED) {
             
         })
 
-	this.on('close', function(removed, done) {
+	    this.on('close', function(removed, done) {
             console.log("Closing device "+this.id)
             this.off('state')
             this.off('serverReady')

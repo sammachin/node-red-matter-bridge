@@ -80,16 +80,13 @@ module.exports = function(RED) {
         })
 
         this.on('close', function(removed, done) {
-            this.removeAllListeners('state')
-            this.removeAllListeners('serverReady')
-            this.removeAllListeners('identify')
-            this.device.close()
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
-            done();
+            console.log("Closing device "+this.id)
+            this.off('state')
+            this.off('serverReady')
+            this.off('identify')
+            this.device.close().then(() => {
+                done();
+            })
         });
         //Wait till server is started
         function waitforserver(node) {

@@ -108,16 +108,15 @@ module.exports = function(RED) {
             
         })
 
-	    this.on('close', function(removed, done) {
+	    this.on('close', async function(removed, done) { 
             let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
             this.log(`Closing device: ${this.id}, ${rtype}`)
+            await this.device.close()    
+            //Remove Node-RED Custom Events
             this.off('state')
             this.off('serverReady')
-            this.off('identify')
-            this.device.close().then(() => {
-                this.log('DEVICE CLOSED')
-                done();
-            })
+            this.off('identify')            
+            done();
         });
 
         //Wait till server is started

@@ -110,7 +110,7 @@ module.exports =  function(RED) {
             node.serverReady = true
         })
         this.log('Trying')
-        if (node.users.length == 0 && node.serverReady){
+        if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
             this.log('Starting Bridge')
             node.matterServer.start().then(() => {
                 node.registered.forEach(x => {
@@ -120,8 +120,14 @@ module.exports =  function(RED) {
             }).catch((err) => {
                 console.error('An error occurred while starting the server:', err);
             })
-        } else {
-            this.log('Not Starting yet, more devices to load')
+        } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
+            node.registered.forEach(x => {
+                x.emit('serverReady')
+            });
+            this.log('Server already running')
+        } 
+        else {
+            this.log('Not Starting')
         }
 
        
@@ -188,7 +194,7 @@ module.exports =  function(RED) {
                 this.error(error)
             }
             this.log('Checking if ready to start')
-            if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline && !node.matterServer.lifecycle.isOnline){
+            if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
                 this.log('Starting Bridge')
                 node.matterServer.start().then(() => {
                     node.registered.forEach(x => {
@@ -198,8 +204,11 @@ module.exports =  function(RED) {
                 }).catch((err) => {
                     this.error('An error occurred while starting the server:', err);
                 })
-            } else {
-                this.log('Not Starting yet, more devices to load')
+            } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
+                node.registered.forEach(x => {
+                    x.emit('serverReady')
+                });
+                this.log('Server already running')
             }
         })
 

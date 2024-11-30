@@ -6,7 +6,7 @@ module.exports = function(RED) {
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.pendingmsg = null
@@ -82,7 +82,7 @@ module.exports = function(RED) {
 
 
         this.on('close', function(removed, done) {
-            console.log("Closing device "+this.id)
+            this.log("Closing device "+this.id)
             this.off('state')
             this.off('serverReady')
             this.off('identify')
@@ -97,7 +97,7 @@ module.exports = function(RED) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

@@ -9,7 +9,7 @@ function typeToBitmap(value){
 
 module.exports = function(RED) {
     function MatterOccupancySensor(config) {
-        console.log(config.sensorType)
+        this.log(config.sensorType)
         RED.nodes.createNode(this,config);
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
@@ -18,7 +18,7 @@ module.exports = function(RED) {
         node.sensorTypeBitmap = typeToBitmap(config.sensorType)
         node.ctx =  this.context().global;
         node.occupied = node.ctx.get(node.id+"-occupied") || null
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
@@ -48,7 +48,7 @@ module.exports = function(RED) {
 
 
         this.on('close', function(removed, done) {
-            console.log("Closing device "+this.id)
+            this.log("Closing device "+this.id)
             this.off('serverReady')
             this.off('identify')
             this.device.close().then(() => {
@@ -61,7 +61,7 @@ module.exports = function(RED) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

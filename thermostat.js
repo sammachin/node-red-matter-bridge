@@ -15,7 +15,7 @@ module.exports = function(RED) {
         node.values = node.ctx.get(node.id+"-values") || null
         node.temperature = node.ctx.get(node.id+"-temperature") || null
 
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.passthrough = /^true$/i.test(config.passthrough)
@@ -148,7 +148,7 @@ module.exports = function(RED) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

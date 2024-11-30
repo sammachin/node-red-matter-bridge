@@ -14,10 +14,10 @@ module.exports = function(RED) {
         node.pending = false
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
-            console.log(node.levelstep)
+            this.log(node.levelstep)
             if (msg.topic == 'state'){
                 msg.payload = node.device.state
                 node.send(msg)
@@ -38,7 +38,7 @@ module.exports = function(RED) {
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
-                console.log(msg.payload.level)
+                this.log(msg.payload.level)
                 msg.payload.level=Math.max(2, Math.min(254, msg.payload.level))
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
@@ -60,7 +60,7 @@ module.exports = function(RED) {
                             break
                     }
                 }
-                console.log(msg.payload)
+                this.log(msg.payload)
                 //If values are changed then set them & wait for callback otherwise send msg on
                 if (msg.payload.state != node.device.state.onOff.onOff || msg.payload.level != node.device.state.levelControl.currentLevel ){
                     node.pending = true
@@ -109,11 +109,13 @@ module.exports = function(RED) {
         })
 
 	    this.on('close', function(removed, done) {
-            console.log("Closing device "+this.id)
+            let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
+            this.log(`Closing device: ${this.id}, ${rtype}`)
             this.off('state')
             this.off('serverReady')
             this.off('identify')
             this.device.close().then(() => {
+                this.log('DEVICE CLOSED')
                 done();
             })
         });
@@ -123,7 +125,7 @@ module.exports = function(RED) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

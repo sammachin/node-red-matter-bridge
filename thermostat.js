@@ -9,8 +9,8 @@ module.exports = function(RED) {
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
         node.mode = config.mode
-        node.heat = (config.mode == 'heat' || 'heatcool')
-        node.cool = (config.mode == 'cool' || 'heatcool')
+        node.heat = (config.mode == 'heat' || config.mode == 'heatcool')
+        node.cool = (config.mode == 'cool' || config.mode == 'heatcool')
         node.ctx =  this.context().global;
         node.values = node.ctx.get(node.id+"-values") || null
         node.temperature = node.ctx.get(node.id+"-temperature") || null
@@ -67,7 +67,7 @@ module.exports = function(RED) {
         };
         
         node.heatSetpointEvt =  function(value){
-            child.values ? child.values.occupiedHeatingSetpoint=value : child.values={occupiedHeatingSetpoint:value}
+            node.values ? node.values.occupiedHeatingSetpoint=value : node.values={occupiedHeatingSetpoint:value}
             let temp = node.device.state.thermostat.localTemperature
             data = {mode : 'heat', setPoint : value, temperature: temp}
             if ((node.pending && node.passthrough)) {

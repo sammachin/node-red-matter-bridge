@@ -30,4 +30,4 @@ Note: This package is for creating virtual devices to control from a Matter Cont
 This is not a certified Matter device and is for development and experimentation only, for more information about Matter and to download the standards goto https://handbook.buildwithmatter.com
 
 
-See the [CHANGELOG.md] for details of each release
+See the [CHANGELOG](https://github.com/sammachin/node-red-matter-bridge/blob/main/CHANGELOG.md) for details of each release

@@ -46,7 +46,6 @@ module.exports = function(RED) {
 
 
         this.on('input', function(msg) {
-            this.log(node.levelstep)
             if (msg.topic == 'state'){
                 msg.payload = node.device.state
                 node.send(msg)
@@ -67,7 +66,6 @@ module.exports = function(RED) {
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
-                this.log(msg.payload.level)
                 msg.payload.level=Math.max(2, Math.min(254, msg.payload.level))
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
@@ -89,7 +87,6 @@ module.exports = function(RED) {
                             break
                     }
                 }
-                this.log(msg.payload)
                 //If values are changed then set them & wait for callback otherwise send msg on
                 if (msg.payload.state != node.device.state.onOff.onOff || msg.payload.level != node.device.state.levelControl.currentLevel ){
                     node.pending = true

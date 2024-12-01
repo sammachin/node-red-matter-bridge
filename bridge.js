@@ -1,5 +1,7 @@
 const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
 const AggregatorEndpoint = require( "@matter/main/endpoints/aggregator").AggregatorEndpoint;
+const DeviceCommisioner = require("@matter/main/protocol")
+
 const os = require('os');
 
 const doorlock = require("./devices/doorlock").doorlock;
@@ -257,6 +259,21 @@ module.exports =  function(RED) {
                 response = {state : 'commissioned'}
             }
             res.send(response);
+        } else {
+            res.sendStatus(404);      
+        }
+    })
+    
+    RED.httpAdmin.get('/_matterbridge/reopencommisioning/:id', RED.auth.needsPermission('admin.write'), function(req,res){
+        let target_node = RED.nodes.getNode(req.params.id)
+        if (target_node){
+            let comm = target_node.matterServer.env.get(DeviceCommisioner)
+            comm.allowBasicCommissioning().then(() => {
+                const pairingData = target_node.matterServer.state.commissioning.pairingCodes;
+                const { qrPairingCode, manualPairingCode } = pairingData;
+                response = {state : 'ready', qrPairingCode : qrPairingCode, manualPairingCode: manualPairingCode}
+                res.send(response);
+            })   
         } else {
             res.sendStatus(404);      
         }

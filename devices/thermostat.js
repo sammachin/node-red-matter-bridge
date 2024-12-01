@@ -56,23 +56,6 @@ module.exports = {
                 }
             })
 
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
-
-            
-            device.events.thermostat.systemMode$Changed.on((value) => {
-                child.values ? child.values.systemMode=value : child.values={systemMode:value}
-                child.emit('mode', value)
-                
-            });
-
-            device.events.thermostat.localTemperature$Changed.on((value) => {
-                child.emit('temp', value)
-            });
 
             if (child.heat){
                 device.events.thermostat.occupiedHeatingSetpoint$Changed.on((value) => {

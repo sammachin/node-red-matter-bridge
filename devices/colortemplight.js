@@ -24,23 +24,6 @@ module.exports = {
                 }
             }
             )
-            device.events.onOff.onOff$Changed.on(value => {
-                child.emit('state', value)
-            });
-            device.events.levelControl.currentLevel$Changed.on(value => {
-                let data = {level: value}
-                child.emit('state', data)
-            })
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
-            device.events.colorControl.colorTemperatureMireds$Changed.on(value => {
-                let data = {temp: value}
-                child.emit('state', data)
-            });
             return device;
     }
  }

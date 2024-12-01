@@ -16,6 +16,16 @@ module.exports = function(RED) {
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.identifying = false
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             this.log(msg.payload)
             if (msg.topic == 'state'){
@@ -44,37 +54,34 @@ module.exports = function(RED) {
         });
         
         this.on('serverReady', function() {
-            this.status({fill:"green",shape:"dot",text:"ready"});
-
+            var node = this
+            node.device.events.identify.startIdentifying.on(node.identifyEvt)
+            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
+            if (node.tilt == 'pos'){
+                node.device.events.windowCovering.currentPositionTiltPercent100ths$Changed.on(node.liftTiltEvt)
+            }
+            if (node.lift == 'pos'){
+                node.device.events.windowCovering.currentPositionLiftPercent100ths$Changed.on(node.liftTiltEvt)
+            }
+            if (node.tilt == 'tilt'){
+                node.device.events.windowCovering.tiltMovement.on(node.tiltMovementEvt)
+            }
+            if (node.tilt == 'lift'){
+                node.device.events.windowCovering.liftMovement.on(node.liftMovementEvt)
+            }
+            node.status({fill:"green",shape:"dot",text:"ready"});    
         })
         
-        this.on('identify', function(data){
-            if (data){
-                this.status({fill:"blue",shape:"dot",text:"identify"});
-            } else {
-                this.status({fill:"green",shape:"dot",text:"ready"});
-            }
-            
-        })
 
-        this.on('lift', function(){
-            data = {'liftPositon' : node.device.state.windowCovering.currentPositionLiftPercent100ths, 'tiltPositon' : node.device.state.windowCovering.currentPositionTiltPercent100ths}
-            //data = {}
-            //data.liftPositon = node.device.state.windowCovering.currentPositionLiftPercent100ths
-            if ((node.pending && node.passthrough)) {
-                var msg = node.pendingmsg
-                msg.payload = data
-                node.send(msg);
-            } else if (!node.pending){
-                var msg = {payload : {}};
-                msg.payload=data
-                node.send(msg);
-            }
-            node.pending = false
-        })
-        this.on('tilt', function(){
+       
+        node.liftTiltEvt =  function(){
             data = {}
-            data.tiltPositon = node.device.state.windowCovering.currentPositionTiltPercent100ths
+            if (node.lift){
+                data.liftPosition = node.device.state.windowCovering.currentPositionLiftPercent100ths
+            }
+            if (node.tilt){
+                data.tiltPosition = node.device.state.windowCovering.currentPositionTiltPercent100ths
+            }
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
                 msg.payload=data
@@ -85,8 +92,9 @@ module.exports = function(RED) {
                 node.send(msg);
             }
             node.pending = false
-        })
-        this.on('liftMovement', function(direction){
+        }
+
+        node.liftMovementEvt = function(direction){
             data = {'action' : 'lift', 'direction' : direction}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
@@ -98,8 +106,9 @@ module.exports = function(RED) {
                 node.send(msg);
             }
             node.pending = false
-        })
-        this.on('tiltMovement', function(direction){
+        }
+
+        node.tiltMovementEvt =  function(direction){
             data = {'action' : 'tilt', 'direction' : direction}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
@@ -111,7 +120,7 @@ module.exports = function(RED) {
                 node.send(msg);
             }
             node.pending = false
-        })
+        }
 
         this.on('close', function(removed, done) {
             this.removeAllListeners('serverReady')

@@ -19,14 +19,7 @@ module.exports = {
                     maxMeasuredValue: child.maxlevel,
                     measuredValue : child.measuredValue ? child.measuredValue : 0
                 }
-            }
-            )
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
+            })
             return device;
     }
  }

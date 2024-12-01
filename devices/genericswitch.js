@@ -29,13 +29,6 @@ module.exports = {
                 },
                 switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions}
             })
-
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
             return device;
     }
  }

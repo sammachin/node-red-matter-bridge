@@ -111,23 +111,23 @@ module.exports =  function(RED) {
         })
         this.log('Trying')
         if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
-            this.log('Starting Bridge')
+            this.log('XStarting Bridge')
             node.matterServer.start().then(() => {
                 node.registered.forEach(x => {
                     x.emit('serverReady')
                 });
-                this.log('Server Started')
+                this.log('XServer Started')
             }).catch((err) => {
-                console.error('An error occurred while starting the server:', err);
+                console.error('XAn error occurred while starting the server:', err);
             })
         } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
             node.registered.forEach(x => {
                 x.emit('serverReady')
             });
-            this.log('Server already running')
+            this.log('XServer already running')
         } 
         else {
-            this.log('Not Starting')
+            this.log('XNot Starting')
         }
 
        
@@ -232,7 +232,7 @@ module.exports =  function(RED) {
                     disabledflows.push(x.id)
                 }
                 if (x.d || disabledflows.includes(x.z)){
-                    this.log('Skipping Disabled Node: '+x.id)
+                    node.log('Skipping Disabled Node: '+x.id)
                     let index = node.users.indexOf(x.id);
                     if (index > -1) { 
                         node.users.splice(index, 1); 

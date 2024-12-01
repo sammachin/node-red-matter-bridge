@@ -20,13 +20,6 @@ module.exports = {
                     occupancy: {occupied: child.occupied}
                 }
             });
-
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
             return device;
     }
  }

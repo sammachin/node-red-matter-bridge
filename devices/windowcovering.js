@@ -81,20 +81,6 @@ module.exports = {
                 }
             })
 
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
-
-            if (child.tilt == 'pos'){
-                device.events.windowCovering.currentPositionTiltPercent100ths$Changed.on((value) => {child.emit('tilt', value)})
-            }
-
-            if (child.lift == 'pos'){
-                device.events.windowCovering.currentPositionLiftPercent100ths$Changed.on((value) => {child.emit('lift', value)})
-            }
 
             if (child.tilt == 'tilt'){
                 device.events.windowCovering.tiltMovement.on((direction) => {child.emit('tiltMovement', direction)})

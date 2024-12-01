@@ -9,7 +9,6 @@ function typeToBitmap(value){
 
 module.exports = function(RED) {
     function MatterOccupancySensor(config) {
-        this.log(config.sensorType)
         RED.nodes.createNode(this,config);
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
@@ -20,6 +19,16 @@ module.exports = function(RED) {
         node.occupied = node.ctx.get(node.id+"-occupied") || null
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
+        node.identifying = false
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
                 msg.payload = node.device.state
@@ -32,28 +41,25 @@ module.exports = function(RED) {
                 node.occupied = value
             }
         });
+
         this.on('serverReady', function() {
-            this.status({fill:"green",shape:"dot",text:"ready"});
+            var node = this
+            node.device.events.identify.startIdentifying.on(node.identifyEvt)
+            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
+            node.status({fill:"green",shape:"dot",text:"ready"});    
         })
         
-
-        this.on('identify', function(data){
-            if (data){
-                this.status({fill:"blue",shape:"dot",text:"identify"});
-            } else {
-                this.status({fill:"green",shape:"dot",text:"ready"});
-            }
-            
-        })
-
-
-        this.on('close', function(removed, done) {
-            this.log("Closing device "+this.id)
-            this.off('serverReady')
-            this.off('identify')
-            this.device.close().then(() => {
-                done();
-            })
+        this.on('close', async function(removed, done) {
+            let node = this
+            let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
+            node.log(`Closing device: ${this.id}, ${rtype}`)
+            //Remove Matter.js  Events
+            await node.device.events.identify.startIdentifying.off(node.identifyEvt)
+            await node.device.events.identify.stopIdentifying.off(node.identifyEvt)
+            //Remove Node-RED Custom  Events
+            node.removeAllListeners('serverReady')
+            await node.device.close()
+            done();
         });
 
         //Wait till server is started

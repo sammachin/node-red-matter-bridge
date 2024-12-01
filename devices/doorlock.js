@@ -25,21 +25,7 @@ module.exports = {
                     lockState: child.lockState ? child.lockState : 1
                 }
             })
-
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
-
-            device.events.doorLock.lockState$Changed.on((value) => {
-                let states = {0 :'unlocked', 1 : 'locked', 2 : 'unlocked'}
-                child.lockState = value
-                child.emit('state', states[value])
-            });
-
-
+            
             return device;
     }
  }

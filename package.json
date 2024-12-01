@@ -1,14 +1,13 @@
 {
   "name": "@sammachin/node-red-matter-bridge",
-  "version": "0.10.1",
+  "version": "0.11.0",
   "description": "Node red package for implementing a matter bridge",
   "main": "index.js",
   "author": "Sam Machin",
   "license": "MIT",
   "repository": "https://github.com/sammachin/node-red-matter-bridge",
   "dependencies": {
-    "@project-chip/matter-node.js": "^0.10.7",
-    "@project-chip/matter.js": "^0.10.7",
+    "@matter/main": "^0.11.8",
     "json-diff": "^1.0.6"
   },
   "engines": {

@@ -1,8 +1,6 @@
-const lightsensor = require("../lightsensor");
-
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  LightSensorDevice = require("@project-chip/matter.js/devices/LightSensorDevice").LightSensorDevice
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {LightSensorDevice} = require("@matter/main/devices")
 
 module.exports = {
     lightsensor: function(child) {
@@ -23,12 +21,6 @@ module.exports = {
                 }
             }
             )
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
             return device;
     }
  }

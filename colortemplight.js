@@ -1,5 +1,4 @@
-const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
-const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const {logEndpoint, EndpointServer} = require( "@matter/main")
 const { hasProperty, isNumber } = require('./utils');
 
 
@@ -15,8 +14,46 @@ module.exports = function(RED) {
         node.passthrough = /^true$/i.test(config.passthrough)
         node.tempformat = config.tempformat || "kelvin" //Default to kelvin for legacy
         node.levelstep = Number(config.levelstep)
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
+
+        node.identifying = false
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+        node.stateEvt = function(value) {
+            if ((node.pending && node.passthrough)) {
+                var msg = node.pendingmsg
+                msg.payload.state = node.device.state.onOff.onOff
+                msg.payload.level = node.device.state.levelControl.currentLevel
+                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
+                if (node.tempformat == 'kelvin'){
+                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
+                } else {
+                    msg.payload.temp = node.device.state.colorControl.colorTemperatureMireds
+                }
+                node.send(msg);
+            } else if (!node.pending){
+                var msg = {payload : {}};
+                msg.payload.state = node.device.state.onOff.onOff
+                msg.payload.level = node.device.state.levelControl.currentLevel
+                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
+                if (node.tempformat == 'kelvin'){
+                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
+                } else {
+                    msg.payload.temp = node.device.state.colorControl.colorTemperatureMireds
+                }
+                node.send(msg);
+            }
+            node.pending = false
+        };
+
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
                 msg.payload = node.device.state
@@ -90,7 +127,13 @@ module.exports = function(RED) {
         });
 
         this.on('serverReady', function() {
-            this.status({fill:"green",shape:"dot",text:"ready"});
+            var node = this
+            node.device.events.onOff.onOff$Changed.on(node.stateEvt) 
+            node.device.events.levelControl.currentLevel$Changed.on(node.stateEvt)
+            node.device.events.colorControl.colorTemperatureMireds$Changed.on(node.stateEvt)
+            node.device.events.identify.startIdentifying.on(node.identifyEvt)
+            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
+            node.status({fill:"green",shape:"dot",text:"ready"});    
         })
 
         this.on('state', function(data){
@@ -111,38 +154,37 @@ module.exports = function(RED) {
                 } else {
                     msg.payload.temp = node.device.state.colorControl.colorTemperatureMireds
                 }
-                    
                 node.send(msg);
             }
             node.pending = false
         })
 
-        this.on('identify', function(data){
-            if (data){
-                this.status({fill:"blue",shape:"dot",text:"identify"});
-            } else {
-                this.status({fill:"green",shape:"dot",text:"ready"});
-            }
-            
-        })
+        
 
-        this.on('close', function(removed, done) {
-            this.off('state')
-            this.off('serverReady')
-            this.off('identify')
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
+        this.on('close', async function(removed, done) {
+            let node = this
+            let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
+            node.log(`Closing device: ${this.id}, ${rtype}`)
+            //Remove Matter.js  Events
+            await node.device.events.identify.startIdentifying.off(node.identifyEvt)
+            await node.device.events.identify.stopIdentifying.off(node.identifyEvt)
+            await node.device.events.onOff.onOff$Changed.off(node.stateEvt)
+            await node.device.events.onOff.onOff$Changed.off(node.stateEvt)
+            await node.device.events.levelControl.currentLevel$Changed.off(node.stateEvt)
+            await node.device.events.colorControl.colorTemperatureMireds$Changed.off(node.stateEvt)
+            //Remove Node-RED Custom  Events
+            node.removeAllListeners('serverReady')
+            await node.device.close()
             done();
         });
+
+
         //Wait till server is started
         function waitforserver(node) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

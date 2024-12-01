@@ -1,11 +1,9 @@
-const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cluster");
-const temperaturesensor = require("../temperaturesensor");
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
 
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  GenericSwitchDevice = require("@project-chip/matter.js/devices/GenericSwitchDevice").GenericSwitchDevice
-const  SwitchServer = require( "@project-chip/matter.js/behavior/definitions/switch").SwitchServer
-const  Switch = require( "@project-chip/matter.js/cluster").Switch; 
+const  {GenericSwitchDevice} = require("@matter/main/devices")
+const  {SwitchServer} = require( "@matter/main/behaviors")
+const  {Switch} = require( "@matter/main/clusters") 
 
 
 module.exports = {
@@ -31,13 +29,6 @@ module.exports = {
                 },
                 switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions}
             })
-
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
             return device;
     }
  }

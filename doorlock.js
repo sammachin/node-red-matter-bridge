@@ -1,5 +1,5 @@
-const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
-const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const {logEndpoint, EndpointServer} = require( "@matter/main")
+
 
 module.exports = function(RED) {
     function MatterDoorLock(config) {
@@ -7,13 +7,24 @@ module.exports = function(RED) {
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.pendingmsg = null
         node.ctx =  this.context().global;
         node.lockState = node.ctx.get(node.id+"-lockState") || null
         node.passthrough = /^true$/i.test(config.passthrough)
+        
+        node.identifying = false
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
                 if (msg.payload){
@@ -59,51 +70,55 @@ module.exports = function(RED) {
                 }
             }
         });
+
         this.on('serverReady', function() {
-            this.status({fill:"green",shape:"dot",text:"ready"});
+            var node = this
+            node.device.events.doorLock.lockState$Changed.on(node.stateEvt) 
+            node.device.events.identify.startIdentifying.on(node.identifyEvt)
+            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
+            node.status({fill:"green",shape:"dot",text:"ready"});    
         })
         
-        this.on('state', function(data){
+        node.stateEvt = function(value) {
+            let states = {0 :'unlocked', 1 : 'locked', 2 : 'unlocked'}
+            node.lockState = value
+            state=states[value]
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
-                msg.payload.state=data
+                msg.payload.state=state
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
-                msg.payload.state=data
+                msg.payload.state=state
                 node.send(msg);
             }
             node.pending = false
+        }
 
-        })
-
-        this.on('identify', function(data){
-            if (data){
-                this.status({fill:"blue",shape:"dot",text:"identify"});
-            } else {
-                this.status({fill:"green",shape:"dot",text:"ready"});
-            }
-            
-        })
+  
 
 
-        this.on('close', function(removed, done) {
-            this.removeAllListeners('state')
-            this.removeAllListeners('serverReady')
-            this.removeAllListeners('identify')
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
+        this.on('close', async function(removed, done) {
+            let node = this
+            let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
+            node.log(`Closing device: ${this.id}, ${rtype}`)
+            //Remove Matter.js  Events
+            await node.device.events.identify.startIdentifying.off(node.identifyEvt)
+            await node.device.events.identify.stopIdentifying.off(node.identifyEvt)
+            await node.device.events.doorLock.lockState$Changed.off(node.stateEvt)
+            //Remove Node-RED Custom  Events
+            node.removeAllListeners('serverReady')
+            await node.device.close()
             done();
         });
+
+        
         //Wait till server is started
         function waitforserver(node) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

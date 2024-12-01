@@ -1,6 +1,6 @@
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  OnOffLightDevice  = require("@project-chip/matter.js/devices/OnOffLightDevice").OnOffLightDevice;
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {OnOffLightDevice}  = require("@matter/main/devices");
 
 
 module.exports = {
@@ -16,15 +16,6 @@ module.exports = {
                     serialNumber: child.id,
                     reachable: true,
                 },
-        });
-        device.events.onOff.onOff$Changed.on(value => {
-            child.emit('state', value)
-        });
-        device.events.identify.startIdentifying.on(() => {
-            child.emit('identify', true)
-        });
-        device.events.identify.stopIdentifying.on(() => {
-            child.emit('identify', false)
         });
         return device;
     }

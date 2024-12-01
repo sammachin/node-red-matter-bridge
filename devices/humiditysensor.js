@@ -1,8 +1,6 @@
-const temperaturesensor = require("../temperaturesensor");
-
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  HumiditySensorDevice = require("@project-chip/matter.js/devices/HumiditySensorDevice").HumiditySensorDevice
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {HumiditySensorDevice} = require("@matter/main/devices")
 
 module.exports = {
     humiditysensor: function(child) {
@@ -21,14 +19,7 @@ module.exports = {
                     maxMeasuredValue: child.maxlevel,
                     measuredValue : child.measuredValue ? child.measuredValue : 0
                 }
-            }
-            )
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
+            })
             return device;
     }
  }

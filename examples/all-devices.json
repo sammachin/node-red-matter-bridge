@@ -88,7 +88,7 @@
         "vendorName": "Node-RED-Matter",
         "productName": "Node-RED-Bridge",
         "networkInterface": "en0",
-        "logLevel": "ERROR"
+        "logLevel": "DEBUG"
     },
     {
         "id": "99c867097068350a",
@@ -665,6 +665,7 @@
         "bridge": "99fe631bdf041506",
         "range": "254",
         "passthrough": "true",
+        "levelstep": "1",
         "x": 700,
         "y": 540,
         "wires": [
@@ -974,6 +975,8 @@
         "bridge": "99fe631bdf041506",
         "range": "254",
         "passthrough": "true",
+        "tempformat": "mired",
+        "levelstep": "1",
         "x": 450,
         "y": 400,
         "wires": [
@@ -1340,6 +1343,8 @@
         "bridge": "99fe631bdf041506",
         "range": "254",
         "passthrough": "true",
+        "tempformat": "kelvin",
+        "levelstep": "1",
         "x": 690,
         "y": 400,
         "wires": [
@@ -1930,7 +1935,7 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 480,
+        "x": 580,
         "y": 260,
         "wires": []
     },
@@ -1945,7 +1950,7 @@
         "reversed": false,
         "coveringType": "255",
         "productType": "255",
-        "x": 250,
+        "x": 210,
         "y": 260,
         "wires": [
             [
@@ -2103,7 +2108,7 @@
         "props": [
             {
                 "p": "payload.temperature",
-                "v": "1800",
+                "v": "1850",
                 "vt": "num"
             }
         ],
@@ -2191,6 +2196,137 @@
         "wires": [
             [
                 "55ffd3c1b27edf1f"
+            ]
+        ]
+    },
+    {
+        "id": "9e46c39712296318",
+        "type": "matterthermostat",
+        "z": "318643e96a60e96c",
+        "name": "Cooling",
+        "bridge": "99fe631bdf041506",
+        "mode": "cool",
+        "passthrough": "true",
+        "x": 460,
+        "y": 740,
+        "wires": [
+            [
+                "a90d4b1d00789c67"
+            ]
+        ]
+    },
+    {
+        "id": "a90d4b1d00789c67",
+        "type": "debug",
+        "z": "318643e96a60e96c",
+        "name": "debug 14",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 620,
+        "y": 740,
+        "wires": []
+    },
+    {
+        "id": "28bb246664811976",
+        "type": "inject",
+        "z": "318643e96a60e96c",
+        "name": "temp 18",
+        "props": [
+            {
+                "p": "payload.temperature",
+                "v": "1850",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 200,
+        "y": 700,
+        "wires": [
+            [
+                "9e46c39712296318"
+            ]
+        ]
+    },
+    {
+        "id": "8224fdbe8dd2d2ca",
+        "type": "inject",
+        "z": "318643e96a60e96c",
+        "name": "heat",
+        "props": [
+            {
+                "p": "payload.mode",
+                "v": "cool",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 210,
+        "y": 760,
+        "wires": [
+            [
+                "9e46c39712296318"
+            ]
+        ]
+    },
+    {
+        "id": "a63ecf4adef1ca27",
+        "type": "inject",
+        "z": "318643e96a60e96c",
+        "name": "off",
+        "props": [
+            {
+                "p": "payload.mode",
+                "v": "off",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 210,
+        "y": 820,
+        "wires": [
+            [
+                "9e46c39712296318"
+            ]
+        ]
+    },
+    {
+        "id": "3981e754c940f2a6",
+        "type": "inject",
+        "z": "318643e96a60e96c",
+        "name": "",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "state",
+        "x": 210,
+        "y": 640,
+        "wires": [
+            [
+                "9e46c39712296318"
             ]
         ]
     },

@@ -1,11 +1,9 @@
-const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cluster");
+const {Endpoint, Observable}  = require("@matter/main");
+const {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
 
-const Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const WindowCoveringDevice = require("@project-chip/matter.js/devices/WindowCoveringDevice").WindowCoveringDevice
-const WindowCoveringServer = require( "@project-chip/matter.js/behavior/definitions/window-covering").WindowCoveringServer
-const WindowCovering = require( "@project-chip/matter.js/cluster").WindowCovering; 
-const Observable = require("@project-chip/matter.js/util").Observable
+const {WindowCoveringDevice} = require("@matter/main/devices")
+const {WindowCoveringServer} = require( "@matter/main/behaviors")
+const {WindowCovering} = require( "@matter/main/clusters")
 
 
 
@@ -83,20 +81,6 @@ module.exports = {
                 }
             })
 
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
-
-            if (child.tilt == 'pos'){
-                device.events.windowCovering.currentPositionTiltPercent100ths$Changed.on((value) => {child.emit('tilt', value)})
-            }
-
-            if (child.lift == 'pos'){
-                device.events.windowCovering.currentPositionLiftPercent100ths$Changed.on((value) => {child.emit('lift', value)})
-            }
 
             if (child.tilt == 'tilt'){
                 device.events.windowCovering.tiltMovement.on((direction) => {child.emit('tiltMovement', direction)})

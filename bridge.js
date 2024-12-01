@@ -1,12 +1,7 @@
-require("@project-chip/matter-node.js");
-
-const VendorId = require("@project-chip/matter.js/datatype").VendorId;
-const Endpoint = require("@project-chip/matter.js/endpoint").Endpoint;
-const AggregatorEndpoint = require( "@project-chip/matter.js/endpoints/AggregatorEndpoint").AggregatorEndpoint;
-const MatterEnvironment = require("@project-chip/matter.js/environment").Environment;
-const ServerNode = require("@project-chip/matter.js/node").ServerNode;
-const Logger = require("@project-chip/matter.js/log").Logger;
+const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
+const AggregatorEndpoint = require( "@matter/main/endpoints/aggregator").AggregatorEndpoint;
 const os = require('os');
+
 const doorlock = require("./devices/doorlock").doorlock;
 const thermostat = require("./devices/thermostat").thermostat;
 const contactsensor = require("./devices/contactsensor").contactsensor
@@ -41,7 +36,7 @@ module.exports =  function(RED) {
         RED.nodes.createNode(this, config);
         var node = this;
         if (node.restart){
-            console.log('Bridge Node Restarted')
+            this.log('Bridge Node Restarted')
         }
         node.restart = false
         switch (config.logLevel) {
@@ -61,7 +56,7 @@ module.exports =  function(RED) {
                 Logger.defaultLogLevel = 0;
                 break;
         }
-        console.log(`Loading Bridge node ${node.id}`)
+        this.log(`Loading Bridge node ${node.id}`)
         //Params
         node.users = config._users
         node.name = config.name
@@ -80,7 +75,7 @@ module.exports =  function(RED) {
         //    node.deviceStorage = storageManager.createContext("Device")
 
         node.serverReady = false;
-        MatterEnvironment.default.vars.set('mdns.networkInterface', node.networkInterface);
+        Environment.default.vars.set('mdns.networkInterface', node.networkInterface);
         //Servers
         ServerNode.create({
             id: node.id,
@@ -110,30 +105,36 @@ module.exports =  function(RED) {
             node.aggregator = new Endpoint(AggregatorEndpoint, { id: "aggregator" });
             node.matterServer = matterServer
             node.matterServer.add(node.aggregator);
-            console.log("Bridge Created, awaiting child nodes")
-            console.log('Server Ready')
+            this.log("Bridge Created, awaiting child nodes")
+            this.log('Server Ready')
             node.serverReady = true
         })
-        console.log('Trying')
-        if (node.users.length == 0 && node.serverReady){
-            console.log('Starting Bridge')
+        this.log('Trying')
+        if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
+            this.log('XStarting Bridge')
             node.matterServer.start().then(() => {
                 node.registered.forEach(x => {
                     x.emit('serverReady')
                 });
-                console.log('Server Started')
+                this.log('XServer Started')
             }).catch((err) => {
-                console.error('An error occurred while starting the server:', err);
+                console.error('XAn error occurred while starting the server:', err);
             })
-        } else {
-            console.log('Not Starting yet, more devices to load')
+        } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
+            node.registered.forEach(x => {
+                x.emit('serverReady')
+            });
+            this.log('XServer already running')
+        } 
+        else {
+            this.log('XNot Starting')
         }
 
        
         node.registered = []
 
         this.on('registerChild', function(child){
-            console.log(`Registering ${child.id} with ${node.id}`)
+            this.log(`Registering ${child.id} with ${node.id}`)
             node.registered.push(child)
             const index = node.users.indexOf(child.id);
             if (index > -1) { 
@@ -186,30 +187,37 @@ module.exports =  function(RED) {
                     child.device = doorlock(child)
                     break
             }
-            console.log("adding device to aggregator")
-            node.aggregator.add(child.device);
-            console.log('Trying')
-            if (node.users.length == 0 && node.serverReady){
-                console.log('Starting Bridge')
+            this.log("adding device to aggregator")
+            try {
+                node.aggregator.add(child.device);
+            } catch (error) {
+                this.error(error)
+            }
+            this.log('Checking if ready to start')
+            if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
+                this.log('Starting Bridge')
                 node.matterServer.start().then(() => {
                     node.registered.forEach(x => {
                         x.emit('serverReady')
                     });
-                    console.log('Server Started')
+                    this.log('Server Started')
                 }).catch((err) => {
-                    console.error('An error occurred while starting the server:', err);
+                    this.error('An error occurred while starting the server:', err);
                 })
-            } else {
-                console.log('Not Starting yet, more devices to load')
+            } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
+                node.registered.forEach(x => {
+                    x.emit('serverReady')
+                });
+                this.log('Server already running')
             }
         })
 
         this.on('close', function(removed, done) {
             if (removed) {
-                console.log("Bridge Removed")
+                this.log("Bridge Removed")
                 node.matterServer.close()
             } else {
-                console.log("Bridge Restarted")
+                this.log("Bridge Restarted")
                 node.restart = true
                 node.matterServer.close()
             }
@@ -224,7 +232,7 @@ module.exports =  function(RED) {
                     disabledflows.push(x.id)
                 }
                 if (x.d || disabledflows.includes(x.z)){
-                    console.log('Skipping Disabled Node: '+x.id)
+                    node.log('Skipping Disabled Node: '+x.id)
                     let index = node.users.indexOf(x.id);
                     if (index > -1) { 
                         node.users.splice(index, 1); 
@@ -255,7 +263,14 @@ module.exports =  function(RED) {
     })
 
     RED.httpAdmin.get('/_matterbridge/interfaces', RED.auth.needsPermission('admin.write'), function(req,res){
-        let interfaces = Object.keys(os.networkInterfaces())
-        res.send(interfaces)
+        let interfaces = os.networkInterfaces()
+        let output = []
+        for (let i in interfaces) {
+            for (let i2 in interfaces[i]) {
+                if (!interfaces[i][i2].internal && interfaces[i][i2].family == "IPv6")
+                    output.push(i)
+            }
+        }
+        res.send(output)
     })
 }

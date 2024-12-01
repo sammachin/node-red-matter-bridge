@@ -1,8 +1,6 @@
-const temperaturesensor = require("../temperaturesensor");
-
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  OccupancySensorDevice = require("@project-chip/matter.js/devices/OccupancySensorDevice").OccupancySensorDevice
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {OccupancySensorDevice} = require("@matter/main/devices")
 
 module.exports = {
     occupancysensor: function(child) {
@@ -21,13 +19,6 @@ module.exports = {
                     occupancySensorTypeBitmap: child.sensorTypeBitmap,
                     occupancy: {occupied: child.occupied}
                 }
-            });
-
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
             });
             return device;
     }

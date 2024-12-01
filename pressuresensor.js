@@ -1,5 +1,4 @@
-const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
-const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const {logEndpoint, EndpointServer} = require( "@matter/main")
 
 module.exports = function(RED) {
     function MatterPressureSensor(config) {
@@ -12,8 +11,18 @@ module.exports = function(RED) {
         node.maxlevel = config.maxlevel*10
         node.ctx =  this.context().global;
         node.measuredValue = node.ctx.get(node.id+"-measuredValue") || null
-        console.log(`Loading Device node ${node.id}`)
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
+        node.identifying = false
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
                 msg.payload = node.device.state
@@ -26,37 +35,27 @@ module.exports = function(RED) {
                 node.measuredValue = value
             }
         });
+
         this.on('serverReady', function() {
-            this.status({fill:"green",shape:"dot",text:"ready"});
+            var node = this
+            node.device.events.identify.startIdentifying.on(node.identifyEvt)
+            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
+            node.status({fill:"green",shape:"dot",text:"ready"});    
         })
         
-
-        this.on('identify', function(data){
-            if (data){
-                this.status({fill:"blue",shape:"dot",text:"identify"});
-            } else {
-                this.status({fill:"green",shape:"dot",text:"ready"});
-            }
-            
+        this.on('serverReady', function() {
+            var node = this
+            node.device.events.identify.startIdentifying.on(node.identifyEvt)
+            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
+            node.status({fill:"green",shape:"dot",text:"ready"});    
         })
 
-
-        this.on('close', function(removed, done) {
-            this.removeAllListeners('serverReady')
-            this.removeAllListeners('identify')
-            if (removed) {
-                // This node has been disabled/deleted
-            } else {
-                // This node is being restarted
-            }
-            done();
-        });
         //Wait till server is started
         function waitforserver(node) {
             if (!node.bridge.serverReady) {
               setTimeout(waitforserver, 100, node)
             } else {
-                console.log('Registering Child......')
+                node.log('Registering Child......')
                 node.bridge.emit('registerChild', node)
             }
         }

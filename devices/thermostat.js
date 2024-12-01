@@ -1,11 +1,8 @@
-
-const Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-
-const ThermostatDevice = require("@project-chip/matter.js/devices/ThermostatDevice").ThermostatDevice
-const Thermostat = require( "@project-chip/matter.js/cluster").Thermostat; 
-const ThermostatServer = require( "@project-chip/matter.js/behavior/definitions/thermostat").ThermostatServer
-
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const {ThermostatDevice} = require("@matter/main/devices")
+const {Thermostat} = require( "@matter/main/clusters")
+const {ThermostatServer} = require( "@matter/main/behaviors")
 
 
 
@@ -59,23 +56,6 @@ module.exports = {
                 }
             })
 
-            device.events.identify.startIdentifying.on(() => {
-                child.emit('identify', true)
-            });
-            device.events.identify.stopIdentifying.on(() => {
-                child.emit('identify', false)
-            });
-
-            
-            device.events.thermostat.systemMode$Changed.on((value) => {
-                child.values ? child.values.systemMode=value : child.values={systemMode:value}
-                child.emit('mode', value)
-                
-            });
-
-            device.events.thermostat.localTemperature$Changed.on((value) => {
-                child.emit('temp', value)
-            });
 
             if (child.heat){
                 device.events.thermostat.occupiedHeatingSetpoint$Changed.on((value) => {

@@ -65,6 +65,7 @@ module.exports = function(RED) {
                 if (msg.payload.state == undefined) {
                     msg.payload.state = node.device.state.onOff.onOff
                 }
+                if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'increaseLevel')){
                     msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
                 }
@@ -74,7 +75,6 @@ module.exports = function(RED) {
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
-                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'temp')) {
                     if (node.tempformat == 'kelvin'){
                         var mireds = 1000000/msg.payload.temp
@@ -174,7 +174,14 @@ module.exports = function(RED) {
             await node.device.events.colorControl.colorTemperatureMireds$Changed.off(node.stateEvt)
             //Remove Node-RED Custom  Events
             node.removeAllListeners('serverReady')
-            await node.device.close()
+            //Remove from Bridge Node Registered
+            let index = node.bridge.registered.indexOf(node);
+            if (index > -1) { 
+                node.bridge.registered.splice(index, 1); 
+            }
+            if (removed){
+                await node.device.close()
+            }
             done();
         });
 

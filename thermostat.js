@@ -177,10 +177,17 @@ module.exports = function(RED) {
             if (node.cool){
                 await node.device.events.thermostat.occupiedCoolingSetpoint$Changed.off(node.coolSetpointEvt)
             }
-            //Remove Node-RED Custom Events
-            node.removeAllListeners('serverReady')
-            await node.device.close()
-            done();
+             //Remove Node-RED Custom  Events
+             node.removeAllListeners('serverReady')
+             //Remove from Bridge Node Registered
+             let index = node.bridge.registered.indexOf(node);
+             if (index > -1) { 
+                 node.bridge.registered.splice(index, 1); 
+             }
+             if (removed){
+                 await node.device.close()
+             }
+             done();
         });
 
 

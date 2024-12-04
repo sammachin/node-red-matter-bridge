@@ -122,17 +122,39 @@ module.exports = function(RED) {
             node.pending = false
         }
 
-        this.on('close', function(removed, done) {
-            this.removeAllListeners('serverReady')
-            this.removeAllListeners('identify')
-            this.removeAllListeners('liftMovement')
-            this.removeAllListeners('tiltMovement')
-            this.removeAllListeners('move')
-
-            this.device.close().then(() => {
-                done();
-            });
+        this.on('close', async function(removed, done) {
+            let node = this
+            let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
+            node.log(`Closing device: ${this.id}, ${rtype}`)
+            //Remove Matter.js Events
+            await node.device.events.identify.startIdentifying.off(node.identifyEvt)
+            await node.device.events.identify.stopIdentifying.off(node.identifyEvt)
+            if (node.tilt == 'pos'){
+                await node.device.events.windowCovering.currentPositionTiltPercent100ths$Changed.off(node.liftTiltEvt)
+            }
+            if (node.lift == 'pos'){
+                await node.device.events.windowCovering.currentPositionLiftPercent100ths$Changed.off(node.liftTiltEvt)
+            }
+            if (node.tilt == 'tilt'){
+                await node.device.events.windowCovering.tiltMovement.off(node.tiltMovementEvt)
+            }
+            if (node.tilt == 'lift'){
+                await node.device.events.windowCovering.liftMovement.off(node.liftMovementEvt)
+            }
+             //Remove Node-RED Custom  Events
+             node.removeAllListeners('serverReady')
+             //Remove from Bridge Node Registered
+             let index = node.bridge.registered.indexOf(node);
+             if (index > -1) { 
+                 node.bridge.registered.splice(index, 1); 
+             }
+             if (removed){
+                 await node.device.close()
+             }
+             done();
         });
+
+
         //Wait till server is started
         function waitforserver(node) {
             if (!node.bridge.serverReady) {

@@ -53,10 +53,10 @@ module.exports = function(RED) {
             } else {
                 node.pending = true
                 node.pendingmsg = msg
+                if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (msg.payload.state == undefined) {
                     msg.payload.state = node.device.state.onOff.onOff
                 }
-                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'increaseLevel')){
                     msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
                 }
@@ -87,6 +87,7 @@ module.exports = function(RED) {
                             break
                     }
                 }
+                console.log(msg.payload)
                 //If values are changed then set them & wait for callback otherwise send msg on
                 if (msg.payload.state != node.device.state.onOff.onOff || msg.payload.level != node.device.state.levelControl.currentLevel ){
                     node.pending = true
@@ -128,7 +129,14 @@ module.exports = function(RED) {
             await node.device.events.levelControl.currentLevel$Changed.off(node.stateEvt)
             //Remove Node-RED Custom  Events
             node.removeAllListeners('serverReady')
-            await node.device.close()
+            //Remove from Bridge Node Registered
+            let index = node.bridge.registered.indexOf(node);
+            if (index > -1) { 
+                node.bridge.registered.splice(index, 1); 
+            }
+            if (removed){
+                await node.device.close()
+            }
             done();
         });
 

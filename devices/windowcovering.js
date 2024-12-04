@@ -80,16 +80,6 @@ module.exports = {
                     ...params
                 }
             })
-
-
-            if (child.tilt == 'tilt'){
-                device.events.windowCovering.tiltMovement.on((direction) => {child.emit('tiltMovement', direction)})
-            }
-
-            if (child.lift == 'lift'){
-                device.events.windowCovering.liftMovement.on((direction) => {child.emit('liftMovement', direction)})
-            }   
-
             return device;
     }
  }

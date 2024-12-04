@@ -55,19 +55,6 @@ module.exports = {
                     ...params
                 }
             })
-
-
-            if (child.heat){
-                device.events.thermostat.occupiedHeatingSetpoint$Changed.on((value) => {
-                    child.values ? child.values.occupiedHeatingSetpoint=value : child.values={occupiedHeatingSetpoint:value}
-                    child.emit('setpoint', 'heat', value)})
-            }
-            if (child.cool){
-                device.events.thermostat.occupiedCoolingSetpoint$Changed.on((value) => {
-                    child.values ? child.values.occupiedCoolingSetpoint=value : child.values={occupiedCoolingSetpoint:value}
-                    child.emit('setpoint', 'cool', value)})
-            }
-
             return device;
     }
  }

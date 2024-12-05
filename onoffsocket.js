@@ -49,22 +49,26 @@ module.exports = function(RED) {
                             break
                     }
                 }
+                let newData = {
+                    onOff: {
+                        onOff: msg.payload.state,
+                    }
+                }
                 //If values are changed then set them & wait for callback otherwise send msg on
-                if (msg.payload.state != node.device.state.onOff.onOff){
+                if (willUpdate.call(node.device, newData)) {
+                    this.debug('WILL UPDATE')
                     node.pending = true
                     node.pendingmsg = msg
-                    node.device.set({
-                        onOff: {
-                            onOff: msg.payload.state,
-                        }
-                    })
-                } else{
+                    node.device.set(newData)
+                } else {
+                    this.debug('WONT UPDATE')
                     if (node.passthrough){
                         node.send(msg);
                     }
                 }
                 
             }
+            
         });
         
         this.on('serverReady', function() {

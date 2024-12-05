@@ -1,6 +1,6 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
 
-const { hasProperty, isNumber } = require('./utils');
+const { hasProperty, willUpdate } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -87,20 +87,22 @@ module.exports = function(RED) {
                             break
                     }
                 }
-                console.log(msg.payload)
+                let newData = {
+                    onOff: {
+                        onOff: msg.payload.state,
+                    },
+                    levelControl: {
+                        currentLevel: msg.payload.level
+                    }
+                }
                 //If values are changed then set them & wait for callback otherwise send msg on
-                if (msg.payload.state != node.device.state.onOff.onOff || msg.payload.level != node.device.state.levelControl.currentLevel ){
+                if (willUpdate.call(node.device, newData)) {
+                    console.log('WILL UPDATE')
                     node.pending = true
                     node.pendingmsg = msg
-                    node.device.set({
-                        onOff: {
-                            onOff: msg.payload.state,
-                        },
-                        levelControl: {
-                            currentLevel: msg.payload.level
-                        }
-                    })
-                } else{
+                    node.device.set(newData)
+                } else {
+                    console.log('WONT UPDATE')
                     if (node.passthrough){
                         node.send(msg);
                     }

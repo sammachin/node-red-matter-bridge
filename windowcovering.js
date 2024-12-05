@@ -32,22 +32,32 @@ module.exports = function(RED) {
                 msg.payload = node.device.state
                 node.send(msg)
             } else {
-                node.pending = true
-                node.pendingmsg = msg
                 if (msg.payload.liftPosition == undefined) {
                     msg.payload.liftPosition = node.device.state.windowCovering.currentPositionLiftPercent100ths
                 }
                 if (msg.payload.tiltPosition == undefined) {
                     msg.payload.tiltPosition = node.device.state.windowCovering.currentPositionTiltPercent100ths
                 }
-                node.device.set({
+                let newData = {
                     windowCovering: {
                         targetPositionLiftPercent100ths: msg.payload.liftPosition,
                         targetPositionTiltPercent100ths: msg.payload.tiltPosition,
                         currentPositionLiftPercent100ths: msg.payload.liftPosition,
                         currentPositionTiltPercent100ths: msg.payload.tiltPosition
                     }
-                })
+                }
+                //If values are changed then set them & wait for callback otherwise send msg on
+                if (willUpdate.call(node.device, newData)) {
+                    this.debug('WILL UPDATE')
+                    node.pending = true
+                    node.pendingmsg = msg
+                    node.device.set(newData)
+                } else {
+                    this.debug('WONT UPDATE')
+                    if (node.passthrough){
+                        node.send(msg);
+                    }
+                }
             }
             
 

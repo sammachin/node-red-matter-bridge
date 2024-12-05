@@ -4,7 +4,21 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
- 
+## [0.11.1] - 2024-12-05
+Fixes for functionality introduced in 0.11
+
+### Added
+Added api for re-opening commisioning from Node-RED, but not yet exposed in UI
+### Changed
+The passthrough logic has been improved and implemented on all nodes.
+
+
+### Fixed
+Bug with dimmable/color lights using the 0-100 scale that was causing an infinite loop & crash
+
+Fixed the issue where devices were being removed and readded from ecosystems when nodes were restarted causing a loss of room assignments and automations
+
+
 ## [0.11.0] - 2024-12-01
 Lots of improvements to core functionality and stablity
 

@@ -43,12 +43,25 @@ module.exports = function(RED) {
             node.status({fill:"green",shape:"dot",text:"ready"});    
         })
         
-        this.on('serverReady', function() {
-            var node = this
-            node.device.events.identify.startIdentifying.on(node.identifyEvt)
-            node.device.events.identify.stopIdentifying.on(node.identifyEvt)
-            node.status({fill:"green",shape:"dot",text:"ready"});    
-        })
+        this.on('close', async function(removed, done) {
+            let node = this
+            let rtype = removed ? 'Device was removed/disabled' : 'Device was restarted'
+            node.log(`Closing device: ${this.id}, ${rtype}`)
+            //Remove Matter.js  Events
+            await node.device.events.identify.startIdentifying.off(node.identifyEvt)
+            await node.device.events.identify.stopIdentifying.off(node.identifyEvt)
+            //Remove Node-RED Custom  Events
+            node.removeAllListeners('serverReady')
+            //Remove from Bridge Node Registered
+            let index = node.bridge.registered.indexOf(node);
+            if (index > -1) { 
+                node.bridge.registered.splice(index, 1); 
+            }
+            if (removed){
+                await node.device.close()
+            }
+            done();
+        });
 
         //Wait till server is started
         function waitforserver(node) {

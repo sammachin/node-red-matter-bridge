@@ -1,5 +1,7 @@
 const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
 const AggregatorEndpoint = require( "@matter/main/endpoints/aggregator").AggregatorEndpoint;
+const DeviceCommisioner = require("@matter/main/protocol")
+
 const os = require('os');
 
 const doorlock = require("./devices/doorlock").doorlock;
@@ -109,25 +111,25 @@ module.exports =  function(RED) {
             this.log('Server Ready')
             node.serverReady = true
         })
-        this.log('Trying')
+        this.log('Trying..')
         if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
-            this.log('XStarting Bridge')
+            this.log('Starting Bridge..')
             node.matterServer.start().then(() => {
                 node.registered.forEach(x => {
                     x.emit('serverReady')
                 });
-                this.log('XServer Started')
+                this.log('Server Started..')
             }).catch((err) => {
-                console.error('XAn error occurred while starting the server:', err);
+                console.error('An error occurred while starting the server..:', err);
             })
         } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
             node.registered.forEach(x => {
                 x.emit('serverReady')
             });
-            this.log('XServer already running')
+            this.log('Server already running..')
         } 
         else {
-            this.log('XNot Starting')
+            this.log('Not Starting..')
         }
 
        
@@ -135,63 +137,69 @@ module.exports =  function(RED) {
 
         this.on('registerChild', function(child){
             this.log(`Registering ${child.id} with ${node.id}`)
-            node.registered.push(child)
             const index = node.users.indexOf(child.id);
             if (index > -1) { 
                 node.users.splice(index, 1); 
             }
-            switch (child.type){
-                case 'matteronofflight':
-                    child.device =  onofflight(child)
-                    break
-                case 'matteronoffsocket':
-                    child.device =  onoffsocket(child)
-                    break
-                case 'matterdimmablelight':
-                    child.device =  dimmablelight(child)
-                    break
-                case 'matterfullcolorlight':
-                    child.device = fullcolorlight(child)
-                    break
-                case 'mattercolortemplight':
-                    child.device = colortemplight(child)
-                    break
-                case 'mattercontactsensor':
-                    child.device = contactsensor(child)
-                    break
-                case 'matterlightsensor':
-                    child.device = lightsensor(child)
-                    break
-                case 'mattertemperaturesensor':
-                    child.device = temperaturesensor(child)
-                    break
-                case 'matteroccupancysensor':
-                    child.device = occupancysensor(child)
-                    break
-                case 'matterpressuresensor':
-                    child.device = pressuresensor(child)
-                    break
-                case 'matterhumiditysensor':
-                    child.device = humiditysensor(child)
-                    break
-                case 'mattergenericswitch':
-                    child.device = genericswitch(child)
-                    break
-                case 'matterwindowcovering':
-                    child.device = windowcovering(child)
-                    break
-                case 'matterthermostat':
-                    child.device = thermostat(child)
-                    break
-                case 'matterdoorlock':
-                    child.device = doorlock(child)
-                    break
-            }
-            this.log("adding device to aggregator")
-            try {
-                node.aggregator.add(child.device);
-            } catch (error) {
-                this.error(error)
+            node.registered.push(child)
+            // Check if Device already exists on Aggregator, else create & add it
+            if (node.aggregator.parts.has(child.id)) {
+                this.log("Device already registered")
+                child.device = node.aggregator.parts.get(child.id)
+            } else {
+                switch (child.type){
+                    case 'matteronofflight':
+                        child.device =  onofflight(child)
+                        break
+                    case 'matteronoffsocket':
+                        child.device =  onoffsocket(child)
+                        break
+                    case 'matterdimmablelight':
+                        child.device =  dimmablelight(child)
+                        break
+                    case 'matterfullcolorlight':
+                        child.device = fullcolorlight(child)
+                        break
+                    case 'mattercolortemplight':
+                        child.device = colortemplight(child)
+                        break
+                    case 'mattercontactsensor':
+                        child.device = contactsensor(child)
+                        break
+                    case 'matterlightsensor':
+                        child.device = lightsensor(child)
+                        break
+                    case 'mattertemperaturesensor':
+                        child.device = temperaturesensor(child)
+                        break
+                    case 'matteroccupancysensor':
+                        child.device = occupancysensor(child)
+                        break
+                    case 'matterpressuresensor':
+                        child.device = pressuresensor(child)
+                        break
+                    case 'matterhumiditysensor':
+                        child.device = humiditysensor(child)
+                        break
+                    case 'mattergenericswitch':
+                        child.device = genericswitch(child)
+                        break
+                    case 'matterwindowcovering':
+                        child.device = windowcovering(child)
+                        break
+                    case 'matterthermostat':
+                        child.device = thermostat(child)
+                        break
+                    case 'matterdoorlock':
+                        child.device = doorlock(child)
+                        break
+                }
+                this.log("adding new device to aggregator")
+                try {
+                    node.aggregator.add(child.device);
+                } catch (error) {
+                    this.error(error)
+                }
             }
             this.log('Checking if ready to start')
             if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
@@ -232,10 +240,11 @@ module.exports =  function(RED) {
                     disabledflows.push(x.id)
                 }
                 if (x.d || disabledflows.includes(x.z)){
-                    node.log('Skipping Disabled Node: '+x.id)
                     let index = node.users.indexOf(x.id);
                     if (index > -1) { 
-                        node.users.splice(index, 1); 
+                        node.log('Skipping Disabled Node: '+x.id)
+                        node.users.splice(index, 1);
+
                     }
                 }
             })
@@ -257,6 +266,21 @@ module.exports =  function(RED) {
                 response = {state : 'commissioned'}
             }
             res.send(response);
+        } else {
+            res.sendStatus(404);      
+        }
+    })
+    
+    RED.httpAdmin.get('/_matterbridge/reopencommisioning/:id', RED.auth.needsPermission('admin.write'), function(req,res){
+        let target_node = RED.nodes.getNode(req.params.id)
+        if (target_node){
+            let comm = target_node.matterServer.env.get(DeviceCommisioner)
+            comm.allowBasicCommissioning().then(() => {
+                const pairingData = target_node.matterServer.state.commissioning.pairingCodes;
+                const { qrPairingCode, manualPairingCode } = pairingData;
+                response = {state : 'ready', qrPairingCode : qrPairingCode, manualPairingCode: manualPairingCode}
+                res.send(response);
+            })   
         } else {
             res.sendStatus(404);      
         }

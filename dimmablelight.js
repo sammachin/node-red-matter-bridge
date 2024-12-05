@@ -1,6 +1,6 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
 
-const { hasProperty, isNumber } = require('./utils');
+const { hasProperty, willUpdate } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -46,7 +46,6 @@ module.exports = function(RED) {
 
 
         this.on('input', function(msg) {
-            this.log(node.levelstep)
             if (msg.topic == 'state'){
                 msg.payload = node.device.state
                 node.send(msg)
@@ -54,10 +53,10 @@ module.exports = function(RED) {
             } else {
                 node.pending = true
                 node.pendingmsg = msg
+                if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (msg.payload.state == undefined) {
                     msg.payload.state = node.device.state.onOff.onOff
                 }
-                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'increaseLevel')){
                     msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
                 }
@@ -67,7 +66,6 @@ module.exports = function(RED) {
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
-                this.log(msg.payload.level)
                 msg.payload.level=Math.max(2, Math.min(254, msg.payload.level))
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
@@ -89,20 +87,22 @@ module.exports = function(RED) {
                             break
                     }
                 }
-                this.log(msg.payload)
+                let newData = {
+                    onOff: {
+                        onOff: msg.payload.state,
+                    },
+                    levelControl: {
+                        currentLevel: msg.payload.level
+                    }
+                }
                 //If values are changed then set them & wait for callback otherwise send msg on
-                if (msg.payload.state != node.device.state.onOff.onOff || msg.payload.level != node.device.state.levelControl.currentLevel ){
+                if (willUpdate.call(node.device, newData)) {
+                    console.log('WILL UPDATE')
                     node.pending = true
                     node.pendingmsg = msg
-                    node.device.set({
-                        onOff: {
-                            onOff: msg.payload.state,
-                        },
-                        levelControl: {
-                            currentLevel: msg.payload.level
-                        }
-                    })
-                } else{
+                    node.device.set(newData)
+                } else {
+                    console.log('WONT UPDATE')
                     if (node.passthrough){
                         node.send(msg);
                     }
@@ -131,7 +131,14 @@ module.exports = function(RED) {
             await node.device.events.levelControl.currentLevel$Changed.off(node.stateEvt)
             //Remove Node-RED Custom  Events
             node.removeAllListeners('serverReady')
-            await node.device.close()
+            //Remove from Bridge Node Registered
+            let index = node.bridge.registered.indexOf(node);
+            if (index > -1) { 
+                node.bridge.registered.splice(index, 1); 
+            }
+            if (removed){
+                await node.device.close()
+            }
             done();
         });
 

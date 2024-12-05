@@ -104,6 +104,7 @@ module.exports = function(RED) {
                 msg.payload = node.device.state
                 node.send(msg)
             } else {
+                let newData = {thermostat : {}}
                 if (hasProperty(msg.payload, 'mode') || (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint))){
                     node.pending = true
                     node.pendingmsg = msg
@@ -122,29 +123,32 @@ module.exports = function(RED) {
                             systemMode =  node.device.state.thermostat.systemMode
                             break;
                     }
-                    let values = {systemMode: systemMode}
+                     newData.thermostat.systemMode = systemMode}
                     if (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint)) {
                         if (systemMode == 4){
-                            values.occupiedHeatingSetpoint = msg.payload.setPoint
+                            newData.thermostat.occupiedHeatingSetpoint = msg.payload.setPoint
                         } else if (systemMode == 3){
-                            values.occupiedCoolingSetpoint = msg.payload.setPoint
+                            newData.thermostat.occupiedCoolingSetpoint = msg.payload.setPoint
                         } 
-                    }
-                    node.device.set({thermostat: values})
-                    node.ctx.set(node.id+"-values",  values)
-                    node.values = values
+                    }   
                 }
                 if (hasProperty(msg.payload, 'temperature') && isNumber(msg.payload.temperature)) {
+                    newData.thermostat.localTemperature = msg.payload.temperature
+                    node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
+                    node.temperature = msg.payload.temperature   
+                }
+                //If values are changed then set them & wait for callback otherwise send msg on
+                if (willUpdate.call(node.device, newData)) {
+                    this.debug('WILL UPDATE')
                     node.pending = true
                     node.pendingmsg = msg
-                    node.device.set({thermostat : {localTemperature : msg.payload.temperature}})
-                    node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
-                    node.temperature = msg.payload.temperature
-                    if (!hasProperty(msg.payload, 'setPoint') && !hasProperty(msg.payload, 'mode')){
-                        this.emit('temp', msg.payload.temperature)
+                    node.device.set(newData)
+                } else {
+                    this.debug('WONT UPDATE')
+                    if (node.passthrough){
+                        node.send(msg);
                     }
                 }
-            }
         });
 
         this.on('serverReady', function() {
@@ -177,10 +181,17 @@ module.exports = function(RED) {
             if (node.cool){
                 await node.device.events.thermostat.occupiedCoolingSetpoint$Changed.off(node.coolSetpointEvt)
             }
-            //Remove Node-RED Custom Events
-            node.removeAllListeners('serverReady')
-            await node.device.close()
-            done();
+             //Remove Node-RED Custom  Events
+             node.removeAllListeners('serverReady')
+             //Remove from Bridge Node Registered
+             let index = node.bridge.registered.indexOf(node);
+             if (index > -1) { 
+                 node.bridge.registered.splice(index, 1); 
+             }
+             if (removed){
+                 await node.device.close()
+             }
+             done();
         });
 
 

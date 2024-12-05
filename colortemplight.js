@@ -60,11 +60,10 @@ module.exports = function(RED) {
                 node.send(msg)
                 logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
-                node.pending = true
-                node.pendingmsg = msg
                 if (msg.payload.state == undefined) {
                     msg.payload.state = node.device.state.onOff.onOff
                 }
+                if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'increaseLevel')){
                     msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
                 }
@@ -74,7 +73,6 @@ module.exports = function(RED) {
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
                 }
-                if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'temp')) {
                     if (node.tempformat == 'kelvin'){
                         var mireds = 1000000/msg.payload.temp
@@ -84,45 +82,47 @@ module.exports = function(RED) {
                 }  else {
                     var mireds = node.device.state.colorControl.colorTemperatureMireds
                 }
-                node.device.set({
+                if (typeof msg.payload.state != "boolean") {
+                    switch (msg.payload.state){
+                        case '1':
+                        case 1:
+                        case 'on':
+                            msg.payload.state = true
+                            break
+                        case '0':
+                        case 0:
+                        case 'off':
+                            msg.payload.state = false
+                            break
+                        case 'toggle':
+                            msg.payload.state = !node.device.state.onOff.onOff
+                            break
+                    }
+                }
+                let newData = {
+                    onOff: {
+                        onOff: msg.payload.state,
+                    },
                     levelControl: {
                         currentLevel: Math.max(2, Math.min(254, msg.payload.level))
                     },
                     colorControl: {
                         colorTemperatureMireds : mireds
                     }
-                })
-
-                switch (msg.payload.state){
-                    case '1':
-                    case 1:
-                    case 'on':
-                    case true:
-                        node.device.set({
-                            onOff: {
-                                onOff: true,
-                            }
-                        })
-                        break
-                    case '0':
-                    case 0:
-                    case 'off':
-                    case false:
-                        node.device.set({
-                            onOff: {
-                                onOff: false,
-                            }
-                        })
-                        break
-                    case 'toggle':
-                        node.device.set({
-                            onOff: {
-                                onOff: !node.device.state.onOff.onOff,
-                            }
-                        })
-                        break
-                    
                 }
+                //If values are changed then set them & wait for callback otherwise send msg on
+                if (willUpdate.call(node.device, newData)) {
+                    console.log('WILL UPDATE')
+                    node.pending = true
+                    node.pendingmsg = msg
+                    node.device.set(newData)
+                } else {
+                    console.log('WONT UPDATE')
+                    if (node.passthrough){
+                        node.send(msg);
+                    }
+                }
+
             }
         });
 
@@ -174,7 +174,14 @@ module.exports = function(RED) {
             await node.device.events.colorControl.colorTemperatureMireds$Changed.off(node.stateEvt)
             //Remove Node-RED Custom  Events
             node.removeAllListeners('serverReady')
-            await node.device.close()
+            //Remove from Bridge Node Registered
+            let index = node.bridge.registered.indexOf(node);
+            if (index > -1) { 
+                node.bridge.registered.splice(index, 1); 
+            }
+            if (removed){
+                await node.device.close()
+            }
             done();
         });
 

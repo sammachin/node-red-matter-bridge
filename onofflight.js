@@ -60,16 +60,19 @@ module.exports = function(RED) {
                             break
                     }
                 }
+                let newData = {
+                    onOff: {
+                        onOff: msg.payload.state,
+                    }
+                }
                 //If values are changed then set them & wait for callback otherwise send msg on
-                if (msg.payload.state != node.device.state.onOff.onOff){
+                if (willUpdate.call(node.device, newData)) {
+                    console.log('WILL UPDATE')
                     node.pending = true
                     node.pendingmsg = msg
-                    node.device.set({
-                        onOff: {
-                            onOff: msg.payload.state,
-                        }
-                    })
-                } else{
+                    node.device.set(newData)
+                } else {
+                    console.log('WONT UPDATE')
                     if (node.passthrough){
                         node.send(msg);
                     }
@@ -98,11 +101,17 @@ module.exports = function(RED) {
             await node.device.events.onOff.onOff$Changed.off(node.stateEvt)
             //Remove Node-RED Custom  Events
             node.removeAllListeners('serverReady')
-            await node.device.close()
+            //Remove from Bridge Node Registered
+            let index = node.bridge.registered.indexOf(node);
+            if (index > -1) { 
+                node.bridge.registered.splice(index, 1); 
+            }
+            if (removed){
+                await node.device.close()
+            }
             done();
         });
-
-
+        
         //Wait till server is started
         function waitforserver(node) {
             if (!node.bridge.serverReady) {

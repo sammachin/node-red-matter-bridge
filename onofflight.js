@@ -1,4 +1,5 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty, willUpdate } = require('./utils');
 
 module.exports = function(RED) {
     function MatterOnOffLight(config) {
@@ -67,12 +68,12 @@ module.exports = function(RED) {
                 }
                 //If values are changed then set them & wait for callback otherwise send msg on
                 if (willUpdate.call(node.device, newData)) {
-                    console.log('WILL UPDATE')
+                    node.debug(`WILL update, ${newData}`)
                     node.pending = true
                     node.pendingmsg = msg
                     node.device.set(newData)
                 } else {
-                    console.log('WONT UPDATE')
+                    node.debug(`WONT update, ${newData}`)
                     if (node.passthrough){
                         node.send(msg);
                     }

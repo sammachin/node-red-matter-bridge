@@ -1,6 +1,6 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
 
-const { hasProperty, isNumber } = require('./utils');
+const { hasProperty, willUpdate } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -39,10 +39,18 @@ module.exports = function(RED) {
                 }
                 if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                 if (hasProperty(msg.payload, 'increaseLevel')){
-                    msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+                    if (node.range == "100") { 
+                        msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
+                    } else {
+                        msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+                    }
                 }
                 if (hasProperty(msg.payload, 'decreaseLevel')){
-                    msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
+                    if (node.range == "100") {
+                        msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
+                     } else {
+                        msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
+                    }
                 }
                 if (msg.payload.level == undefined) {
                     msg.payload.level = node.device.state.levelControl.currentLevel
@@ -101,12 +109,12 @@ module.exports = function(RED) {
                 }
                 //If values are changed then set them & wait for callback otherwise send msg on
                 if (willUpdate.call(node.device, newData)) {
-                    console.log('WILL UPDATE')
+                    node.debug(`WILL update, ${newData}`)
                     node.pending = true
                     node.pendingmsg = msg
                     node.device.set(newData)
                 } else {
-                    console.log('WONT UPDATE')
+                    node.debug(`WONT update, ${newData}`)
                     if (node.passthrough){
                         node.send(msg);
                     }

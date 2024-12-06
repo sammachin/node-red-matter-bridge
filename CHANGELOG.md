@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## [0.11.2] - 2024-12-06
+Fixes I should have spotted if I'd done 0.11.1 properly!
+
+### Fixed
+willUpdate not imported on some devices
+missed the passthrough on doorLock
+spotted a bug with step-change on level control when using 0-100 scale 
+
 ## [0.11.1] - 2024-12-05
 Fixes for functionality introduced in 0.11
 

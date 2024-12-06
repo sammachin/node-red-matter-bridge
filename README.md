@@ -4,8 +4,8 @@ This package is designed to allow users to create a Matter Bridge and within tha
 
 The device nodes can then be used to connect to whatever non matter devices the user has in their home and translate the commands and data between them.
 
+### Device Types
 We currentlty support the following device types:
-
 - On/Off Light
 - On/Off Socket
 - Dimmable Light
@@ -25,8 +25,17 @@ We currentlty support the following device types:
 
 These are the device types supported by most of the major controller platforms, not all controllers will support all device types and not all the features of a device are availble in all controllers.
 
+
+### Passthrough
+Device nodes that have an output (eg not sensors or switches) have an option in the config for `Passthrough Input msg to Output` The intention of this setting is to allow virtual devices to be updated by actual devices without creating a feedback loop.
+The behaviour is as folllows:
+Whenever a Matter Nodes state is changed from outside of Node-RED, eg using the Apple/Google/Amazon app then the node will output a new status value as a brand new message.
+Whenever the node receives an input from another node then the node will only output the status if passthrough is set to true and will use the original message with an updated payload. This is consistent regardless of whether the device actual state changes so sending multiple ON messages will output multiple ON messages even if the device only updates once.
+
+### This is not a Controller
 Note: This package is for creating virtual devices to control from a Matter Controller, if you are wanting to control your real matter hardware devices from node-red then lookout for my upcoming node-red-matter-controller package instead.
 
+### Matter
 This is not a certified Matter device and is for development and experimentation only, for more information about Matter and to download the standards goto https://handbook.buildwithmatter.com
 
 

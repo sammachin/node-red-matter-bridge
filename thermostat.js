@@ -1,6 +1,6 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
 
-const { hasProperty, isNumber } = require('./utils');
+const { hasProperty, isNumber, willUpdate } = require('./utils');
 
 module.exports = function(RED) {
     function MatterThermostat(config) {
@@ -104,7 +104,7 @@ module.exports = function(RED) {
                 msg.payload = node.device.state
                 node.send(msg)
             } else {
-                let newData = {thermostat : {}}
+                var newData = {thermostat : {}}
                 if (hasProperty(msg.payload, 'mode') || (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint))){
                     node.pending = true
                     node.pendingmsg = msg
@@ -123,7 +123,7 @@ module.exports = function(RED) {
                             systemMode =  node.device.state.thermostat.systemMode
                             break;
                     }
-                     newData.thermostat.systemMode = systemMode}
+                    newData.thermostat.systemMode = systemMode
                     if (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint)) {
                         if (systemMode == 4){
                             newData.thermostat.occupiedHeatingSetpoint = msg.payload.setPoint
@@ -135,7 +135,7 @@ module.exports = function(RED) {
                 if (hasProperty(msg.payload, 'temperature') && isNumber(msg.payload.temperature)) {
                     newData.thermostat.localTemperature = msg.payload.temperature
                     node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
-                    node.temperature = msg.payload.temperature   
+                    node.temperature = msg.payload.temperature
                 }
                 //If values are changed then set them & wait for callback otherwise send msg on
                 if (willUpdate.call(node.device, newData)) {
@@ -149,6 +149,7 @@ module.exports = function(RED) {
                         node.send(msg);
                     }
                 }
+            }
         });
 
         this.on('serverReady', function() {

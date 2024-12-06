@@ -1,4 +1,5 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty, willUpdate } = require('./utils');
 
 
 module.exports = function(RED) {
@@ -38,6 +39,7 @@ module.exports = function(RED) {
                 node.pendingmsg = msg
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
+                }
                 let lockState 
                 switch (msg.payload.state){
                     case '1':
@@ -45,11 +47,6 @@ module.exports = function(RED) {
                     case 'lock':
                     case 'locked':
                     case true:
-                        node.device.set({
-                            doorLock: {
-                                lockState: 1,
-                            }
-                        })
                         lockState = 1
                         break
                     case '0':
@@ -57,16 +54,26 @@ module.exports = function(RED) {
                     case 'unlock':
                     case 'unlocked':
                     case false:
-                        node.device.set({
-                            doorLock: {
-                                lockState: 2,
-                            }
-                        })
                         lockState = 2
                         break
                 }
                 node.ctx.set(node.id+"-lockState",  lockState)
                 node.lockState = lockState
+                newData = {
+                    doorLock: {
+                        lockState: lockState,
+                    }
+                }
+                if (willUpdate.call(node.device, newData)) {
+                    node.debug(`WILL update, ${newData}`)
+                    node.pending = true
+                    node.pendingmsg = msg
+                    node.device.set(newData)
+                } else {
+                    node.debug(`WONT update, ${newData}`)
+                    if (node.passthrough){
+                        node.send(msg);
+                    }
                 }
             }
         });

@@ -14,14 +14,24 @@ module.exports = function(RED) {
         node.ctx =  this.context().global;
         node.lockState = node.ctx.get(node.id+"-lockState") || null
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.bat = config.bat
+        node.identifying = false
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
-                if (msg.payload){
+                if (hasProperty(msg, 'payload')) {
                     node.device.set(msg.payload)
                 }
                 msg.payload = node.device.state
                 node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
                 node.pending = true
                 node.pendingmsg = msg

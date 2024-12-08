@@ -8,7 +8,8 @@
         defaults: {
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
-            sensorType: {value: 1}
+            sensorType: {value: 1},
+            bat: {value: false}
         },
         label: function() {
             return this.name||"Occupancy Sensor";
@@ -35,6 +36,10 @@
             <option value=3>PIR & Ultrasonic</option>
             <option value=4>Physical Contact</option>
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
     </div>
 </script>
 

@@ -1,13 +1,13 @@
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  DimmableLightDevice   = require("@project-chip/matter.js/devices/DimmableLightDevice").DimmableLightDevice
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
+const  {DimmableLightDevice}   = require("@matter/main/devices")
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 
 module.exports = {
     dimmablelight: function(child) {
         const device = new Endpoint(
-            DimmableLightDevice.with(BridgedDeviceBasicInformationServer),
-            {
+            DimmableLightDevice.with(BridgedDeviceBasicInformationServer, ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -16,6 +16,16 @@ module.exports = {
                     serialNumber: child.id,
                     reachable: true,
                 },
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
         });
         device.events.onOff.onOff$Changed.on(value => {
             child.emit('state', value)

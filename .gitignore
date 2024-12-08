@@ -97,3 +97,5 @@ replblind.js
 replthermostat.js
 repllock.js
 repllightdevice.js
+lib/diff.js
+replpower.js

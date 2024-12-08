@@ -1,11 +1,7 @@
-
-const Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-
-const ThermostatDevice = require("@project-chip/matter.js/devices/ThermostatDevice").ThermostatDevice
-const Thermostat = require( "@project-chip/matter.js/cluster").Thermostat; 
-const ThermostatServer = require( "@project-chip/matter.js/behavior/definitions/thermostat").ThermostatServer
-
+const {Endpoint}  = require("@matter/main");
+const {BridgedDeviceBasicInformationServer, ThermostatServer, PowerSourceServer}  = require("@matter/main/behaviors");
+const {ThermostatDevice} = require("@matter/main/devices")
+const {Thermostat, PowerSource} = require( "@matter/main/clusters")
 
 
 
@@ -46,7 +42,7 @@ module.exports = {
         console.log(params)
         const device = new Endpoint(ThermostatDevice.with(BridgedDeviceBasicInformationServer, ThermostatServer.with(
              ...features    
-            )),{
+            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -57,7 +53,17 @@ module.exports = {
                 },
                 thermostat: {
                     ...params
-                }
+                },
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
             })
 
             device.events.identify.startIdentifying.on(() => {

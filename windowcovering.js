@@ -14,9 +14,23 @@ module.exports = function(RED) {
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.identifying = false
+        node.bat = config.bat
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             console.log(msg.payload)
             if (msg.topic == 'state'){
+                if (hasProperty(msg, 'payload')) {
+                    node.device.set(msg.payload)
+                }
                 msg.payload = node.device.state
                 node.send(msg)
             } else {

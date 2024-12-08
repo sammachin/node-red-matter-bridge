@@ -13,13 +13,18 @@ module.exports = function(RED) {
         node.pending = false
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
-        console.log(`Loading Device node ${node.id}`)
+        node.tempformat = config.tempformat || "kelvin" //Default to kelvin for legacy
+        node.levelstep = Number(config.levelstep)
+        node.bat = config.bat
+        this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
+                if (hasProperty(msg, 'payload')) {
+                    node.device.set(msg.payload)
+                }
                 msg.payload = node.device.state
                 node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
                 node.pending = true
                 node.pendingmsg = msg

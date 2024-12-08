@@ -1,5 +1,6 @@
-const logEndpoint = require( "@project-chip/matter.js/device").logEndpoint;
-const EndpointServer = require("@project-chip/matter.js/endpoint").EndpointServer;
+const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty } = require('./utils');
+
 
 
 module.exports = function(RED) {
@@ -15,12 +16,24 @@ module.exports = function(RED) {
         node.ctx =  this.context().global;
         node.stateValue = node.ctx.get(node.id+"-stateValue") || null
         node.status({fill:"red",shape:"ring",text:"not running"});
+        node.identifying = false
+        node.bat = config.bat
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
+                if (hasProperty(msg, 'payload')) {
+                    node.device.set(msg.payload)
+                }
+                node.error((node.device.state));
+            }else {
                 node.device.set({booleanState: {stateValue: msg.payload}})
                 node.ctx.set(node.id+"-stateValue",  msg.payload)
                 node.stateValue = msg.payload

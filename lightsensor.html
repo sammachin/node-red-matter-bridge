@@ -8,8 +8,9 @@
         defaults: {
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
-            minlevel: {value: 0},
-            maxlevel: {value: 3576000}
+            minlevel: {value: 1},
+            maxlevel: {value: 3576000},
+            bat: {value : false}
         },
         label: function() {
             return this.name||"Light Sensor";
@@ -35,6 +36,10 @@
     <div class="form-row">
         <label for="node-input-minlevel">Max Level (Lux)</label>
         <input type="text" id="node-input-maxlevel" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
     </div>
 </script>
 

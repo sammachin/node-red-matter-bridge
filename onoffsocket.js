@@ -12,11 +12,25 @@ module.exports = function(RED) {
         node.passthrough = /^true$/i.test(config.passthrough)
         console.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
+        node.identifying = false
+        node.bat = config.bat
+        node.identifyEvt = function() {
+            node.identifying = !node.identifying
+            if (node.identifying){
+                node.status({fill:"blue",shape:"dot",text:"identify"});
+            } else {
+                node.status({fill:"green",shape:"dot",text:"ready"});
+            }
+        };
+
+
         this.on('input', function(msg) {
             if (msg.topic == 'state'){
+                if (hasProperty(msg, 'p')) {
+                    node.device.set(msg.payload)
+                }
                 msg.payload = node.device.state
                 node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
             } else {
                 node.pending = true
                 node.pendingmsg = msg

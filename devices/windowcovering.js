@@ -1,11 +1,7 @@
-const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cluster");
-
-const Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const WindowCoveringDevice = require("@project-chip/matter.js/devices/WindowCoveringDevice").WindowCoveringDevice
-const WindowCoveringServer = require( "@project-chip/matter.js/behavior/definitions/window-covering").WindowCoveringServer
-const WindowCovering = require( "@project-chip/matter.js/cluster").WindowCovering; 
-const Observable = require("@project-chip/matter.js/util").Observable
+const {Endpoint, Observable}  = require("@matter/main");
+const {BridgedDeviceBasicInformationServer,WindowCoveringServer, PowerSourceServer}  = require("@matter/main/behaviors");
+const {WindowCoveringDevice} = require("@matter/main/devices")
+const {WindowCovering, PowerSource} = require( "@matter/main/clusters")
 
 
 
@@ -69,7 +65,7 @@ module.exports = {
 
         const device = new Endpoint(WindowCoveringDevice.with(BridgedDeviceBasicInformationServer, EventWindowCoveringServer.with(
              ...features    
-            )),{
+            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -80,7 +76,17 @@ module.exports = {
                 },
                 windowCovering: {
                     ...params
-                }
+                },
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
             })
 
             device.events.identify.startIdentifying.on(() => {

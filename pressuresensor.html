@@ -9,7 +9,8 @@
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
             minlevel: {value: -3276.7},
-            maxlevel: {value: 3276.7}
+            maxlevel: {value: 3276.7},
+            bat: {value: false}
         },
         label: function() {
             return this.name||"Pressure Sensor";
@@ -35,6 +36,10 @@
     <div class="form-row">
         <label for="node-input-minlevel">Max Level (kPa)</label>
         <input type="text" id="node-input-maxlevel" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
     </div>
 </script>
 

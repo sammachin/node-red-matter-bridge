@@ -1,8 +1,8 @@
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  ColorTemperatureLightDevice  = require( "@project-chip/matter.js/devices/ColorTemperatureLightDevice").ColorTemperatureLightDevice;
-const  ColorControlServer = require( "@project-chip/matter.js/behavior/definitions/color-control").ColorControlServer
-const  ColorControl  = require( "@project-chip/matter.js/cluster").ColorControl
+const  { Endpoint }  = require("@matter/main");
+const  { BridgedDeviceBasicInformationServer, PowerSourceServer, ColorControlServer }  = require("@matter/main/behaviors")
+const  { ColorTemperatureLightDevice }  = require( "@matter/main/devices")
+const  { ColorControl, PowerSource }  = require( "@matter/main/clusters")
+
 
 module.exports = {
     fullcolorlight: function(child) {
@@ -11,7 +11,7 @@ module.exports = {
                 ColorControl.Feature.HueSaturation,
                 ColorControl.Feature.Xy,
                 ColorControl.Feature.ColorTemperature,
-            )),{
+            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -24,7 +24,17 @@ module.exports = {
                     coupleColorTempToLevelMinMireds: 0x00FA,
                     startUpColorTemperatureMireds: 0x00FA,
                     colorMode: 0
-                }
+                },
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
             }
             )
             device.events.onOff.onOff$Changed.on(value => {

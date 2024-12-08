@@ -12,7 +12,8 @@
             positions: {value: 2},
             multiPressMax: {value: 2},
             longPressDelay: {value: 50},
-            multiPressDelay: {value: 50}
+            multiPressDelay: {value: 50},
+            bat: {value : false}
         },
         label: function() {
             return this.name||"Generic Switch";
@@ -53,6 +54,10 @@
     <div class="form-row">
         <label for="node-input-multiPressDelay">Multi Press Delay (ms)</label>
         <input type="text" id="node-input-multiPressDelay" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
     </div>
 </script>
 

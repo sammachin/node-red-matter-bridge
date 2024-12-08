@@ -1,11 +1,7 @@
-const { BallastConfigurationCluster } = require("@project-chip/matter-node.js/cluster");
-const temperaturesensor = require("../temperaturesensor");
-
-const  Endpoint  = require("@project-chip/matter.js/endpoint").Endpoint;
-const  BridgedDeviceBasicInformationServer  = require("@project-chip/matter.js/behavior/definitions/bridged-device-basic-information").BridgedDeviceBasicInformationServer;
-const  GenericSwitchDevice = require("@project-chip/matter.js/devices/GenericSwitchDevice").GenericSwitchDevice
-const  SwitchServer = require( "@project-chip/matter.js/behavior/definitions/switch").SwitchServer
-const  Switch = require( "@project-chip/matter.js/cluster").Switch; 
+const  {Endpoint}  = require("@matter/main");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer,  SwitchServer}  = require("@matter/main/behaviors");
+const  {GenericSwitchDevice} = require("@matter/main/devices")
+const  {Switch, PowerSource} = require( "@matter/main/clusters") 
 
 
 module.exports = {
@@ -20,7 +16,7 @@ module.exports = {
         const device = new Endpoint(
             GenericSwitchDevice.with(BridgedDeviceBasicInformationServer, SwitchServer.with(
                 ...features
-            )),{
+            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -29,7 +25,17 @@ module.exports = {
                     serialNumber: child.id,
                     reachable: true,
                 },
-                switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions}
+                switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions},
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
             })
 
             device.events.identify.startIdentifying.on(() => {

@@ -8,9 +8,9 @@
         defaults: {
             name: {value:""},
             bridge: { value: "", type: "matterbridge", required: true },
-            minlevel: {value: -27315},
-            maxlevel: {value: 32767},
-            battery: {value: false}
+            minlevel: {value: -273.15},
+            maxlevel: {value: 327.67},
+            bat: {value : false}
         },
         label: function() {
             return this.name||"Temperature Sensor";
@@ -43,6 +43,10 @@
     <div class="form-row">
         <label for="node-input-minlevel">Max Level (°C)</label>
         <input type="text" id="node-input-maxlevel" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
     </div>
 </script>
 

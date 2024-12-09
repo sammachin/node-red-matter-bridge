@@ -1,4 +1,6 @@
-require("@project-chip/matter-node.js");
+const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
+const AggregatorEndpoint = require( "@matter/main/endpoints/aggregator").AggregatorEndpoint;
+const DeviceCommisioner = require("@matter/main/protocol")
 
 const VendorId = require("@project-chip/matter.js/datatype").VendorId;
 const Endpoint = require("@project-chip/matter.js/endpoint").Endpoint;

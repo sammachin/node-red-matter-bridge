@@ -1,13 +1,10 @@
 const {Endpoint, Observable}  = require("@matter/main");
-const {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 
 const {WindowCoveringDevice} = require("@matter/main/devices")
 const {WindowCoveringServer} = require( "@matter/main/behaviors")
 const {WindowCovering} = require( "@matter/main/clusters")
-
-
-
-
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 class Events extends WindowCoveringServer.Events {
     liftMovement = new Observable();

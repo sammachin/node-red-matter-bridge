@@ -1,6 +1,7 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 const  {OnOffLightDevice}  = require("@matter/main/devices");
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 
 module.exports = {

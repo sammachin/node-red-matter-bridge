@@ -1,9 +1,10 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 
 const  {GenericSwitchDevice} = require("@matter/main/devices")
 const  {SwitchServer} = require( "@matter/main/behaviors")
 const  {Switch} = require( "@matter/main/clusters") 
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 
 module.exports = {

@@ -1,6 +1,7 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 const  {HumiditySensorDevice} = require("@matter/main/devices")
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 module.exports = {
     humiditysensor: function(child) {

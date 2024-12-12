@@ -1,11 +1,9 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 const {ThermostatDevice} = require("@matter/main/devices")
 const {Thermostat} = require( "@matter/main/clusters")
 const {ThermostatServer} = require( "@matter/main/behaviors")
-
-
-
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 module.exports = {
     thermostat: function(child) {

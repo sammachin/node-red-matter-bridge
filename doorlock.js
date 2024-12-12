@@ -15,7 +15,7 @@ module.exports = function(RED) {
         node.ctx =  this.context().global;
         node.lockState = node.ctx.get(node.id+"-lockState") || null
         node.passthrough = /^true$/i.test(config.passthrough)
-        
+        node.bat = config.bat
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -27,14 +27,28 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                if (msg.payload){
-                    node.device.set(msg.payload)
-                }
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(node.dev)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 BatChargeLevel: msg.battery.BatChargeLevel
+                             }
+                         })
+                     }
+                     break
+                 default:
                 node.pending = true
                 node.pendingmsg = msg
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
@@ -75,6 +89,7 @@ module.exports = function(RED) {
                         node.send(msg);
                     }
                 }
+                break
             }
         });
 

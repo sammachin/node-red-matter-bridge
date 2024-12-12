@@ -13,7 +13,8 @@
             reversed: {value: false},
             coveringType: {value: 255},
             productType: {value: 255},
-            passthrough: {value: true}
+            passthrough: {value: true},
+            bat: {value : false}
         },
         label: function() {
             return this.name||"Window Covering";
@@ -108,6 +109,10 @@
         </select>
     </div>
     -->
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
+     </div>
 </script>
 
 <script type="text/x-red" data-help-name="matterwindowcovering">

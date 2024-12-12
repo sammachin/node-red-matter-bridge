@@ -18,6 +18,7 @@ module.exports = function(RED) {
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.bat = config.bat;
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -100,73 +101,92 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-            } else {
-                var newData = {thermostat : {}}
-                let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
-                if (hasProperty(msg.payload, 'mode')){
-                    let systemMode
-                    let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'} 
-                    switch (msg.payload.mode) {
-                        case 'heat':
-                            systemMode = 4
-                            break;
-                        case 'cool':
-                            systemMode = 3
-                            break;
-                        case 'off':
-                            systemMode = 0
-                            break
-                        default:
-                            systemMode = node.device.state.thermostat.systemMode
-                            break;
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(node.dev)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 BatChargeLevel: msg.battery.BatChargeLevel
+                             }
+                         })
+                     }
+                     break
+                default:
+                    var newData = {thermostat : {}}
+                    let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
+                    if (hasProperty(msg.payload, 'mode')){
+                        let systemMode
+                        let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'} 
+                        switch (msg.payload.mode) {
+                            case 'heat':
+                                systemMode = 4
+                                break;
+                            case 'cool':
+                                systemMode = 3
+                                break;
+                            case 'off':
+                                systemMode = 0
+                                break
+                            default:
+                                systemMode = node.device.state.thermostat.systemMode
+                                break;
+                        }
+                        newData.thermostat.systemMode = systemMode
+                        msg.payload.mode = modes[systemMode]
+                    } else {
+                        systemMode = node.device.state.thermostat.systemMode
+                        newData.thermostat.systemMode = systemMode
+                        msg.payload.mode = modes[systemMode]
                     }
-                    newData.thermostat.systemMode = systemMode
-                    msg.payload.mode = modes[systemMode]
-                } else {
-                    systemMode = node.device.state.thermostat.systemMode
-                    newData.thermostat.systemMode = systemMode
-                    msg.payload.mode = modes[systemMode]
-                }
 
-                if (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint)) {
-                    if (msg.payload.setPoint < 50) {msg.payload.setPoint = msg.payload.setPoint*100 }
-                    if (systemMode == 4){
-                        newData.thermostat.occupiedHeatingSetpoint = msg.payload.setPoint
-                    } else if (systemMode == 3){
-                        newData.thermostat.occupiedCoolingSetpoint = msg.payload.setPoint
-                    } 
-                } else {
-                    if (systemMode == 4){
-                        newData.thermostat.occupiedHeatingSetpoint = node.device.state.thermostat.occupiedHeatingSetpoint
-                        msg.payload.setPoint = node.device.state.thermostat.occupiedHeatingSetpoint
-                    } else if (systemMode == 3){
-                        msg.payload.setPoint = node.device.state.thermostat.occupiedCoolingSetpoint
-                        newData.thermostat.occupiedCoolingSetpoint = node.device.state.thermostat.occupiedCoolingSetpoint
-                    } 
-                }  
-                if (hasProperty(msg.payload, 'temperature') && isNumber(msg.payload.temperature)) {
-                    if (msg.payload.temperature < 50) {msg.payload.temperature = msg.payload.temperature*100}
-                    newData.thermostat.localTemperature = msg.payload.temperature
-                    node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
-                    node.temperature = msg.payload.temperature
-                } else {
-                    msg.payload.temperature = node.device.state.thermostat.localTemperature
-                }
-                //If values are changed then set them & wait for callback otherwise send msg on
-                if (willUpdate.call(node.device, newData)) {
-                    this.debug('WILL UPDATE')
-                    node.pending = true
-                    node.pendingmsg = msg
-                    node.device.set(newData)
-                } else {
-                    this.debug('WONT UPDATE')
-                    if (node.passthrough){
-                        node.send(msg);
+                    if (hasProperty(msg.payload, 'setPoint') && isNumber(msg.payload.setPoint)) {
+                        if (msg.payload.setPoint < 50) {msg.payload.setPoint = msg.payload.setPoint*100 }
+                        if (systemMode == 4){
+                            newData.thermostat.occupiedHeatingSetpoint = msg.payload.setPoint
+                        } else if (systemMode == 3){
+                            newData.thermostat.occupiedCoolingSetpoint = msg.payload.setPoint
+                        } 
+                    } else {
+                        if (systemMode == 4){
+                            newData.thermostat.occupiedHeatingSetpoint = node.device.state.thermostat.occupiedHeatingSetpoint
+                            msg.payload.setPoint = node.device.state.thermostat.occupiedHeatingSetpoint
+                        } else if (systemMode == 3){
+                            msg.payload.setPoint = node.device.state.thermostat.occupiedCoolingSetpoint
+                            newData.thermostat.occupiedCoolingSetpoint = node.device.state.thermostat.occupiedCoolingSetpoint
+                        } 
+                    }  
+                    if (hasProperty(msg.payload, 'temperature') && isNumber(msg.payload.temperature)) {
+                        if (msg.payload.temperature < 50) {msg.payload.temperature = msg.payload.temperature*100}
+                        newData.thermostat.localTemperature = msg.payload.temperature
+                        node.ctx.set(node.id+"-temperature",  msg.payload.temperature)
+                        node.temperature = msg.payload.temperature
+                    } else {
+                        msg.payload.temperature = node.device.state.thermostat.localTemperature
                     }
-                }
+                    //If values are changed then set them & wait for callback otherwise send msg on
+                    if (willUpdate.call(node.device, newData)) {
+                        this.debug('WILL UPDATE')
+                        node.pending = true
+                        node.pendingmsg = msg
+                        node.device.set(newData)
+                    } else {
+                        this.debug('WONT UPDATE')
+                        if (node.passthrough){
+                            node.send(msg);
+                        }
+                    }
+                    break
             }
         });
 

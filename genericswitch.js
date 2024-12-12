@@ -13,6 +13,7 @@ module.exports = function(RED) {
         node.multiPressMax = Number(config.multiPressMax)
         node.longPressDelay = Number(config.longPressDelay)
         node.multiPressDelay = Number(config.multiPressDelay)
+        node.bat = config.bat
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.identifying = false
@@ -26,35 +27,54 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
-                ep = node.device
-                let t
-                switch (msg.payload.type.toLowerCase()) {
-                    case "single":
-                        t = ep.state.switch.longPressDelay/2
-                        press(ep, 1)
-                        setTimeout(press, t, ep, 0)
-                        break
-                    case "double":
-                        t = ep.state.switch.longPressDelay/4
-                        press(ep, 1)
-                        setTimeout(press, t, ep, 0)
-                        setTimeout(press, t*2, ep, 1)
-                        setTimeout(press, t*3, ep, 0)
-                        break            
-                    case "long":
-                        t = ep.state.switch.multiPressDelay*1.5
-                        press(ep, 1)
-                        setTimeout(press, t, ep, 0)
-                        break
-                    case "position":
-                        ep.set({switch : {currentPosition: msg.payload.position}})
-                        break
-                }
+            switch (msg.topic) {
+
+                case 'state':
+	                    if (hasProperty(msg, 'payload')) {
+	                        node.device.set(msg.payload)
+	                    }
+	                    if (config.wires.length != 0){
+	                        msg.payload = node.device.state
+	                        node.send(node.dev)
+	                    } else{
+	                        node.error((node.device.state));
+	                    }
+	                    break;
+	            case 'battery':
+	                    if (node.bat){
+	                        node.device.set({
+	                            powerSource: {
+	                                BatChargeLevel: msg.battery.BatChargeLevel
+	                            }
+	                        })
+	                    }
+	                    break
+	            default:
+                    ep = node.device
+                    let t
+                    switch (msg.payload.type.toLowerCase()) {
+                        case "single":
+                            t = ep.state.switch.longPressDelay/2
+                            press(ep, 1)
+                            setTimeout(press, t, ep, 0)
+                            break
+                        case "double":
+                            t = ep.state.switch.longPressDelay/4
+                            press(ep, 1)
+                            setTimeout(press, t, ep, 0)
+                            setTimeout(press, t*2, ep, 1)
+                            setTimeout(press, t*3, ep, 0)
+                            break            
+                        case "long":
+                            t = ep.state.switch.multiPressDelay*1.5
+                            press(ep, 1)
+                            setTimeout(press, t, ep, 0)
+                            break
+                        case "position":
+                            ep.set({switch : {currentPosition: msg.payload.position}})
+                            break
+                    }
+                    break;
             }
         });
         

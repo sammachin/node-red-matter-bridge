@@ -17,6 +17,7 @@ module.exports = function(RED) {
         node.sensorTypeBitmap = typeToBitmap(config.sensorType)
         node.ctx =  this.context().global;
         node.occupied = node.ctx.get(node.id+"-occupied") || null
+        node.bat = config.bat;
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.identifying = false
@@ -30,15 +31,33 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
-                value = msg.payload
-                node.device.set({occupancySensing: {occupancy: {occupied: value}}})
-                node.ctx.set(node.id+"-occupied",  value)
-                node.occupied = value
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(node.dev)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                case 'battery':
+                    if (node.bat){
+                        node.device.set({
+                            powerSource: {
+                                BatChargeLevel: msg.battery.BatChargeLevel
+                            }
+                        })
+                    }
+                     break
+                default:
+                    value = msg.payload
+                    node.device.set({occupancySensing: {occupancy: {occupied: value}}})
+                    node.ctx.set(node.id+"-occupied",  value)
+                    node.occupied = value
+                    break
             }
         });
 

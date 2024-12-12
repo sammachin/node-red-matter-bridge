@@ -16,7 +16,7 @@ module.exports = function(RED) {
         node.levelstep = Number(config.levelstep)
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
-
+        node.bat = config.bat
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -55,83 +55,101 @@ module.exports = function(RED) {
 
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
-                if (msg.payload.state == undefined) {
-                    msg.payload.state = node.device.state.onOff.onOff
-                }
-                if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
-                if (hasProperty(msg.payload, 'increaseLevel')){
-                    if (node.range == "100") { 
-                        msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(node.dev)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 BatChargeLevel: msg.battery.BatChargeLevel
+                             }
+                         })
+                     }
+                     break
+                default:
+                    if (msg.payload.state == undefined) {
+                        msg.payload.state = node.device.state.onOff.onOff
+                    }
+                    if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
+                    if (hasProperty(msg.payload, 'increaseLevel')){
+                        if (node.range == "100") { 
+                            msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
+                        } else {
+                            msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+                        }
+                    }
+                    if (hasProperty(msg.payload, 'decreaseLevel')){
+                        if (node.range == "100") {
+                            msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
+                        } else {
+                            msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
+                        }
+                    }
+                    if (msg.payload.level == undefined) {
+                        msg.payload.level = node.device.state.levelControl.currentLevel
+                    }
+                    if (hasProperty(msg.payload, 'temp')) {
+                        if (node.tempformat == 'kelvin'){
+                            var mireds = 1000000/msg.payload.temp
+                        } else {
+                            var mireds = msg.payload.temp
+                        } 
+                    }  else {
+                        var mireds = node.device.state.colorControl.colorTemperatureMireds
+                    }
+                    if (typeof msg.payload.state != "boolean") {
+                        switch (msg.payload.state){
+                            case '1':
+                            case 1:
+                            case 'on':
+                                msg.payload.state = true
+                                break
+                            case '0':
+                            case 0:
+                            case 'off':
+                                msg.payload.state = false
+                                break
+                            case 'toggle':
+                                msg.payload.state = !node.device.state.onOff.onOff
+                                break
+                        }
+                    }
+                    let newData = {
+                        onOff: {
+                            onOff: msg.payload.state,
+                        },
+                        levelControl: {
+                            currentLevel: Math.max(2, Math.min(254, msg.payload.level))
+                        },
+                        colorControl: {
+                            colorTemperatureMireds : mireds
+                        }
+                    }
+                    //If values are changed then set them & wait for callback otherwise send msg on
+                    if (willUpdate.call(node.device, newData)) {
+                        node.debug(`WILL update, ${newData}`)
+                        node.pending = true
+                        node.pendingmsg = msg
+                        node.device.set(newData)
                     } else {
-                        msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+                        node.debug(`WONT update, ${newData}`)
+                        if (node.passthrough){
+                            node.send(msg);
+                        }
                     }
-                }
-                if (hasProperty(msg.payload, 'decreaseLevel')){
-                    if (node.range == "100") {
-                        msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
-                     } else {
-                        msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
-                    }
-                }
-                if (msg.payload.level == undefined) {
-                    msg.payload.level = node.device.state.levelControl.currentLevel
-                }
-                if (hasProperty(msg.payload, 'temp')) {
-                    if (node.tempformat == 'kelvin'){
-                        var mireds = 1000000/msg.payload.temp
-                    } else {
-                        var mireds = msg.payload.temp
-                    } 
-                }  else {
-                    var mireds = node.device.state.colorControl.colorTemperatureMireds
-                }
-                if (typeof msg.payload.state != "boolean") {
-                    switch (msg.payload.state){
-                        case '1':
-                        case 1:
-                        case 'on':
-                            msg.payload.state = true
-                            break
-                        case '0':
-                        case 0:
-                        case 'off':
-                            msg.payload.state = false
-                            break
-                        case 'toggle':
-                            msg.payload.state = !node.device.state.onOff.onOff
-                            break
-                    }
-                }
-                let newData = {
-                    onOff: {
-                        onOff: msg.payload.state,
-                    },
-                    levelControl: {
-                        currentLevel: Math.max(2, Math.min(254, msg.payload.level))
-                    },
-                    colorControl: {
-                        colorTemperatureMireds : mireds
-                    }
-                }
-                //If values are changed then set them & wait for callback otherwise send msg on
-                if (willUpdate.call(node.device, newData)) {
-                    node.debug(`WILL update, ${newData}`)
-                    node.pending = true
-                    node.pendingmsg = msg
-                    node.device.set(newData)
-                } else {
-                    node.debug(`WONT update, ${newData}`)
-                    if (node.passthrough){
-                        node.send(msg);
-                    }
-                }
-
-            }
+                    break;
+	        }     
+            
         });
 
         this.on('serverReady', function() {

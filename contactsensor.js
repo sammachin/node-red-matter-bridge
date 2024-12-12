@@ -16,6 +16,7 @@ module.exports = function(RED) {
         node.stateValue = node.ctx.get(node.id+"-stateValue") || null
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.identifying = false
+        node.bat = config.bat
         node.identifyEvt = function() {
             node.identifying = !node.identifying
             if (node.identifying){
@@ -26,14 +27,33 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(node.dev)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 BatChargeLevel: msg.battery.BatChargeLevel
+                             }
+                         })
+                     }
+                     break
+         
+                default:
                 node.device.set({booleanState: {stateValue: msg.payload}})
                 node.ctx.set(node.id+"-stateValue",  msg.payload)
                 node.stateValue = msg.payload
+                break
             }
         });
         

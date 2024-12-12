@@ -67,7 +67,7 @@ module.exports = {
 
         const device = new Endpoint(WindowCoveringDevice.with(BridgedDeviceBasicInformationServer, EventWindowCoveringServer.with(
              ...features    
-            )),{
+            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -78,7 +78,17 @@ module.exports = {
                 },
                 windowCovering: {
                     ...params
-                }
+                },
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
             })
             return device;
     }

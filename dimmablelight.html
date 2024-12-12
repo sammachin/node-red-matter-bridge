@@ -10,7 +10,8 @@
             bridge: { value: "", type: "matterbridge", required: true },
             range: {value: "254"},
             passthrough: {value: true},
-            levelstep: {value: 1}
+            levelstep: {value: 1},
+            bat: {value : false}
         },
         label: function() {
             return this.name||"Dimmable Light";
@@ -47,6 +48,11 @@
         <label for="node-input-levelstep">Value for Level Step Change</label>
         <input type="text" id="node-input-levelstep" placeholder="1">
     </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
+     </div>
+     
 </script>
 
 <script type="text/x-red" data-help-name="matterdimmablelight">

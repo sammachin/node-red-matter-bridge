@@ -12,6 +12,7 @@ module.exports = function(RED) {
         node.pending = false
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.bat = config.bat;
         node.stateEvt = function(value) {
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
@@ -34,53 +35,69 @@ module.exports = function(RED) {
                 node.status({fill:"green",shape:"dot",text:"ready"});
             }
         };
-
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
-                if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
-                    msg.payload = state = {state: msg.payload}
-                }
-                if (typeof msg.payload.state != "boolean") {
-                    switch (msg.payload.state){
-                        case '1':
-                        case 1:
-                        case 'on':
-                            msg.payload.state = true
-                            break
-                        case '0':
-                        case 0:
-                        case 'off':
-                            msg.payload.state = false
-                            break
-                        case 'toggle':
-                            msg.payload.state = !node.device.state.onOff.onOff
-                            break
+        	switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(node.dev)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.battery){
+                         node.device.set({
+                             powerSource: {
+                                 BatChargeLevel: msg.battery.BatChargeLevel
+                             }
+                         })
+                     }
+                     break
+         
+                default:
+                    if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
+                        msg.payload = state = {state: msg.payload}
                     }
-                }
-                let newData = {
-                    onOff: {
-                        onOff: msg.payload.state,
+                    if (typeof msg.payload.state != "boolean") {
+                        switch (msg.payload.state){
+                            case '1':
+                            case 1:
+                            case 'on':
+                                msg.payload.state = true
+                                break
+                            case '0':
+                            case 0:
+                            case 'off':
+                                msg.payload.state = false
+                                break
+                            case 'toggle':
+                                msg.payload.state = !node.device.state.onOff.onOff
+                                break
+                        }
                     }
-                }
-                //If values are changed then set them & wait for callback otherwise send msg on
-                if (willUpdate.call(node.device, newData)) {
-                    node.debug(`WILL update, ${newData}`)
-                    node.pending = true
-                    node.pendingmsg = msg
-                    node.device.set(newData)
-                } else {
-                    node.debug(`WONT update, ${newData}`)
-                    if (node.passthrough){
-                        node.send(msg);
+                    let newData = {
+                        onOff: {
+                            onOff: msg.payload.state,
+                        }
                     }
-                }
-                
-            }
-            
+                    //If values are changed then set them & wait for callback otherwise send msg on
+                    if (willUpdate.call(node.device, newData)) {
+                        node.debug(`WILL update, ${newData}`)
+                        node.pending = true
+                        node.pendingmsg = msg
+                        node.device.set(newData)
+                    } else {
+                        node.debug(`WONT update, ${newData}`)
+                        if (node.passthrough){
+                            node.send(msg);
+                        }
+                    }
+                    break;
+             }     
         });
         
         this.on('serverReady', function() {

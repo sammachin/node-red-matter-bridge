@@ -1,4 +1,4 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {
     function MatterTemperatureSensor(config) {
@@ -32,25 +32,35 @@ module.exports = function(RED) {
                      }
                      if (config.wires.length != 0){
                          msg.payload = node.device.state
-                         node.send(node.dev)
+                         node.send(msg)
                      } else{
                          node.error((node.device.state));
                      }
                      break;
-                case 'battery':
+                 case 'battery':
                      if (node.bat){
                          node.device.set({
                              powerSource: {
-                                 BatChargeLevel: msg.battery.BatChargeLevel
+                                 batChargeLevel: msg.battery.batChargeLevel
                              }
                          })
                      }
                      break
                 default:
-                    value = msg.payload*100
-                    node.device.set({temperatureMeasurement: {measuredValue: value}})
-                    node.ctx.set(node.id+"-measuredValue",  value)
-                    node.measuredValue = value
+                    if (isNumber(msg.payload)){
+                        value = msg.payload*100
+                        try {
+                            node.device.set({temperatureMeasurement: {measuredValue: value}})
+                        }
+                        catch (error) { 
+                            node.error(error)
+                        }
+                        node.ctx.set(node.id+"-measuredValue",  value)
+                        node.measuredValue = value
+                    } else{
+                        node.error('Invalid input')
+                    }
+                   
                     break
             }
         });

@@ -8,6 +8,10 @@ function isNumber(value) {
     return typeof value === 'number' && !isNaN(value);
 }
 
+function isBoolean(value) {
+    return typeof value === 'boolean' && !isNaN(value);
+}
+
 function willUpdate(data) {
     var device = this
     var changed = false

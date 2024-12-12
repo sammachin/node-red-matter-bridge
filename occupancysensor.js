@@ -1,4 +1,4 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty, isBoolean } = require('./utils');
 
 
 function typeToBitmap(value){
@@ -38,25 +38,29 @@ module.exports = function(RED) {
                      }
                      if (config.wires.length != 0){
                          msg.payload = node.device.state
-                         node.send(node.dev)
+                         node.send(msg)
                      } else{
                          node.error((node.device.state));
                      }
                      break;
-                case 'battery':
-                    if (node.bat){
-                        node.device.set({
-                            powerSource: {
-                                BatChargeLevel: msg.battery.BatChargeLevel
-                            }
-                        })
-                    }
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 batChargeLevel: msg.battery.batChargeLevel
+                             }
+                         })
+                     }
                      break
                 default:
-                    value = msg.payload
-                    node.device.set({occupancySensing: {occupancy: {occupied: value}}})
-                    node.ctx.set(node.id+"-occupied",  value)
-                    node.occupied = value
+                    if (isBoolean(msg.payload)){
+                        value = msg.payload
+                        node.device.set({occupancySensing: {occupancy: {occupied: value}}})
+                        node.ctx.set(node.id+"-occupied",  value)
+                        node.occupied = value
+                    } else{
+                        node.error('Invalid input')
+                    }
                     break
             }
         });

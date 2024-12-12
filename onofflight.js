@@ -43,21 +43,20 @@ module.exports = function(RED) {
                      }
                      if (config.wires.length != 0){
                          msg.payload = node.device.state
-                         node.send(node.dev)
+                         node.send(msg)
                      } else{
                          node.error((node.device.state));
                      }
                      break;
                  case 'battery':
-                     if (node.battery){
+                     if (node.bat){
                          node.device.set({
                              powerSource: {
-                                 BatChargeLevel: msg.battery.BatChargeLevel
+                                 batChargeLevel: msg.battery.batChargeLevel
                              }
                          })
                      }
                      break
-         
                 default:
                     if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                         msg.payload = state = {state: msg.payload}

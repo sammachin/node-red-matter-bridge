@@ -1,6 +1,4 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
-
-
+const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {
     function MatterLightSensor(config) {
@@ -33,30 +31,35 @@ module.exports = function(RED) {
                      }
                      if (config.wires.length != 0){
                          msg.payload = node.device.state
-                         node.send(node.dev)
+                         node.send(msg)
                      } else{
                          node.error((node.device.state));
                      }
                      break;
-                case 'battery':
-                     if (node.battery){
+                 case 'battery':
+                     if (node.bat){
                          node.device.set({
                              powerSource: {
-                                 BatChargeLevel: msg.battery.BatChargeLevel
+                                 batChargeLevel: msg.battery.batChargeLevel
                              }
                          })
                      }
                      break
                 default:
-                    let value
-                    if (msg.payload == 0) {
-                        value = 0
+                    if (isNumber(msg.payload)){
+                        let value
+                        if (msg.payload == 0) {
+                            value = 0
+                        } else {
+                            value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
+                        }
+                        node.device.set({illuminanceMeasurement: {measuredValue: value }})
+                        node.ctx.set(node.id+"-measuredValue",  value)
+                        node.measuredValue = value
                     } else {
-                        value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
+                        node.error('Invalid input')
                     }
-                    node.device.set({illuminanceMeasurement: {measuredValue: value }})
-                    node.ctx.set(node.id+"-measuredValue",  value)
-                    node.measuredValue = value
+                    
                     break;
 	        }     
         });

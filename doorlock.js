@@ -34,7 +34,7 @@ module.exports = function(RED) {
                      }
                      if (config.wires.length != 0){
                          msg.payload = node.device.state
-                         node.send(node.dev)
+                         node.send(msg)
                      } else{
                          node.error((node.device.state));
                      }
@@ -43,7 +43,7 @@ module.exports = function(RED) {
                      if (node.bat){
                          node.device.set({
                              powerSource: {
-                                 BatChargeLevel: msg.battery.BatChargeLevel
+                                 batChargeLevel: msg.battery.batChargeLevel
                              }
                          })
                      }

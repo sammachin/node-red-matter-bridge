@@ -1,9 +1,8 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {
     function MatterPressureSensor(config) {
         RED.nodes.createNode(this,config);
-
         var node = this;
         node.bridge = RED.nodes.getNode(config.bridge);
         node.name = config.name
@@ -32,25 +31,29 @@ module.exports = function(RED) {
                      }
                      if (config.wires.length != 0){
                          msg.payload = node.device.state
-                         node.send(node.dev)
+                         node.send(msg)
                      } else{
                          node.error((node.device.state));
                      }
                      break;
-                case 'battery':
+                 case 'battery':
                      if (node.bat){
                          node.device.set({
                              powerSource: {
-                                 BatChargeLevel: msg.battery.BatChargeLevel
+                                 batChargeLevel: msg.battery.batChargeLevel
                              }
                          })
                      }
                      break
                 default:
-                    let value = msg.payload*10
-                    node.device.set({pressureMeasurement: {measuredValue: value }})
-                    node.ctx.set(node.id+"-measuredValue",  value)
-                    node.measuredValue = value
+                    if (isNumber(msg.payload)){
+                        let value = msg.payload*10
+                        node.device.set({pressureMeasurement: {measuredValue: value }})
+                        node.ctx.set(node.id+"-measuredValue",  value)
+                        node.measuredValue = value
+                    } else {
+                        node.error('Invalid Input')
+                    }
                     break
             }
         });

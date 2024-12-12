@@ -30,25 +30,25 @@ module.exports = function(RED) {
             switch (msg.topic) {
 
                 case 'state':
-	                    if (hasProperty(msg, 'payload')) {
-	                        node.device.set(msg.payload)
-	                    }
-	                    if (config.wires.length != 0){
-	                        msg.payload = node.device.state
-	                        node.send(node.dev)
-	                    } else{
-	                        node.error((node.device.state));
-	                    }
-	                    break;
-	            case 'battery':
-	                    if (node.bat){
-	                        node.device.set({
-	                            powerSource: {
-	                                BatChargeLevel: msg.battery.BatChargeLevel
-	                            }
-	                        })
-	                    }
-	                    break
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(msg)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 batChargeLevel: msg.battery.batChargeLevel
+                             }
+                         })
+                     }
+                     break
 	            default:
                     ep = node.device
                     let t

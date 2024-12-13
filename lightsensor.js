@@ -53,7 +53,7 @@ module.exports = function(RED) {
                         } else {
                             value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
                         }
-                        node.device.set({illuminanceMeasurement: {measuredValue: value }})
+                        node.device.set({illuminanceMeasurement: {measuredValue: value }}).catch((err) => {node.debug(err); node.error('Invalid Input')})
                         node.ctx.set(node.id+"-measuredValue",  value)
                         node.measuredValue = value
                     } else {

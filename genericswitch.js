@@ -1,4 +1,4 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty} = require('./utils');
 
 
 module.exports = function(RED) {
@@ -50,28 +50,34 @@ module.exports = function(RED) {
                      }
                      break
 	            default:
-                    ep = node.device
                     let t
+                    if (!hasProperty(msg.payload, 'type')){
+                        node.error('Invalid Input, missing property msg.payload.type')
+                        break;
+                    }
                     switch (msg.payload.type.toLowerCase()) {
                         case "single":
-                            t = ep.state.switch.longPressDelay/2
-                            press(ep, 1)
+                            t = node.device.state.switch.longPressDelay/2
+                            press(node.device, 1)
                             setTimeout(press, t, ep, 0)
                             break
                         case "double":
-                            t = ep.state.switch.longPressDelay/4
-                            press(ep, 1)
-                            setTimeout(press, t, ep, 0)
-                            setTimeout(press, t*2, ep, 1)
-                            setTimeout(press, t*3, ep, 0)
+                            t = node.device.state.switch.longPressDelay/4
+                            press(node.device, 1)
+                            setTimeout(press, t, node.device, 0)
+                            setTimeout(press, t*2, node.device, 1)
+                            setTimeout(press, t*3, node.device, 0)
                             break            
                         case "long":
-                            t = ep.state.switch.multiPressDelay*1.5
-                            press(ep, 1)
-                            setTimeout(press, t, ep, 0)
+                            t = node.device.state.switch.multiPressDelay*1.5
+                            press(node.device, 1)
+                            setTimeout(press, t, node.device, 0)
                             break
                         case "position":
-                            ep.set({switch : {currentPosition: msg.payload.position}})
+                            node.device.set({switch : {currentPosition: msg.payload.position}}).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                            break
+                        default:
+                            node.error('Invalid Input');
                             break
                     }
                     break;
@@ -120,6 +126,6 @@ module.exports = function(RED) {
     RED.nodes.registerType("mattergenericswitch",MatterGenericSwitch)
 }
 
-function press(ep, pos){
-    ep.set({switch : {currentPosition: pos}})
+function press(node, pos){
+    node.device.set({switch : {currentPosition: pos}}).catch((err) => {node.debug(err); node.error('Invalid Input')})
 }

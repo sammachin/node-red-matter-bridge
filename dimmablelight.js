@@ -125,7 +125,7 @@ module.exports = function(RED) {
                         node.debug(`WILL update, ${newData}`)
                         node.pending = true
                         node.pendingmsg = msg
-                        node.device.set(newData)
+                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
                     } else {
                         node.debug(`WONT update, ${newData}`)
                         if (node.passthrough){

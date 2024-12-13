@@ -55,7 +55,7 @@ module.exports = function(RED) {
                 default:
                     if (isBoolean(msg.payload)){
                         value = msg.payload
-                        node.device.set({occupancySensing: {occupancy: {occupied: value}}})
+                        node.device.set({occupancySensing: {occupancy: {occupied: value}}}).catch((err) => {node.debug(err); node.error('Invalid Input')})
                         node.ctx.set(node.id+"-occupied",  value)
                         node.occupied = value
                     } else{

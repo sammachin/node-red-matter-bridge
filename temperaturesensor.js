@@ -49,12 +49,7 @@ module.exports = function(RED) {
                 default:
                     if (isNumber(msg.payload)){
                         value = msg.payload*100
-                        try {
-                            node.device.set({temperatureMeasurement: {measuredValue: value}})
-                        }
-                        catch (error) { 
-                            node.error(error)
-                        }
+                        node.device.set({temperatureMeasurement: {measuredValue: value}}).catch((err) => {node.debug(err); node.error('Invalid Input')})               
                         node.ctx.set(node.id+"-measuredValue",  value)
                         node.measuredValue = value
                     } else{

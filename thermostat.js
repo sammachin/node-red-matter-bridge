@@ -179,7 +179,7 @@ module.exports = function(RED) {
                         this.debug('WILL UPDATE')
                         node.pending = true
                         node.pendingmsg = msg
-                        node.device.set(newData)
+                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
                     } else {
                         this.debug('WONT UPDATE')
                         if (node.passthrough){

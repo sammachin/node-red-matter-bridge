@@ -49,7 +49,7 @@ module.exports = function(RED) {
 	            default:
                     if (isNumber(msg.payload)){
                         let value = msg.payload*100
-                        node.device.set({relativeHumidityMeasurement: {measuredValue: value}})
+                        node.device.set({relativeHumidityMeasurement: {measuredValue: value}}).catch((err) => {node.debug(err); node.error('Invalid Input')})
                         node.ctx.set(node.id+"-measuredValue",  value)
                         node.measuredValue = value
                     } else{

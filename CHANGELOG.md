@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.3] = 2024-12-13
+Preview release of Battery state/Powersource, and more robustness
+
+### Fixed
+The thermostat node has had its inputs refactored to allow setting of multiple values, mode, setPoint & temperature in a single message reliably, or any one or two of the values.
+Inputs are now validated and errors (hopefully) caught so sending an invalid message shouldn't crash node-red
+The sensor nodes can now output their cluster state (using node.error)
+
+### Added
+I've added "preview" support for the Power Source cluster on all devices, this means you can now check a box on the config marked 'battery' and the device will identify has having a rechargable battery to the controller.
+At present only the status of the battery level can be set by sending in a message with a TOPIC of 'battery' and then a key of `msg.battery.batChargeLevel` and a value of either 0, 1 or 2. 0 Being "OK", 1 being "Low" and 2 being "Critical" 
+Support for this across ecosystems and device types is still a bit patchy.
+
+I've also added an "advanced" feature, if you send in a msg with a topic of `state` and no payload it will output the attributes of all the clusters, equally you can set a payload to correspond to the output cluster data or only certain parts of it and it will attempt to update those cluster attributes where allowed.
+Note this is very much a low-level interface to the matter.js library and is mostly for debugging and development, you are advised to consult the matter spec documents to understand the possible values and which attributes may be changed.
+
+
 ## [0.11.2] - 2024-12-06
 Fixes I should have spotted if I'd done 0.11.1 properly!
 

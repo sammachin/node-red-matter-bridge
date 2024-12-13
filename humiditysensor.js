@@ -1,4 +1,4 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
+const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {
     function MatterHumiditySensor(config) {
@@ -11,9 +11,9 @@ module.exports = function(RED) {
         node.maxlevel = config.maxlevel*100
         node.ctx =  this.context().global;
         node.measuredValue = node.ctx.get(node.id+"-measuredValue") || null
+        node.bat = config.bat;
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
-
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -25,17 +25,38 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
-                let value = msg.payload*100
-                node.device.set({relativeHumidityMeasurement: {measuredValue: value}})
-                node.ctx.set(node.id+"-measuredValue",  value)
-                node.measuredValue = value
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(msg)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 batChargeLevel: msg.battery.batChargeLevel
+                             }
+                         })
+                     }
+                     break
+	            default:
+                    if (isNumber(msg.payload)){
+                        let value = msg.payload*100
+                        node.device.set({relativeHumidityMeasurement: {measuredValue: value}}).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                        node.ctx.set(node.id+"-measuredValue",  value)
+                        node.measuredValue = value
+                    } else{
+                        node.error('Invalid input')
+                    }
+                    break
             }
-            
         });
 
         this.on('serverReady', function() {

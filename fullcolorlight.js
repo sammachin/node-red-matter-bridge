@@ -15,6 +15,7 @@ module.exports = function(RED) {
         node.passthrough = /^true$/i.test(config.passthrough)
         node.tempformat = config.tempformat || "kelvin" //Default to kelvin for legacy
         node.levelstep = Number(config.levelstep)
+        node.bat = config.bat;
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.identifying = false
@@ -28,97 +29,114 @@ module.exports = function(RED) {
         };
 
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {    
-
-                if (msg.payload.state == undefined) {
-                    msg.payload.state = node.device.state.onOff.onOff
-                }
-                if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
-                if (hasProperty(msg.payload, 'increaseLevel')){
-                    if (node.range == "100") { 
-                        msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
-                    } else {
-                        msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(msg)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 batChargeLevel: msg.battery.batChargeLevel
+                             }
+                         })
+                     }
+                     break
+                default:    
+                    if (msg.payload.state == undefined) {
+                        msg.payload.state = node.device.state.onOff.onOff
                     }
-                }
-                if (hasProperty(msg.payload, 'decreaseLevel')){
-                    if (node.range == "100") {
-                        msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
-                     } else {
-                        msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
-                    }
-                }
-                if (msg.payload.level == undefined) {
-                    msg.payload.level = node.device.state.levelControl.currentLevel
-                }
-                if ((hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')) && hasProperty(msg.payload, 'temp')) {
-                    node.error("Can't set Colour Temp and Hue/Sat at same time")
-                } else {
-                    if (hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')){
-                        msg.payload.hue = msg.payload.hue ? msg.payload.hue : node.device.state.colorControl.currentHue
-                        msg.payload.sat = msg.payload.sat ? msg.payload.sat : node.device.state.colorControl.currentSaturation
-                        newcolor = {
-                            colorMode: 0,
-                            currentHue: msg.payload.hue,
-                            currentSaturation: msg.payload.sat
-                        }
-                    } else if (hasProperty(msg.payload, 'temp')) {
-                        if (node.tempformat == 'kelvin'){
-                            var mireds = 1000000/msg.payload.temp
+                    if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
+                    if (hasProperty(msg.payload, 'increaseLevel')){
+                        if (node.range == "100") { 
+                            msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
                         } else {
-                            var mireds = msg.payload.temp
-                        } 
-                        newcolor = {
-                            colorMode: 2,
-                            colorTemperatureMireds : mireds
+                            msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
                         }
                     }
-                    else {
-                            newcolor = {colorMode: node.device.state.colorControl.colorMode}
+                    if (hasProperty(msg.payload, 'decreaseLevel')){
+                        if (node.range == "100") {
+                            msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
+                        } else {
+                            msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
+                        }
                     }
-                }
-                if (typeof msg.payload.state != "boolean") {
-                    switch (msg.payload.state){
-                        case '1':
-                        case 1:
-                        case 'on':
-                            msg.payload.state = true
-                            break
-                        case '0':
-                        case 0:
-                        case 'off':
-                            msg.payload.state = false
-                            break
-                        case 'toggle':
-                            msg.payload.state = !node.device.state.onOff.onOff
-                            break
+                    if (msg.payload.level == undefined) {
+                        msg.payload.level = node.device.state.levelControl.currentLevel
                     }
-                }
-                let newData = {
-                    onOff: {
-                        onOff: msg.payload.state,
-                    },
-                    levelControl: {
-                        currentLevel: Math.max(2, Math.min(254, msg.payload.level))
-                    },
-                    colorControl: newcolor
-                }
-                //If values are changed then set them & wait for callback otherwise send msg on
-                if (willUpdate.call(node.device, newData)) {
-                    node.debug(`WILL update, ${newData}`)
-                    node.pending = true
-                    node.pendingmsg = msg
-                    node.device.set(newData)
-                } else {
-                    node.debug(`WONT update, ${newData}`)
-                    if (node.passthrough){
-                        node.send(msg);
+                    if ((hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')) && hasProperty(msg.payload, 'temp')) {
+                        node.error("Can't set Colour Temp and Hue/Sat at same time")
+                    } else {
+                        if (hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')){
+                            msg.payload.hue = msg.payload.hue ? msg.payload.hue : node.device.state.colorControl.currentHue
+                            msg.payload.sat = msg.payload.sat ? msg.payload.sat : node.device.state.colorControl.currentSaturation
+                            newcolor = {
+                                colorMode: 0,
+                                currentHue: msg.payload.hue,
+                                currentSaturation: msg.payload.sat
+                            }
+                        } else if (hasProperty(msg.payload, 'temp')) {
+                            if (node.tempformat == 'kelvin'){
+                                var mireds = 1000000/msg.payload.temp
+                            } else {
+                                var mireds = msg.payload.temp
+                            } 
+                            newcolor = {
+                                colorMode: 2,
+                                colorTemperatureMireds : mireds
+                            }
+                        }
+                        else {
+                                newcolor = {colorMode: node.device.state.colorControl.colorMode}
+                        }
                     }
-                }
+                    if (typeof msg.payload.state != "boolean") {
+                        switch (msg.payload.state){
+                            case '1':
+                            case 1:
+                            case 'on':
+                                msg.payload.state = true
+                                break
+                            case '0':
+                            case 0:
+                            case 'off':
+                                msg.payload.state = false
+                                break
+                            case 'toggle':
+                                msg.payload.state = !node.device.state.onOff.onOff
+                                break
+                        }
+                    }
+                    let newData = {
+                        onOff: {
+                            onOff: msg.payload.state,
+                        },
+                        levelControl: {
+                            currentLevel: Math.max(2, Math.min(254, msg.payload.level))
+                        },
+                        colorControl: newcolor
+                    }
+                    //If values are changed then set them & wait for callback otherwise send msg on
+                    if (willUpdate.call(node.device, newData)) {
+                        node.debug(`WILL update, ${newData}`)
+                        node.pending = true
+                        node.pendingmsg = msg
+                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                    } else {
+                        node.debug(`WONT update, ${newData}`)
+                        if (node.passthrough){
+                            node.send(msg);
+                        }
+                    }
+                    break;
             }
         });
         

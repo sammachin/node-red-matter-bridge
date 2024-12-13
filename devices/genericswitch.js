@@ -1,9 +1,10 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 
 const  {GenericSwitchDevice} = require("@matter/main/devices")
 const  {SwitchServer} = require( "@matter/main/behaviors")
 const  {Switch} = require( "@matter/main/clusters") 
+const  {PowerSource}  = require( "@matter/main/clusters")
 
 
 module.exports = {
@@ -18,7 +19,7 @@ module.exports = {
         const device = new Endpoint(
             GenericSwitchDevice.with(BridgedDeviceBasicInformationServer, SwitchServer.with(
                 ...features
-            )),{
+            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -27,7 +28,17 @@ module.exports = {
                     serialNumber: child.id,
                     reachable: true,
                 },
-                switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions}
+                switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions},
+                ... child.bat? {powerSource: {
+                    status: PowerSource.PowerSourceStatus.Active,
+                    order: 1,
+                    description: "Battery",
+                    batFunctionalWhileCharging: true,
+                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                    batChargeState: PowerSource.BatChargeState.Unknown,
+                    batReplacementNeeded: false,
+                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
+                }}: {}
             })
             return device;
     }

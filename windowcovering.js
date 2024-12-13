@@ -17,6 +17,7 @@ module.exports = function(RED) {
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.pending = false
         node.passthrough = /^true$/i.test(config.passthrough)
+        node.bat = config.bat;
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -29,36 +30,55 @@ module.exports = function(RED) {
 
         this.on('input', function(msg) {
             this.log(msg.payload)
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-            } else {
-                if (msg.payload.liftPosition == undefined) {
-                    msg.payload.liftPosition = node.device.state.windowCovering.currentPositionLiftPercent100ths
-                }
-                if (msg.payload.tiltPosition == undefined) {
-                    msg.payload.tiltPosition = node.device.state.windowCovering.currentPositionTiltPercent100ths
-                }
-                let newData = {
-                    windowCovering: {
-                        targetPositionLiftPercent100ths: msg.payload.liftPosition,
-                        targetPositionTiltPercent100ths: msg.payload.tiltPosition,
-                        currentPositionLiftPercent100ths: msg.payload.liftPosition,
-                        currentPositionTiltPercent100ths: msg.payload.tiltPosition
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(msg)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 batChargeLevel: msg.battery.batChargeLevel
+                             }
+                         })
+                     }
+                     break
+                default:
+                    if (msg.payload.liftPosition == undefined) {
+                        msg.payload.liftPosition = node.device.state.windowCovering.currentPositionLiftPercent100ths
                     }
-                }
-                //If values are changed then set them & wait for callback otherwise send msg on
-                if (willUpdate.call(node.device, newData)) {
-                    node.debug(`WILL update, ${newData}`)
-                    node.pending = true
-                    node.pendingmsg = msg
-                    node.device.set(newData)
-                } else {
-                    node.debug(`WONT update, ${newData}`)
-                    if (node.passthrough){
-                        node.send(msg);
+                    if (msg.payload.tiltPosition == undefined) {
+                        msg.payload.tiltPosition = node.device.state.windowCovering.currentPositionTiltPercent100ths
                     }
-                }
+                    let newData = {
+                        windowCovering: {
+                            targetPositionLiftPercent100ths: msg.payload.liftPosition,
+                            targetPositionTiltPercent100ths: msg.payload.tiltPosition,
+                            currentPositionLiftPercent100ths: msg.payload.liftPosition,
+                            currentPositionTiltPercent100ths: msg.payload.tiltPosition
+                        }
+                    }
+                    //If values are changed then set them & wait for callback otherwise send msg on
+                    if (willUpdate.call(node.device, newData)) {
+                        node.debug(`WILL update, ${newData}`)
+                        node.pending = true
+                        node.pendingmsg = msg
+                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                    } else {
+                        node.debug(`WONT update, ${newData}`)
+                        if (node.passthrough){
+                            node.send(msg);
+                        }
+                    }
+                    break
             }
             
 

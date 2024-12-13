@@ -1,6 +1,4 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
-
-
+const { hasProperty, isNumber } = require('./utils');
 
 module.exports = function(RED) {
     function MatterLightSensor(config) {
@@ -12,6 +10,7 @@ module.exports = function(RED) {
         node.maxlevel = config.maxlevel
         node.ctx =  this.context().global;
         node.measuredValue = node.ctx.get(node.id+"-measuredValue") || null
+        node.bat = config.bat;
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
 
@@ -24,23 +23,45 @@ module.exports = function(RED) {
                 node.status({fill:"green",shape:"dot",text:"ready"});
             }
         };
-
         this.on('input', function(msg) {
-            if (msg.topic == 'state'){
-                msg.payload = node.device.state
-                node.send(msg)
-                logEndpoint(EndpointServer.forEndpoint(node.bridge.matterServer))
-            } else {
-                let value
-                if (msg.payload == 0) {
-                    value = 0
-                } else {
-                    value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
-                }
-                node.device.set({illuminanceMeasurement: {measuredValue: value }})
-                node.ctx.set(node.id+"-measuredValue",  value)
-                node.measuredValue = value
-            }
+            switch (msg.topic) {
+                case 'state':
+                     if (hasProperty(msg, 'payload')) {
+                         node.device.set(msg.payload)
+                     }
+                     if (config.wires.length != 0){
+                         msg.payload = node.device.state
+                         node.send(msg)
+                     } else{
+                         node.error((node.device.state));
+                     }
+                     break;
+                 case 'battery':
+                     if (node.bat){
+                         node.device.set({
+                             powerSource: {
+                                 batChargeLevel: msg.battery.batChargeLevel
+                             }
+                         })
+                     }
+                     break
+                default:
+                    if (isNumber(msg.payload)){
+                        let value
+                        if (msg.payload == 0) {
+                            value = 0
+                        } else {
+                            value = Math.floor(10000*Math.log10(msg.payload) +1) // Convert Lux to Measured Value
+                        }
+                        node.device.set({illuminanceMeasurement: {measuredValue: value }}).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                        node.ctx.set(node.id+"-measuredValue",  value)
+                        node.measuredValue = value
+                    } else {
+                        node.error('Invalid input')
+                    }
+                    
+                    break;
+	        }     
         });
         
         this.on('serverReady', function() {

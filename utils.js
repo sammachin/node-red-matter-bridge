@@ -25,4 +25,4 @@ function willUpdate(data) {
     return changed
 }
 
-module.exports = { hasProperty, isNumber, willUpdate };
+module.exports = { hasProperty, isNumber, willUpdate, isBoolean };

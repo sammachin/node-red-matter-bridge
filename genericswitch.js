@@ -28,7 +28,6 @@ module.exports = function(RED) {
 
         this.on('input', function(msg) {
             switch (msg.topic) {
-
                 case 'state':
                      if (hasProperty(msg, 'payload')) {
                          node.device.set(msg.payload)
@@ -58,20 +57,20 @@ module.exports = function(RED) {
                     switch (msg.payload.type.toLowerCase()) {
                         case "single":
                             t = node.device.state.switch.longPressDelay/2
-                            press(node.device, 1)
-                            setTimeout(press, t, ep, 0)
+                            press(node, 1)
+                            setTimeout(press, t, node, 0)
                             break
                         case "double":
                             t = node.device.state.switch.longPressDelay/4
-                            press(node.device, 1)
-                            setTimeout(press, t, node.device, 0)
-                            setTimeout(press, t*2, node.device, 1)
-                            setTimeout(press, t*3, node.device, 0)
+                            press(node, 1)
+                            setTimeout(press, t, node, 0)
+                            setTimeout(press, t*2, node, 1)
+                            setTimeout(press, t*3, node, 0)
                             break            
                         case "long":
                             t = node.device.state.switch.multiPressDelay*1.5
-                            press(node.device, 1)
-                            setTimeout(press, t, node.device, 0)
+                            press(node, 1)
+                            setTimeout(press, t, node, 0)
                             break
                         case "position":
                             node.device.set({switch : {currentPosition: msg.payload.position}}).catch((err) => {node.debug(err); node.error('Invalid Input')})

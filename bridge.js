@@ -1,6 +1,8 @@
 const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
-const AggregatorEndpoint = require( "@matter/main/endpoints/aggregator").AggregatorEndpoint;
-const DeviceCommisioner = require("@matter/main/protocol")
+const {AggregatorEndpoint} = require( "@matter/main/endpoints")
+const {DeviceCommisioner} = require("@matter/main/protocol")
+const {NetworkCommissioning} = require("@matter/main/clusters")
+const {NetworkCommissioningServer} = require("@matter/main/behaviors")
 
 const os = require('os');
 
@@ -75,11 +77,11 @@ module.exports =  function(RED) {
         //const storageManager = new Storage.StorageManager(node.storage);
         //storageManager.initialize().then(() => {
         //    node.deviceStorage = storageManager.createContext("Device")
-
+        const networkId = new Uint8Array(32);
         node.serverReady = false;
         Environment.default.vars.set('mdns.networkInterface', node.networkInterface);
         //Servers
-        ServerNode.create({
+        ServerNode.create(ServerNode.RootEndpoint.with(NetworkCommissioningServer.with("EthernetNetworkInterface")),{
             id: node.id,
             network: {
                 port: node.port,
@@ -102,6 +104,14 @@ module.exports =  function(RED) {
                 serialNumber: `noderedmatter-${node.id}`,
                 uniqueId : node.id
             },
+            networkCommissioning: {
+                maxNetworks: 1,
+                interfaceEnabled: true,
+                lastConnectErrorValue: 0,
+                lastNetworkId: networkId,
+                lastNetworkingStatus: NetworkCommissioning.NetworkCommissioningStatus.Success,
+                networks: [{ networkId: networkId, connected: true }],
+            }
         })
         .then((matterServer) =>{
             node.aggregator = new Endpoint(AggregatorEndpoint, { id: "aggregator" });

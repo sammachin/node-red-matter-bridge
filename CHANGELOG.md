@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.11.4] - 2024-12-29
+Bug Fix and Tuya
+
+### Fixed
+Added an initial colour mode to the color temp light device which was crashing if a state command was sent before any color temp was set.
+
+### Added
+Added the network commisioning cluster as Tuya ecosystems were expecting to find it on commisioning, however Tuya still non-functional as they don't support bridges.
+
+
 ## [0.11.3] = 2024-12-13
 Preview release of Battery state/Powersource, and more robustness
 

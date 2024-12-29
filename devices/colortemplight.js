@@ -22,6 +22,7 @@ module.exports = {
                 colorControl: {
                     coupleColorTempToLevelMinMireds: 0x00FA,
                     startUpColorTemperatureMireds: 0x00FA,
+                    colorMode: 2
                 },
                 ... child.bat? {powerSource: {
                     status: PowerSource.PowerSourceStatus.Active,

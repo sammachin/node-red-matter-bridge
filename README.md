@@ -33,7 +33,7 @@ Whenever a Matter Nodes state is changed from outside of Node-RED, eg using the 
 Whenever the node receives an input from another node then the node will only output the status if passthrough is set to true and will use the original message with an updated payload. This is consistent regardless of whether the device actual state changes so sending multiple ON messages will output multiple ON messages even if the device only updates once.
 
 ### This is not a Controller
-Note: This package is for creating virtual devices to control from a Matter Controller, if you are wanting to control your real matter hardware devices from node-red then lookout for my upcoming node-red-matter-controller package instead.
+Note: This package is for creating virtual devices to control from a Matter Controller, if you are wanting to control your real matter hardware devices from node-red then take a look at  my  [node-red-matter-controller](https://flows.nodered.org/node/@sammachin/node-red-matter-controller) package instead.
 
 ### Matter
 This is not a certified Matter device and is for development and experimentation only, for more information about Matter and to download the standards goto https://handbook.buildwithmatter.com

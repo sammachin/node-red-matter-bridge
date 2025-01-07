@@ -49,8 +49,6 @@ module.exports = function(RED) {
                      }
                      break
                  default:
-                node.pending = true
-                node.pendingmsg = msg
                 if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
                     msg.payload = state = {state: msg.payload}
                 }

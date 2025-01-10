@@ -26,9 +26,19 @@ module.exports = function(RED) {
                 node.status({fill:"green",shape:"dot",text:"ready"});
             }
         };
-        node.stateEvt = function(value) {
+        node.stateEvt = function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
@@ -40,6 +50,7 @@ module.exports = function(RED) {
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}

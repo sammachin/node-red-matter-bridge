@@ -13,14 +13,25 @@ module.exports = function(RED) {
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
         node.bat = config.bat;
-        node.stateEvt = function(value) {
+        node.stateEvt = function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
                 msg.payload.state = node.device.state.onOff.onOff
+                msg.eventSource = eventSource
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
                 msg.payload.state = node.device.state.onOff.onOff
+                msg.eventSource = eventSource
                 node.send(msg);
             }
             node.pending = false

@@ -105,7 +105,16 @@ module.exports = function(RED) {
         
 
        
-        node.liftTiltEvt =  function(){
+        node.liftTiltEvt =  function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             data = {}
             if (node.lift){
                 data.liftPosition = node.device.state.windowCovering.currentPositionLiftPercent100ths
@@ -115,38 +124,62 @@ module.exports = function(RED) {
             }
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             }
             node.pending = false
         }
 
-        node.liftMovementEvt = function(direction){
+        node.liftMovementEvt = function(direction, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             data = {'action' : 'lift', 'direction' : direction}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             }
             node.pending = false
         }
 
-        node.tiltMovementEvt =  function(direction){
+        node.tiltMovementEvt =  function(direction, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             data = {'action' : 'tilt', 'direction' : direction}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             }

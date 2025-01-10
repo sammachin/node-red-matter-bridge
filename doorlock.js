@@ -101,16 +101,27 @@ module.exports = function(RED) {
             node.status({fill:"green",shape:"dot",text:"ready"});    
         })
         
-        node.stateEvt = function(value) {
+        node.stateEvt = function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             let states = {0 :'unlocked', 1 : 'locked', 2 : 'unlocked'}
             node.lockState = value
             state=states[value]
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload.state=state
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload.state=state
                 node.send(msg);
             }

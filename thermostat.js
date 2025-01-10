@@ -29,7 +29,16 @@ module.exports = function(RED) {
             }
         };
         
-        node.modeEvt = function(value){
+        node.modeEvt = function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             node.values ? node.values.systemMode=value : node.values={systemMode:value}
             let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
             let temp = node.device.state.thermostat.localTemperature
@@ -41,49 +50,82 @@ module.exports = function(RED) {
             }
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload = data
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             }
             node.pending = false
         };
         
-        node.coolSetpointEvt =  function(value){
+        node.coolSetpointEvt =  function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             let temp = node.device.state.thermostat.localTemperature
             node.values ? node.values.occupiedCoolingSetpoint=value : node.values={occupiedCoolingSetpoint:value}
             data = {mode : 'cool', setPoint : value, temperature: temp}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload = data
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             }
             node.pending = false
         };
         
-        node.heatSetpointEvt =  function(value){
+        node.heatSetpointEvt =  function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             node.values ? node.values.occupiedHeatingSetpoint=value : node.values={occupiedHeatingSetpoint:value}
             let temp = node.device.state.thermostat.localTemperature
             data = {mode : 'heat', setPoint : value, temperature: temp}
             if ((node.pending && node.passthrough)) {
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload = data
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
             }
             node.pending = false
         };
 
-        node.tempEvt =  function(value){
+        node.tempEvt =  function(value, oldValue, context) {
+            let eventSource = {}
+            if (hasProperty(context, 'offline')) {
+                eventSource.local = true
+            } else {
+                eventSource.local = false
+                eventSource.srcAddress = context.exchange.channel.channel.peerAddress
+                eventSource.srcPort = context.exchange.channel.channel.peerPort
+                eventSource.fabric = node.bridge.matterServer.state.commissioning.fabrics[context.fabric]
+            }
             let modes = {0 : 'off', 3 : 'cool', 4 : 'heat'}
             let mode = node.device.state.thermostat.systemMode
             data = {'mode' : modes[mode], 'temperature' : value}
@@ -93,6 +135,7 @@ module.exports = function(RED) {
                 data.setPoint = node.device.state.thermostat.occupiedCoolingSetpoint
             }
             if ((node.pending && node.passthrough)) {
+                msg.eventSource = eventSource
                 var msg = node.pendingmsg
                 msg.payload = data
                 node.send(msg);

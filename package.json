@@ -34,7 +34,8 @@
       "matter-genercswitch": "genericswitch.js",
       "matter-windowcovering": "windowcovering.js",
       "matter-thermostat": "thermostat.js",
-      "matter-doorlock": "doorlock.js"
+      "matter-doorlock": "doorlock.js",
+      "matter-fan": "fan.js"
     }
   }
 }

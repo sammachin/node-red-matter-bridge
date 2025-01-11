@@ -1,0 +1,124 @@
+<script type="text/javascript">
+    RED.nodes.registerType('matterfan',{
+        category: 'Matter',
+        color: '#289db6',
+        icon: "font-awesome/fa-dot-circle-o ",
+        inputs:1,
+        outputs:1,
+        defaults: {
+            name: {value:""},
+            bridge: { value: "", type: "matterbridge", required: true },
+            passthrough: {value: true},
+            levelstep: {value: 1},
+            bat: {value : false},
+            topic: {}
+        },
+        label: function() {
+            return this.name||"Fan";
+        },
+        paletteLabel: "Fan"
+
+    });
+</script>
+
+<script type="text/x-red" data-template-name="matterfan">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-bridge">Bridge</label>
+        <input type="text" id="node-input-bridge" style="width:70%;">
+    </div>
+    <div class="form-row">
+        <label for="node-input-passthrough">Passthrough Input msg to Output</label>
+        <select type="text" id="node-input-passthrough" style="width:50%;" >
+            <option value=true>True</option>
+            <option value=false>False</option>
+        </select>
+    </div>
+    <div class="form-row">
+        <label for="node-input-levelstep">Value for Level Step Change</label>
+        <input type="text" id="node-input-levelstep" placeholder="1">
+    </div>
+    <div class="form-row">
+        <label for="node-input-bat">Battery</label>
+        <input type="checkbox" id="node-input-bat"/>
+     </div>
+     <div class="form-row">
+        <label for="node-input-topic">Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic for new msgs">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="matterfan">
+   <p>A Bridged Dimmable light</p>
+
+   <h3>Inputs</h3>
+       <dl class="message-properties">
+            <dt class="optional">
+                payload.state         
+                <span class="property-type">
+                    string | bool | number
+                </span>
+            </dt>
+            <dd> 
+                Control the state of the light, accepts either true/fase, "on/off" or "0/1",<br>
+                You can also toggle the state by setting the value to "toggle"
+            </dd>
+           <dt class="optional">
+            payload.level         
+            <span class="property-type">
+                number
+            </span>
+            </dt>
+            <dd> 
+                Control the level of the light,<br>
+                either 0-100 or 0-254 depending on the configuration of the range property
+            </dd>
+            <dt class="optional">
+                payload.increaseLevel         
+ 
+            </dt>
+            <dd> 
+                If set this will increase the level by the value defined in the Level Step config
+            </dd>
+            <dt class="optional">
+                payload.decreaseLevel         
+ 
+            </dt>
+            <dd> 
+                If set this will decrease the level by the value defined in the Level Step config
+            </dd>
+       </dl>
+   
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>
+            payload.state         
+            <span class="property-type">
+                bool 
+            </span>
+        </dt>
+        <dd> 
+            State of the light, on is true, off is false
+        </dd>
+       <dt class="optional">
+        payload.level         
+        <span class="property-type">
+            number
+        </span>
+        </dt>
+        <dd> 
+            The level of the light,<br>
+            either 0-100 or 0-254 depending on the configuration of the range property
+        </dd>
+   </dl>
+   
+   <h3>Details</h3>
+   Passthrough will control the behaviour of the node in regards to an input, 
+   if set to True then the inout msg wil be output with the new state in the payload.
+   If set to False then the output will be suppressed.
+   Where the devices state is updated by an external matter controller a new msg object will always be output. 
+   
+</script>

@@ -21,6 +21,8 @@ const humiditysensor = require("./devices/humiditysensor").humiditysensor;
 const pressuresensor = require("./devices/pressuresensor").pressuresensor;
 const occupancysensor = require("./devices/occupancysensor").occupancysensor;
 const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
+const fan = require("./devices/fan").fan;
+
 
 
 
@@ -202,6 +204,9 @@ module.exports =  function(RED) {
                         break
                     case 'matterdoorlock':
                         child.device = doorlock(child)
+                        break
+                    case 'matterfan':
+                        child.device = fan(child)
                         break
                 }
                 this.log("adding new device to aggregator")

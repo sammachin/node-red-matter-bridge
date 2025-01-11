@@ -19,6 +19,7 @@ module.exports = function(RED) {
         node.pending = false
         node.passthrough = /^true$/i.test(config.passthrough)
         node.bat = config.bat;
+        node.topic = config.topic || false
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -55,6 +56,7 @@ module.exports = function(RED) {
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                if (node.topic) {msg.topic = node.topic}
                 msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
@@ -82,6 +84,7 @@ module.exports = function(RED) {
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                if (node.topic) {msg.topic = node.topic}
                 msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);
@@ -109,6 +112,7 @@ module.exports = function(RED) {
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                if (node.topic) {msg.topic = node.topic}
                 msg.eventSource = eventSource
                 msg.payload=data
                 node.send(msg);

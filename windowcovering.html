@@ -14,7 +14,8 @@
             coveringType: {value: 255},
             productType: {value: 255},
             passthrough: {value: true},
-            bat: {value : false}
+            bat: {value : false},
+            topic: {}
         },
         label: function() {
             return this.name||"Window Covering";
@@ -113,6 +114,10 @@
         <label for="node-input-bat">Battery</label>
         <input type="checkbox" id="node-input-bat"/>
      </div>
+     <div class="form-row">
+        <label for="node-input-topic">Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic for new msgs">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="matterwindowcovering">

@@ -17,6 +17,7 @@ module.exports = function(RED) {
         this.log(`Loading Device node ${node.id}`)
         node.status({fill:"red",shape:"ring",text:"not running"});
         node.bat = config.bat
+        node.topic = config.topic || false
         node.identifying = false
         node.identifyEvt = function() {
             node.identifying = !node.identifying
@@ -50,6 +51,7 @@ module.exports = function(RED) {
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                if (node.topic) {msg.topic = node.topic}
                 msg.eventSource = eventSource
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel

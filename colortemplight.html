@@ -12,7 +12,8 @@
             passthrough: {value: true},
             tempformat: {value: "kelvin"},
             levelstep: {value: 1},
-            bat: {value : false}
+            bat: {value : false},
+            topic : {}
         },
         label: function() {
             return this.name||"Color Temp Light";
@@ -59,6 +60,10 @@
     <div class="form-row">
         <label for="node-input-bat">Battery</label>
     <input type="checkbox" id="node-input-bat"/>
+    </div>
+    <div class="form-row">
+        <label for="node-input-topic">Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic for new msgs">
     </div>
 
 </script>

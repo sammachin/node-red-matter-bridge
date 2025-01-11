@@ -13,6 +13,7 @@ module.exports = function(RED) {
         node.pendingmsg = null
         node.passthrough = /^true$/i.test(config.passthrough)
         node.bat = config.bat;
+        node.topic = config.topic || false
         node.stateEvt = function(value, oldValue, context) {
             let eventSource = {}
             if (hasProperty(context, 'offline')) {
@@ -30,6 +31,7 @@ module.exports = function(RED) {
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
+                if (node.topic) {msg.topic = node.topic}
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.eventSource = eventSource
                 node.send(msg);

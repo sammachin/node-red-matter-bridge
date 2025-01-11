@@ -11,7 +11,8 @@
             range: {value: "254"},
             passthrough: {value: true},
             levelstep: {value: 1},
-            bat: {value : false}
+            bat: {value : false},
+            topic: {}
         },
         label: function() {
             return this.name||"Dimmable Light";
@@ -52,7 +53,10 @@
         <label for="node-input-bat">Battery</label>
         <input type="checkbox" id="node-input-bat"/>
      </div>
-     
+     <div class="form-row">
+        <label for="node-input-topic">Topic</label>
+        <input type="text" id="node-input-topic" placeholder="Topic for new msgs">
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="matterdimmablelight">

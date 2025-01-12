@@ -81,8 +81,6 @@ module.exports = function(RED) {
                      }
                      break
                 default:
-                    node.pending = true
-                    node.pendingmsg = msg
                     if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                     if (msg.payload.state == undefined) {
                         msg.payload.state = node.device.state.onOff.onOff

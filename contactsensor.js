@@ -1,5 +1,5 @@
 const { hasProperty, isBoolean } = require('./utils');
-
+const {battery} = require('./battery')
 
 
 module.exports = function(RED) {
@@ -41,11 +41,7 @@ module.exports = function(RED) {
                      break;
                  case 'battery':
                      if (node.bat){
-                         node.device.set({
-                             powerSource: {
-                                 batChargeLevel: msg.battery.batChargeLevel
-                             }
-                         })
+                         battery(node, msg)
                      }
                      break
          

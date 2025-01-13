@@ -1,12 +1,24 @@
 const  {Endpoint}  = require("@matter/main")
 const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 const  {ContactSensorDevice}  =  require( "@matter/main/devices")
-const  {PowerSource}  = require( "@matter/main/clusters")
+const  {PowerSource}  = require( "@matter/main/clusters");
+const { batFeatures } = require("../battery");
 
 module.exports = {
     contactsensor: function(child) {
+        console.log(`BAT: ${child.bat}`)
         const device = new Endpoint(
-            ContactSensorDevice.with(BridgedDeviceBasicInformationServer, ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
+            ContactSensorDevice.with(
+                BridgedDeviceBasicInformationServer, 
+                ... child.bat? 
+                    [
+                        PowerSourceServer.with(
+                        PowerSource.Feature.Battery, 
+                        (child.bat=='recharge') ? PowerSource.Feature.Rechargeable : PowerSource.Feature.Replaceable
+                    )]
+                    : []
+            ),
+            {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -18,16 +30,7 @@ module.exports = {
                 booleanState: {
                     stateValue: child.stateValue ? child.stateValue : child.initial
                 },
-                ... child.bat? {powerSource: {
-                    status: PowerSource.PowerSourceStatus.Active,
-                    order: 1,
-                    description: "Battery",
-                    batFunctionalWhileCharging: true,
-                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
-                    batChargeState: PowerSource.BatChargeState.Unknown,
-                    batReplacementNeeded: false,
-                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
-                }}: {}
+                ... child.bat? {powerSource: batFeatures(child)}: {}
             }
             )
             return device;

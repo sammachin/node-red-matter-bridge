@@ -8,6 +8,7 @@
             productId : {value: "0x8000"},
             vendorName : {value: "Node-RED-Matter"},
             productName : {value: "Node-RED-Bridge"},
+            storageLocation: {required: true},
             networkInterface : {required: true},
             logLevel: {value: "ERROR"}
         },
@@ -56,6 +57,17 @@
             .error(function(e) {
                 console.log(e.status);
             })
+            console.log(this.storageLocation)
+            if (!this.storageLocation){
+                $.get('_matterbridge/homedir', function(r) {
+                    defaultLocation=(`${r}/.matter`)
+                    let sLoc = document.getElementById('node-config-input-storageLocation');
+                    sLoc.value = defaultLocation
+                })
+                .error(function(e) {
+                    console.log(e.status);
+                })
+            }
         },
         oneditsave: function(){
             console.log(this)
@@ -88,6 +100,10 @@
         <label for="node-config-input-networkInterface">Network interface</label>
         <select type="text" id="node-config-input-networkInterface" style="width:50%;" >
         </select>
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-storageLocation">Storage Location</label>
+        <input type="text" id="node-config-input-storageLocation" style="width:50%;" >
     </div>
     <div class="form-row">
         <label for="node-config-input-logLevel">Log Level</label>

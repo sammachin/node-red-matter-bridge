@@ -1,4 +1,4 @@
-const { Endpoint, Environment, ServerNode, Logger, VendorId } = require("@matter/main");
+const { Endpoint, Environment, ServerNode, Logger, VendorId, StorageService } = require("@matter/main");
 const {AggregatorEndpoint} = require( "@matter/main/endpoints")
 const {DeviceCommisioner} = require("@matter/main/protocol")
 const {NetworkCommissioning} = require("@matter/main/clusters")
@@ -70,18 +70,24 @@ module.exports =  function(RED) {
         node.productId = +config.productId
         node.vendorName = config.vendorName
         node.productName = config.productName
-        node.networkInterface = config.networkInterface 
+        node.networkInterface = config.networkInterface
+        node.storageLocation = config.storageLocation
         node.port = 5540
         node.passcode = genPasscode()
         node.discriminator = +Math.floor(Math.random() * 4095).toString().padStart(4, '0')
-        //Storage TODO: Refactor to use node-red node storage
-        //node.storage= new Storage.StorageBackendDisk("storage-"+node.id)
-        //const storageManager = new Storage.StorageManager(node.storage);
-        //storageManager.initialize().then(() => {
-        //    node.deviceStorage = storageManager.createContext("Device")
         const networkId = new Uint8Array(32);
         node.serverReady = false;
         Environment.default.vars.set('mdns.networkInterface', node.networkInterface);
+        //Storage
+        const environment = Environment.default;
+        let ss = environment.get(StorageService);
+        if (node.storageLocation){
+            ss.location = node.storageLocation;
+            environment.set(StorageService, ss)
+            node.log(`Using Custom Storage Location: ${ss.location}`)
+        } else {
+            node.log(`Using Default Storage Location: ${ss.location}`)
+        }
         //Servers
         ServerNode.create(ServerNode.RootEndpoint.with(NetworkCommissioningServer.with("EthernetNetworkInterface")),{
             id: node.id,
@@ -314,5 +320,9 @@ module.exports =  function(RED) {
             return output.indexOf(elem) == pos;
         })
         res.send(uniqueOutput)
+    })
+    RED.httpAdmin.get('/_matterbridge/homedir', RED.auth.needsPermission('admin.write'), function(req,res){
+        const homedir = require('os').homedir();
+        res.send(homedir)
     })
 }

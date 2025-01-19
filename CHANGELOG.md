@@ -5,13 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.12.0] -- ??
+## [0.12.0] -- 2024-01-19
 
 ### Added
-Fan device
+#### Fan device
+Added the Fan device type, also changed the color of the HVAC nodes (Fan, & Thermostat ) as I really didn't like the dark red
 
-Battery Support
+#### Battery Support
+Further to the preview of Battery support in 0.11.3 I've refactored some of the code and given each device the option of having a Replacable or Rechargeable battery.
+You can set the battery state on the device using a msg witha topic of `battery` and then the following msg values:
+msg.battery.level = 0|1|2 For Ok, Low & Critical
+msg.battery.percent = 0-100 Percentage of Battery
+msg.battery.charge = 0|1 for Not charging or Charging (only on rechargeable type)
 
+I'm not totally happy with the suport for battery state in the major controllers, The level value seems to work fairly well and the charging state on Apple & Google.
+Indicating percentage seems to be very hit & miss, I need to do more testing to figure this out, feedback would be welcome here.
+On Alexa it seems to only show either 100% for level ok or 0% for Low/Critical.
+
+#### Topic for new Messages
+Nodes that have an output now have an additional field that may be cofigured to set msg.topic when the node originates a message, eg the state has been changed by an external Matter controller.
+This will not be used when the msg is from an input using passthrough.
 
 ### Changed
 The bridge now supports a configurable storage location, see the README for details of how this can be changed, By default the package will continue to use the existing value of $HOME/.matter.

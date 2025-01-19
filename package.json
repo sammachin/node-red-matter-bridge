@@ -1,6 +1,6 @@
 {
   "name": "@sammachin/node-red-matter-bridge",
-  "version": "0.11.4",
+  "version": "0.12.0",
   "description": "Node red package for implementing a matter bridge",
   "main": "index.js",
   "author": "Sam Machin",

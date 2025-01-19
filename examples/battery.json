@@ -1,0 +1,355 @@
+[
+    {
+        "id": "c812b63cfb869955",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Low",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 350,
+        "y": 120,
+        "wires": [
+            [
+                "50b5534a81257c09"
+            ]
+        ]
+    },
+    {
+        "id": "1e79b5792004a346",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery 50%",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.percent",
+                "v": "60",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 350,
+        "y": 360,
+        "wires": [
+            [
+                "50b5534a81257c09"
+            ]
+        ]
+    },
+    {
+        "id": "0ae751e9051ba2b2",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Ok",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 1060,
+        "y": 100,
+        "wires": [
+            [
+                "b1772bca9a2ccc7b"
+            ]
+        ]
+    },
+    {
+        "id": "91d5d9808dc1fcbe",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery 65%",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.percent",
+                "v": "65",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 1050,
+        "y": 360,
+        "wires": [
+            [
+                "b1772bca9a2ccc7b"
+            ]
+        ]
+    },
+    {
+        "id": "50b5534a81257c09",
+        "type": "mattercontactsensor",
+        "z": "b8a95f930ab1c86d",
+        "name": "Sensor REPLC",
+        "bridge": "99fe631bdf041506",
+        "initial": "true",
+        "bat": "replace",
+        "x": 720,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "b1772bca9a2ccc7b",
+        "type": "mattercontactsensor",
+        "z": "b8a95f930ab1c86d",
+        "name": "Bat Sensor RECHG",
+        "bridge": "99fe631bdf041506",
+        "initial": "true",
+        "bat": "recharge",
+        "x": 1450,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "1d8c9535de3485da",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Low",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 1050,
+        "y": 140,
+        "wires": [
+            [
+                "b1772bca9a2ccc7b"
+            ]
+        ]
+    },
+    {
+        "id": "14c6da68a44fcd35",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Charging",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.charge",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 1040,
+        "y": 240,
+        "wires": [
+            [
+                "b1772bca9a2ccc7b"
+            ]
+        ]
+    },
+    {
+        "id": "6b987890af91a032",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Crit",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "2",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 1040,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "457912baf215a92c",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Not Charging",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.charge",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 1060,
+        "y": 280,
+        "wires": [
+            [
+                "b1772bca9a2ccc7b"
+            ]
+        ]
+    },
+    {
+        "id": "8f74c9b9b9a6fa74",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Ok",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "0",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 360,
+        "y": 220,
+        "wires": [
+            [
+                "50b5534a81257c09"
+            ]
+        ]
+    },
+    {
+        "id": "3f072337531afeed",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Low",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "1",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 350,
+        "y": 260,
+        "wires": [
+            [
+                "50b5534a81257c09"
+            ]
+        ]
+    },
+    {
+        "id": "c430d80ac9d72a2f",
+        "type": "inject",
+        "z": "b8a95f930ab1c86d",
+        "name": "Battery Level Crit",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "battery.level",
+                "v": "2",
+                "vt": "num"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "battery",
+        "x": 340,
+        "y": 300,
+        "wires": [
+            [
+                "50b5534a81257c09"
+            ]
+        ]
+    },
+    {
+        "id": "99fe631bdf041506",
+        "type": "matterbridge",
+        "name": "Test Home",
+        "vendorId": "0xFFF1",
+        "productId": "0x8001",
+        "vendorName": "Node-RED-Matter",
+        "productName": "Node-RED-Bridge",
+        "storageLocation": "/Users/smachin/.matter",
+        "networkInterface": "en0",
+        "logLevel": "DEBUG"
+    }
+]

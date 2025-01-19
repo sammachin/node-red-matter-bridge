@@ -1,6 +1,5 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
-
 const { hasProperty, willUpdate } = require('./utils');
+const {battery} = require('./battery')
 
 
 module.exports = function(RED) {
@@ -71,15 +70,11 @@ module.exports = function(RED) {
                          node.error((node.device.state));
                      }
                      break;
-                 case 'battery':
-                     if (node.bat){
-                         node.device.set({
-                             powerSource: {
-                                 batChargeLevel: msg.battery.batChargeLevel
-                             }
-                         })
-                     }
-                     break
+                case 'battery':
+                    if (node.bat){
+                        battery(node, msg)
+                    }
+                break
                 default:
                     node.pending = true
                     node.pendingmsg = msg

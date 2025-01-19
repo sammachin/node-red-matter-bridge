@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.0] -- ??
+
+### Added
+Fan device
+
+Battery Support
+
+
+### Changed
+The bridge now supports a configurable storage location, see the README for details of how this can be changed, By default the package will continue to use the existing value of $HOME/.matter.
+Changing this on a configured system without manually copying the files to the new location will result in errors.
+If you are running Node-RED in a container like Docker then you will likely want to update this to a persistant file storage location.
+
+
+
 ## [0.11.4] - 2024-12-29
 Bug Fix and Tuya
 

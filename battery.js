@@ -1,6 +1,6 @@
 const { hasProperty} = require('./utils');
 const  {PowerSource}  = require( "@matter/main/clusters")
-
+const  {PowerSourceServer}  = require("@matter/main/behaviors");
 
 function battery(node, msg) {
     if (hasProperty(msg.battery, 'level')){
@@ -83,12 +83,32 @@ function batFeatures(node) {
                 batQuantity: 1
             }
             break;
+        default:
+            features =  {
+                status: PowerSource.PowerSourceStatus.Active,
+                order: 1,
+                description: "Battery",
+                batChargeLevel: PowerSource.BatChargeLevel.Ok,
+                batReplacementNeeded: false,
+                batReplaceability: PowerSource.BatReplaceability.UserReplaceable,
+                batReplacementDescription: "",
+                batQuantity: 1
+            }
+            break;
     }
     return features
-    
 }
 
-module.exports = { battery, batFeatures };
+function batCluster(node){
+    let cl = [
+        PowerSourceServer.with(
+        PowerSource.Feature.Battery, 
+        (node.bat=='recharge') ? PowerSource.Feature.Rechargeable : PowerSource.Feature.Replaceable
+    )]
+    return cl
+}
+
+module.exports = { battery, batFeatures, batCluster };
 
 
 

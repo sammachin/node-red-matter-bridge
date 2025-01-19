@@ -1,10 +1,8 @@
 const {Endpoint, Observable}  = require("@matter/main");
-const {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
-
+const {BridgedDeviceBasicInformationServer, WindowCoveringServer}  = require("@matter/main/behaviors");
 const {WindowCoveringDevice} = require("@matter/main/devices")
-const {WindowCoveringServer} = require( "@matter/main/behaviors")
 const {WindowCovering} = require( "@matter/main/clusters")
-const  {PowerSource}  = require( "@matter/main/clusters")
+const { batFeatures, batCluster } = require("../battery");
 
 class Events extends WindowCoveringServer.Events {
     liftMovement = new Observable();
@@ -64,7 +62,7 @@ module.exports = {
 
         const device = new Endpoint(WindowCoveringDevice.with(BridgedDeviceBasicInformationServer, EventWindowCoveringServer.with(
              ...features    
-            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
+            ), ... child.bat ? batCluster(child) : []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -76,16 +74,7 @@ module.exports = {
                 windowCovering: {
                     ...params
                 },
-                ... child.bat? {powerSource: {
-                    status: PowerSource.PowerSourceStatus.Active,
-                    order: 1,
-                    description: "Battery",
-                    batFunctionalWhileCharging: true,
-                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
-                    batChargeState: PowerSource.BatChargeState.Unknown,
-                    batReplacementNeeded: false,
-                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
-                }}: {}
+                ... child.bat? {powerSource: batFeatures(child)}: {}
             })
             return device;
     }

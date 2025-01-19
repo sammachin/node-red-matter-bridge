@@ -1,9 +1,9 @@
 const  { Endpoint }  = require("@matter/main");
-const  { BridgedDeviceBasicInformationServer, PowerSourceServer }  = require("@matter/main/behaviors")
+const  { BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors")
 const  { ColorTemperatureLightDevice }  = require( "@matter/main/devices")
 const  { ColorControlServer } = require( "@matter/main/behaviors")
 const  { ColorControl }  = require( "@matter/main/clusters")
-const  {PowerSource}  = require( "@matter/main/clusters")
+const { batFeatures, batCluster } = require("../battery");
 
 
 module.exports = {
@@ -13,7 +13,7 @@ module.exports = {
                 ColorControl.Feature.HueSaturation,
                 ColorControl.Feature.Xy,
                 ColorControl.Feature.ColorTemperature,
-            ), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
+            ), ... child.bat ? batCluster(child) : []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -27,16 +27,7 @@ module.exports = {
                     startUpColorTemperatureMireds: 0x00FA,
                     colorMode: 0
                 },
-                ... child.bat? {powerSource: {
-                    status: PowerSource.PowerSourceStatus.Active,
-                    order: 1,
-                    description: "Battery",
-                    batFunctionalWhileCharging: true,
-                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
-                    batChargeState: PowerSource.BatChargeState.Unknown,
-                    batReplacementNeeded: false,
-                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
-                }}: {}
+                ... child.bat? {powerSource: batFeatures(child)}: {}
             })
             return device;
     }

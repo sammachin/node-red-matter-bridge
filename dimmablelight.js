@@ -1,6 +1,5 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
-
 const { hasProperty, willUpdate } = require('./utils');
+const {battery} = require('./battery')
 
 
 module.exports = function(RED) {
@@ -70,16 +69,12 @@ module.exports = function(RED) {
                      } else{
                          node.error((node.device.state));
                      }
-                     break;
-                 case 'battery':
-                     if (node.bat){
-                         node.device.set({
-                             powerSource: {
-                                 batChargeLevel: msg.battery.batChargeLevel
-                             }
-                         })
-                     }
-                     break
+                break;
+                case 'battery':
+                    if (node.bat){
+                        battery(node, msg)
+                    }
+                break
                 default:
                     if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
                     if (msg.payload.state == undefined) {

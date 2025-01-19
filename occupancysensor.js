@@ -1,4 +1,5 @@
 const { hasProperty, isBoolean } = require('./utils');
+const {battery} = require('./battery')
 
 
 function typeToBitmap(value){
@@ -43,15 +44,11 @@ module.exports = function(RED) {
                          node.error((node.device.state));
                      }
                      break;
-                 case 'battery':
-                     if (node.bat){
-                         node.device.set({
-                             powerSource: {
-                                 batChargeLevel: msg.battery.batChargeLevel
-                             }
-                         })
-                     }
-                     break
+                case 'battery':
+                    if (node.bat){
+                        battery(node, msg)
+                    }
+                break
                 default:
                     if (isBoolean(msg.payload)){
                         value = msg.payload

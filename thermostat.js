@@ -1,6 +1,7 @@
 const {logEndpoint, EndpointServer} = require( "@matter/main")
 
 const { hasProperty, isNumber, willUpdate } = require('./utils');
+const {battery} = require('./battery')
 
 module.exports = function(RED) {
     function MatterThermostat(config) {
@@ -160,15 +161,11 @@ module.exports = function(RED) {
                          node.error((node.device.state));
                      }
                      break;
-                 case 'battery':
-                     if (node.bat){
-                         node.device.set({
-                             powerSource: {
-                                 batChargeLevel: msg.battery.batChargeLevel
-                             }
-                         })
-                     }
-                     break
+                case 'battery':
+                    if (node.bat){
+                        battery(node, msg)
+                    }
+                break
                 default:
                     if (!hasProperty(msg.payload, 'mode') || !hasProperty(msg.payload, 'setPoint') || !hasProperty(msg.payload, 'temperature')){
                         node.error('Invalid input')

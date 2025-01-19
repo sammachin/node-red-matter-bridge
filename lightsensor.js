@@ -1,4 +1,5 @@
 const { hasProperty, isNumber } = require('./utils');
+const {battery} = require('./battery')
 
 module.exports = function(RED) {
     function MatterLightSensor(config) {
@@ -36,15 +37,11 @@ module.exports = function(RED) {
                          node.error((node.device.state));
                      }
                      break;
-                 case 'battery':
-                     if (node.bat){
-                         node.device.set({
-                             powerSource: {
-                                 batChargeLevel: msg.battery.batChargeLevel
-                             }
-                         })
-                     }
-                     break
+                case 'battery':
+                    if (node.bat){
+                        battery(node, msg)
+                    }
+                break
                 default:
                     if (isNumber(msg.payload)){
                         let value

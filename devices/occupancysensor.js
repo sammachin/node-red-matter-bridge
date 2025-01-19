@@ -2,11 +2,12 @@ const  {Endpoint}  = require("@matter/main");
 const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 const  {OccupancySensorDevice} = require("@matter/main/devices")
 const  {PowerSource}  = require( "@matter/main/clusters")
+const { batFeatures, batCluster } = require("../battery");
 
 module.exports = {
     occupancysensor: function(child) {
         const device = new Endpoint(
-            OccupancySensorDevice.with(BridgedDeviceBasicInformationServer, ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
+            OccupancySensorDevice.with(BridgedDeviceBasicInformationServer,  ... child.bat ? batCluster(child) : []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -20,16 +21,7 @@ module.exports = {
                     occupancySensorTypeBitmap: child.sensorTypeBitmap,
                     occupancy: {occupied: child.occupied}
                 },
-                ... child.bat? {powerSource: {
-                    status: PowerSource.PowerSourceStatus.Active,
-                    order: 1,
-                    description: "Battery",
-                    batFunctionalWhileCharging: true,
-                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
-                    batChargeState: PowerSource.BatChargeState.Unknown,
-                    batReplacementNeeded: false,
-                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
-                }}: {}
+                ... child.bat? {powerSource: batFeatures(child)}: {}
             });
             return device;
     }

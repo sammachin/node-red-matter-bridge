@@ -57,8 +57,12 @@
     </div>
     <div class="form-row">
         <label for="node-input-bat">Battery</label>
-        <input type="checkbox" id="node-input-bat"/>
-     </div>
+        <select type="text" id="node-input-bat" style="width:50%;" >
+            <option value=false>None</option>
+            <option value="recharge">Rechargeable</option>
+            <option value="replace">Replaceable</option>
+        </select>
+    </div>
 </script>
 
 <script type="text/x-red" data-help-name="mattergenericswitch">

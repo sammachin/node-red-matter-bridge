@@ -1,7 +1,8 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer, PowerSourceServer, FanControlServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, FanControlServer}  = require("@matter/main/behaviors");
 const  {FanDevice}  = require("@matter/main/devices");
 const  {FanControl}  = require( "@matter/main/clusters")
+const { batFeatures, batCluster } = require("../battery");
 
 
 module.exports = {
@@ -14,7 +15,7 @@ module.exports = {
         ]
 
         const device = new Endpoint(
-            FanDevice.with(BridgedDeviceBasicInformationServer, FanControlServer.with(...features), ... child.bat? [PowerSourceServer.with(PowerSource.Feature.Battery, PowerSource.Feature.Rechargeable)]: []), {
+            FanDevice.with(BridgedDeviceBasicInformationServer, FanControlServer.with(...features), ... child.bat ? batCluster(child) : []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,
@@ -34,16 +35,7 @@ module.exports = {
                     rockSetting: FanControl.Rock.rockLeftRight,
                     airflowDirection: 0
                 },
-                ... child.bat? {powerSource: {
-                    status: PowerSource.PowerSourceStatus.Active,
-                    order: 1,
-                    description: "Battery",
-                    batFunctionalWhileCharging: true,
-                    batChargeLevel: PowerSource.BatChargeLevel.Ok,
-                    batChargeState: PowerSource.BatChargeState.Unknown,
-                    batReplacementNeeded: false,
-                    batReplaceability: PowerSource.BatReplaceability.Unspecified,
-                }}: {}
+                ... child.bat? {powerSource: batFeatures(child)}: {}
         });
         return device;
     }

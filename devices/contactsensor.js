@@ -1,22 +1,14 @@
 const  {Endpoint}  = require("@matter/main")
 const  {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors");
 const  {ContactSensorDevice}  =  require( "@matter/main/devices")
-const  {PowerSource}  = require( "@matter/main/clusters");
-const { batFeatures } = require("../battery");
+const { batFeatures, batCluster } = require("../battery");
 
 module.exports = {
     contactsensor: function(child) {
-        console.log(`BAT: ${child.bat}`)
         const device = new Endpoint(
             ContactSensorDevice.with(
                 BridgedDeviceBasicInformationServer, 
-                ... child.bat? 
-                    [
-                        PowerSourceServer.with(
-                        PowerSource.Feature.Battery, 
-                        (child.bat=='recharge') ? PowerSource.Feature.Rechargeable : PowerSource.Feature.Replaceable
-                    )]
-                    : []
+                ... child.bat ? batCluster(child) : []
             ),
             {
                 id: child.id,

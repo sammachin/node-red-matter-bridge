@@ -39,12 +39,11 @@ module.exports = function(RED) {
                          node.error((node.device.state));
                      }
                      break;
-                 case 'battery':
-                     if (node.bat){
-                         battery(node, msg)
-                     }
-                     break
-         
+                case 'battery':
+                    if (node.bat){
+                        battery(node, msg)
+                    }
+                    break
                 default:
                     if (isBoolean(msg.payload)){
                         node.device.set({booleanState: {stateValue: msg.payload}})

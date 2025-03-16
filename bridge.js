@@ -5,6 +5,7 @@ const {NetworkCommissioning} = require("@matter/main/clusters")
 const {NetworkCommissioningServer} = require("@matter/main/behaviors")
 
 const os = require('os');
+var pjson = require('./package.json');
 
 const doorlock = require("./devices/doorlock").doorlock;
 const thermostat = require("./devices/thermostat").thermostat;
@@ -110,7 +111,9 @@ module.exports =  function(RED) {
                 productLabel: node.name,
                 productId: node.productId,
                 serialNumber: node.id.replace('-', ''),
-                uniqueId : node.id.replace('-', '').split("").reverse().join("")
+                uniqueId : node.id.replace('-', '').split("").reverse().join(""),
+                hardwareVersion: 1,
+                softwareVersion: Number(pjson.version.replaceAll('.', ''))
             },
             networkCommissioning: {
                 maxNetworks: 1,
@@ -241,14 +244,14 @@ module.exports =  function(RED) {
             }
         })
 
-        this.on('close', function(removed, done) {
+        this.on('close', async function(removed, done) {
             if (removed) {
                 this.log("Bridge Removed")
-                node.matterServer.close()
+                await node.matterServer.close()
             } else {
                 this.log("Bridge Restarted")
                 node.restart = true
-                node.matterServer.close()
+                await node.matterServer.close()
             }
             done();
         });

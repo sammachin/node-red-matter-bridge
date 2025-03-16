@@ -1,12 +1,22 @@
 const  {Endpoint}  = require("@matter/main");
-const  {BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors");
+const  {BridgedDeviceBasicInformationServer, IdentifyServer}  = require("@matter/main/behaviors");
 const  {OnOffLightDevice}  = require("@matter/main/devices");
 const { batFeatures, batCluster } = require("../battery");
+
+
+//Dummy handler to see if any ecosystems use this command and to suppress warning abount implementtion
+class NewIdentifyServer extends IdentifyServer {
+    async triggerEffect(identifier, variant){
+        console.log(`triggerEffect received identifier:${identifier}, variant: ${variant}`)
+    }
+}
+
+
 
 module.exports = {
     onofflight: function(child) {
         const device = new Endpoint(
-            OnOffLightDevice.with(BridgedDeviceBasicInformationServer, ... child.bat ? batCluster(child) : []), {
+            OnOffLightDevice.with(BridgedDeviceBasicInformationServer, NewIdentifyServer, ... child.bat ? batCluster(child) : []), {
                 id: child.id,
                 bridgedDeviceBasicInformation: {
                     nodeLabel: child.name,

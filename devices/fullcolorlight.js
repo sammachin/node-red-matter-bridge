@@ -1,15 +1,24 @@
 const  { Endpoint }  = require("@matter/main");
-const  { BridgedDeviceBasicInformationServer}  = require("@matter/main/behaviors")
+const  { BridgedDeviceBasicInformationServer, IdentifyServer}  = require("@matter/main/behaviors")
 const  { ColorTemperatureLightDevice }  = require( "@matter/main/devices")
 const  { ColorControlServer } = require( "@matter/main/behaviors")
 const  { ColorControl }  = require( "@matter/main/clusters")
 const { batFeatures, batCluster } = require("../battery");
 
 
+//Dummy handler to see if any ecosystems use this command and to suppress warning abount implementtion
+class NewIdentifyServer extends IdentifyServer {
+    async triggerEffect(identifier, variant){
+        console.log(`triggerEffect received identifier:${identifier}, variant: ${variant}`)
+    }
+}
+
+
+
 module.exports = {
     fullcolorlight: function(child) {
         const device = new Endpoint(
-            ColorTemperatureLightDevice.with(BridgedDeviceBasicInformationServer, ColorControlServer.with(
+            ColorTemperatureLightDevice.with(BridgedDeviceBasicInformationServer, NewIdentifyServer, ColorControlServer.with(
                 ColorControl.Feature.HueSaturation,
                 ColorControl.Feature.Xy,
                 ColorControl.Feature.ColorTemperature,

@@ -4,6 +4,16 @@ const {ThermostatDevice} = require("@matter/main/devices")
 const {Thermostat} = require( "@matter/main/clusters")
 const { batFeatures, batCluster } = require("../battery");
 
+//Dummy handler to see if any ecosystems use this command and to suppress warning abount implementtion
+class NewThermoStatServer extends ThermostatServer {
+    async setpointRaiseLower(mode, amount){
+        console.log(`setpointRaiseLower received mode:${mode}, amount: ${amount}`)
+    }
+}
+
+
+
+
 module.exports = {
     thermostat: function(child) {
         let features = []
@@ -37,7 +47,7 @@ module.exports = {
         } else if (params.systemMode == 3){
             params.occupiedCoolingSetpoint = child.values.occupiedCoolingSetpoint
         } 
-        const device = new Endpoint(ThermostatDevice.with(BridgedDeviceBasicInformationServer, ThermostatServer.with(
+        const device = new Endpoint(ThermostatDevice.with(BridgedDeviceBasicInformationServer, NewThermoStatServer.with(
              ...features    
             ), ... child.bat ? batCluster(child) : []), {
                 id: child.id,

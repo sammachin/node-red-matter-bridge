@@ -21,7 +21,8 @@ module.exports = {
                     nodeLabel: child.name,
                     productName: child.name,
                     productLabel: child.name,
-                    serialNumber: child.id,
+                    serialNumber: child.id.replace('-', ''),
+                    uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
                 },
                 fanControl :{

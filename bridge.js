@@ -109,8 +109,8 @@ module.exports =  function(RED) {
                 productName: node.name,
                 productLabel: node.name,
                 productId: node.productId,
-                serialNumber: `noderedmatter-${node.id}`,
-                uniqueId : node.id
+                serialNumber: node.id.replace('-', ''),
+                uniqueId : node.id.replace('-', '').split("").reverse().join("")
             },
             networkCommissioning: {
                 maxNetworks: 1,

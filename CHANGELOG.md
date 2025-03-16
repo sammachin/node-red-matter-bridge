@@ -5,7 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [0.12.0] -- 2024-01-19
+
+## [0.12.1] -- 2025-03-16
+
+Fixes and update
+
+### Fixed
+Change to the way serial numbers are created to prevent an error when using a device node in a subflow
+Fixed closing of the serverNode to prevent errors with storage service
+added dummy handlers for indetifyServer triggerEffect and thermostat setPointRaiseLower to suppress warnings
+
+### Changed
+Fix labels on level control to start at 1 not 0
+Updated to matter.js 12.5 with better handling of sessions restoration on restarts of the bridge.
+
+
+## [0.12.0] -- 2025-01-19
 
 ### Added
 #### Fan device

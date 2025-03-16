@@ -72,7 +72,7 @@ module.exports = function(RED) {
                         }
                     }
                     //If values are changed then set them & wait for callback otherwise send msg on
-                    if (willUpdate.call(node.device, newData)) {
+                    if (typeof newData?.onOff?.onOff === 'boolean' && willUpdate.call(node.device, newData)) {
                         node.debug(`WILL update, ${newData}`)
                         node.pending = true
                         node.pendingmsg = msg

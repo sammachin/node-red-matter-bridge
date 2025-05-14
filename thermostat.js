@@ -167,7 +167,7 @@ module.exports = function(RED) {
                     }
                 break
                 default:
-                    if (!hasProperty(msg.payload, 'mode') || !hasProperty(msg.payload, 'setPoint') || !hasProperty(msg.payload, 'temperature')){
+                    if (!(hasProperty(msg.payload, 'mode') || hasProperty(msg.payload, 'setPoint') || hasProperty(msg.payload, 'temperature'))){
                         node.error('Invalid input')
                         break;
                     }

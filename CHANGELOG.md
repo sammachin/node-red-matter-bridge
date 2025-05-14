@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
+## [0.12.2 -- 2025-05-14
+Bug fix
+
+### Fixed 
+Bug in thermostat node that didn't allow input of mode, setPoint or Temperature
+
 ## [0.12.1] -- 2025-03-16
 
 Fixes and update

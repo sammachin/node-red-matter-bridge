@@ -67,7 +67,7 @@ module.exports =  function(RED) {
         //Params
         node.users = config._users
         node.name = config.name
-        node.vendorId = +config.vendorId
+        node.vendorId = VendorId(+config.vendorId)
         node.productId = +config.productId
         node.vendorName = config.vendorName
         node.productName = config.productName
@@ -107,7 +107,7 @@ module.exports =  function(RED) {
             },
             basicInformation: {
                 vendorName : node.vendorName,
-                vendorId: VendorId(node.vendorId),
+                vendorId: node.vendorId,
                 nodeLabel: node.name,
                 productName: node.name,
                 productLabel: node.name,

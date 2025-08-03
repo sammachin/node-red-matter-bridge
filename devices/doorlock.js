@@ -25,7 +25,7 @@ module.exports = {
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
                     vendorName : node.vendorName,
-                    vendorId: VendorId(node.vendorId),
+                    vendorId: node.vendorId,
                     hardwareVersion: node.hardwareVersion,
                     softwareVersion: node.softwareVersion
                 },

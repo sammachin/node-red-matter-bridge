@@ -135,6 +135,7 @@ module.exports = function(RED) {
                     } else {
                         node.debug(`WONT update, ${newData}`)
                         if (node.passthrough){
+                            if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
                             node.send(msg);
                         }
                     }

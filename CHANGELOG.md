@@ -5,8 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.12.3] -- 2025-08-03
+Bug fix
 
-## [0.12.2 -- 2025-05-14
+### Fixed 
+Fixed a bug with dimmable lights (and color temp and full color) where the level would multiple by 2.54 with passthrough set and no change in state.
+
+## [0.12.2] -- 2025-05-14
 Bug fix
 
 ### Fixed 

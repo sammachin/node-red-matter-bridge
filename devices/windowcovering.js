@@ -38,7 +38,7 @@ class EventWindowCoveringServer extends WindowCoveringServer {
 
 
 module.exports = {
-    windowcovering: function(child) {
+    windowcovering: function(child, node) {
         let features = []
         if (child.lift) {
             features.push(WindowCovering.Feature.Lift)
@@ -71,6 +71,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: node.vendorId,
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 windowCovering: {
                     ...params

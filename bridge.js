@@ -71,6 +71,8 @@ module.exports =  function(RED) {
         node.productId = +config.productId
         node.vendorName = config.vendorName
         node.productName = config.productName
+        node.hardwareVersion = 1
+        node.softwareVersion = Number(pjson.version.replaceAll('.', ''))
         node.networkInterface = config.networkInterface
         node.storageLocation = config.storageLocation
         node.port = 5540
@@ -104,7 +106,7 @@ module.exports =  function(RED) {
                 deviceType: AggregatorEndpoint.deviceType,
             },
             basicInformation: {
-                vendorName : 'Node-RED Matter Bridge',
+                vendorName : node.vendorName,
                 vendorId: VendorId(node.vendorId),
                 nodeLabel: node.name,
                 productName: node.name,
@@ -112,8 +114,8 @@ module.exports =  function(RED) {
                 productId: node.productId,
                 serialNumber: node.id.replace('-', ''),
                 uniqueId : node.id.replace('-', '').split("").reverse().join(""),
-                hardwareVersion: 1,
-                softwareVersion: Number(pjson.version.replaceAll('.', ''))
+                hardwareVersion: node.hardwareVersion,
+                softwareVersion: node.softwareVersion
             },
             networkCommissioning: {
                 maxNetworks: 1,
@@ -170,52 +172,52 @@ module.exports =  function(RED) {
             } else {
                 switch (child.type){
                     case 'matteronofflight':
-                        child.device =  onofflight(child)
+                        child.device =  onofflight(child, node)
                         break
                     case 'matteronoffsocket':
-                        child.device =  onoffsocket(child)
+                        child.device =  onoffsocket(child, node)
                         break
                     case 'matterdimmablelight':
-                        child.device =  dimmablelight(child)
+                        child.device =  dimmablelight(child, node)
                         break
                     case 'matterfullcolorlight':
-                        child.device = fullcolorlight(child)
+                        child.device = fullcolorlight(child, node)
                         break
                     case 'mattercolortemplight':
-                        child.device = colortemplight(child)
+                        child.device = colortemplight(child, node)
                         break
                     case 'mattercontactsensor':
-                        child.device = contactsensor(child)
+                        child.device = contactsensor(child, node)
                         break
                     case 'matterlightsensor':
-                        child.device = lightsensor(child)
+                        child.device = lightsensor(child, node)
                         break
                     case 'mattertemperaturesensor':
-                        child.device = temperaturesensor(child)
+                        child.device = temperaturesensor(child, node)
                         break
                     case 'matteroccupancysensor':
-                        child.device = occupancysensor(child)
+                        child.device = occupancysensor(child, node)
                         break
                     case 'matterpressuresensor':
-                        child.device = pressuresensor(child)
+                        child.device = pressuresensor(child, node)
                         break
                     case 'matterhumiditysensor':
-                        child.device = humiditysensor(child)
+                        child.device = humiditysensor(child, node)
                         break
                     case 'mattergenericswitch':
-                        child.device = genericswitch(child)
+                        child.device = genericswitch(child, node)
                         break
                     case 'matterwindowcovering':
-                        child.device = windowcovering(child)
+                        child.device = windowcovering(child, node)
                         break
                     case 'matterthermostat':
-                        child.device = thermostat(child)
+                        child.device = thermostat(child, node)
                         break
                     case 'matterdoorlock':
-                        child.device = doorlock(child)
+                        child.device = doorlock(child, node)
                         break
                     case 'matterfan':
-                        child.device = fan(child)
+                        child.device = fan(child, node)
                         break
                 }
                 this.log("adding new device to aggregator")

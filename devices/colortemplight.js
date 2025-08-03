@@ -17,7 +17,7 @@ class NewIdentifyServer extends IdentifyServer {
 
  
 module.exports = {
-    colortemplight: function(child) {
+    colortemplight: function(child, node) {
         const device = new Endpoint(
             ColorTemperatureLightDevice.with(BridgedDeviceBasicInformationServer, NewIdentifyServer, ColorControlServer.with(
                 ColorControl.Feature.ColorTemperature,
@@ -32,6 +32,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: VendorId(node.vendorId),
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 colorControl: {
                     coupleColorTempToLevelMinMireds: 0x00FA,

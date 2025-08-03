@@ -5,7 +5,7 @@ const { batFeatures, batCluster } = require("../battery");
 
 
 module.exports = {
-    humiditysensor: function(child) {
+    humiditysensor: function(child, node) {
         const device = new Endpoint(
             HumiditySensorDevice.with(BridgedDeviceBasicInformationServer, ... child.bat ? batCluster(child) : []), {
                 id: child.id,
@@ -16,6 +16,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: VendorId(node.vendorId),
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 relativeHumidityMeasurement: {
                     minMeasuredValue: child.minlevel,

@@ -6,7 +6,7 @@ const { batFeatures, batCluster } = require("../battery");
 
 
 module.exports = {
-    fan: function(child) {
+    fan: function(child, node) {
         features = [
             FanControl.Feature.MultiSpeed,
             FanControl.Feature.Auto,
@@ -24,6 +24,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: VendorId(node.vendorId),
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 fanControl :{
                     fanMode: 0,

@@ -4,7 +4,7 @@ const  {ContactSensorDevice}  =  require( "@matter/main/devices")
 const { batFeatures, batCluster } = require("../battery");
 
 module.exports = {
-    contactsensor: function(child) {
+    contactsensor: function(child, node) {
         const device = new Endpoint(
             ContactSensorDevice.with(
                 BridgedDeviceBasicInformationServer, 
@@ -19,6 +19,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: VendorId(node.vendorId),
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 booleanState: {
                     stateValue: child.stateValue ? child.stateValue : child.initial

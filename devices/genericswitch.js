@@ -7,7 +7,7 @@ const { batFeatures, batCluster } = require("../battery");
 
 
 module.exports = {
-    genericswitch: function(child) {
+    genericswitch: function(child, node) {
         let features = [
             child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitch : Switch.Feature.LatchingSwitch,
             child.switchtype == 'momentary' ? Switch.Feature.MomentarySwitchLongPress : null, 
@@ -28,6 +28,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: VendorId(node.vendorId),
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 switch: child.switchtype == 'momentary' ? { longPressDelay: child.longPressDelay, multiPressDelay: child.multiPressDelay, multiPressMax: child.multiPressMax, numberOfPositions: child.positions }: {numberOfPositions: child.positions},
                 ... child.bat? {powerSource: batFeatures(child)}: {}

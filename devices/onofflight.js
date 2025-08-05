@@ -14,7 +14,7 @@ class NewIdentifyServer extends IdentifyServer {
 
 
 module.exports = {
-    onofflight: function(child) {
+    onofflight: function(child, node) {
         const device = new Endpoint(
             OnOffLightDevice.with(BridgedDeviceBasicInformationServer, NewIdentifyServer, ... child.bat ? batCluster(child) : []), {
                 id: child.id,
@@ -25,9 +25,14 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: node.vendorId,
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 ... child.bat? {powerSource: batFeatures(child)}: {}
         });
         return device;
     }
  }
+

@@ -15,7 +15,7 @@ class NewThermoStatServer extends ThermostatServer {
 
 
 module.exports = {
-    thermostat: function(child) {
+    thermostat: function(child, node) {
         let features = []
         if (child.heat) {
             features.push(Thermostat.Feature.Heating)
@@ -58,6 +58,11 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: node.vendorId,
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
+
                 },
                 thermostat: {
                     ...params

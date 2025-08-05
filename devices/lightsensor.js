@@ -4,7 +4,7 @@ const  {LightSensorDevice} = require("@matter/main/devices")
 const { batFeatures, batCluster } = require("../battery");
 
 module.exports = {
-    lightsensor: function(child) {
+    lightsensor: function(child, node) {
         const device = new Endpoint(
             LightSensorDevice.with(BridgedDeviceBasicInformationServer,  ... child.bat ? batCluster(child) : []), {
                 id: child.id,
@@ -15,6 +15,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: node.vendorId,
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 illuminanceMeasurement: {
                     minMeasuredValue: Math.floor(10000*Math.log10(child.minlevel) +1),

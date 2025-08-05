@@ -11,7 +11,7 @@ const { batFeatures, batCluster } = require("../battery");
 
 
 module.exports = {
-    doorlock: function(child) {
+    doorlock: function(child, node) {
         const device = new Endpoint(DoorLockDevice.with(BridgedDeviceBasicInformationServer, 
             ... child.bat ? batCluster(child) : []
             ),
@@ -24,6 +24,10 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: node.vendorId,
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
                 },
                 doorLock: {
                     lockType: 2,

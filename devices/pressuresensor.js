@@ -4,7 +4,7 @@ const {PressureSensorDevice} = require("@matter/main/devices")
 const { batFeatures, batCluster } = require("../battery");
 
 module.exports = {
-    pressuresensor: function(child) {
+    pressuresensor: function(child, node) {
         const device = new Endpoint(
             PressureSensorDevice.with(BridgedDeviceBasicInformationServer, ... child.bat ? batCluster(child) : []), {
                 id: child.id,
@@ -15,6 +15,11 @@ module.exports = {
                     serialNumber: child.id.replace('-', ''),
                     uniqueId : child.id.replace('-', '').split("").reverse().join(""),
                     reachable: true,
+                    vendorName : node.vendorName,
+                    vendorId: node.vendorId,
+                    hardwareVersion: node.hardwareVersion,
+                    softwareVersion: node.softwareVersion
+
                 },
                 pressureMeasurement: {
                     minMeasuredValue: child.minlevel,

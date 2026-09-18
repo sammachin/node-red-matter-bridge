@@ -89,13 +89,11 @@ module.exports =  function(RED) {
 
         //Storage
         const environment = Environment.default;
-        const ss = environment.get(StorageService);
         if (node.storageLocation) {
-            ss.location = node.storageLocation;
-            environment.set(StorageService, ss);
-            node.log(`Using Custom Storage Location: ${ss.location}`);
+            environment.vars.set('storage.path', node.storageLocation);
+            node.log(`Using Custom Storage Location: ${node.storageLocation}`);
         } else {
-            node.log(`Using Default Storage Location: ${ss.location}`);
+            node.log(`Using Default Storage Location: ${environment.get(StorageService).location}`);
         }
 
         //Servers

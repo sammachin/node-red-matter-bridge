@@ -9,6 +9,7 @@ test('fan input passes actual Matter attribute validation (#80)', async t => {
     const node = createNode('../fan');
     node.device = fan({ id: node.id, name: 'Test fan', bat: false });
     await aggregator.add(node.device);
+    assert.equal(node.device.state.fanControl.rockSetting.rockLeftRight, false);
     node.emit('serverReady');
     node.receive({ payload: { percent: 45 } });
     await settle();

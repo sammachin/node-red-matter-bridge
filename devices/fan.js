@@ -33,7 +33,7 @@ module.exports = {
                     speedSetting: 0,
                     speedCurrent: 0,
                     rockSupport: { rockLeftRight: true, rockUpDown: false, rockRound: false },
-                    rockSetting: FanControl.Rock.rockLeftRight,
+                    rockSetting: { rockLeftRight: false, rockUpDown: false, rockRound: false },
                     airflowDirection: 0
                 },
                 ... child.bat? {powerSource: batFeatures(child)}: {}

@@ -8,11 +8,11 @@ for thermostat startup, fan input/output and initialization errors.
 
 ## Requirements
 
-- Node.js 20.19 or later.
+- Node.js 20.19–21.x, or 22.13 or later.
 - Node-RED 3 or later.
 - Matter controllers and a network with working IPv6 and multicast.
 
-This release uses Matter.js `^0.16.10`. Automated tests cover the node logic and
+This release uses Matter.js `^0.17.9`. Automated tests cover the node logic and
 offline Matter endpoints; controller compatibility needs testing in your setup.
 
 ## Installation

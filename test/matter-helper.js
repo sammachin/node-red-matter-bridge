@@ -1,10 +1,13 @@
-const { Environment, StorageService, StorageBackendMemory, ServerNode, Endpoint, Logger } = require('@matter/main');
+const { Environment, StorageService, MemoryStorageDriver, Filesystem, ServerNode, Endpoint, Logger } = require('@matter/main');
 const { AggregatorEndpoint } = require('@matter/main/endpoints');
 
 async function createMatterBridge(t) {
     Logger.defaultLogLevel = 4;
     const environment = new Environment('bridge-regression-test', Environment.default);
-    new StorageService(environment, () => new StorageBackendMemory());
+    const storage = new StorageService(environment);
+    storage.registerDriver(MemoryStorageDriver);
+    storage.defaultDriver = 'memory';
+    environment.delete(Filesystem);
     const server = await ServerNode.create({
         id: 'bridge-regression-test',
         environment,

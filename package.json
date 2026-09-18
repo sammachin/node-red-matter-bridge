@@ -1,6 +1,6 @@
 {
   "name": "@slyke/node-red-matter-bridge",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Matter bridge nodes for Node-RED, maintained by Slyke with startup and device fixes",
   "author": "Sam Machin",
   "license": "MIT",
@@ -9,11 +9,11 @@
     "url": "git+https://github.com/Slyke/node-red-matter-bridge.git"
   },
   "dependencies": {
-    "@matter/main": "^0.16.10",
-    "traverse": "^0.6.10"
+    "@matter/main": "^0.17.9",
+    "traverse": "^0.6.11"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=20.19.0 <22.0.0 || >=22.13.0"
   },
   "keywords": [
     "node-red"

@@ -146,52 +146,71 @@ module.exports = function(RED) {
             node.pending = false
         };
 
-        this.on('input', function(msg) {
-            switch (msg.topic) {
-                case 'state':
-                     if (hasProperty(msg, 'payload')) {
-                         node.device.set(msg.payload)
-                     }
-                     if (config.wires.length != 0){
-                         msg.payload = node.device.state
-                         node.send(msg)
-                     } else{
-                         node.error((node.device.state));
-                     }
-                     break;
-                case 'battery':
-                    if (node.bat){
-                        battery(node, msg)
-                    }
-                break
-                default:
-                    if (!(hasProperty(msg.payload, 'mode') || hasProperty(msg.payload, 'setPoint') || hasProperty(msg.payload, 'temperature'))){
-                        node.error('Invalid input')
-                        break;
-                    }
-                    var newData = {thermostat : {}}
-                    sysMode(msg, newData)
-                    .then((systemMode) => setPoint(msg, newData, systemMode))
-                    .then(() => temperature(msg, newData))
-                    .then(() => {
-                        //If values are changed then set them & wait for callback otherwise send msg on
-                        if (willUpdate.call(node.device, newData)) {
-                            this.debug('WILL UPDATE')
-                            node.pending = true
-                            node.pendingmsg = msg
-                            node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
-                        } else {
-                            this.debug('WONT UPDATE')
-                            if (node.passthrough){
-                                node.send(msg);
-                            }
+        // Retained MQTT input can arrive before Matter creates this endpoint.
+        let inputReady = false;
+        const pendingInputs = [];
+        const processInput = async (msg) => {
+            try {
+                switch (msg.topic) {
+                    case 'state':
+                         if (hasProperty(msg, 'payload')) {
+                             await node.device.set(msg.payload)
+                         }
+                         if (config.wires.length != 0){
+                             msg.payload = node.device.state
+                             node.send(msg)
+                         } else{
+                             node.error((node.device.state));
+                         }
+                         break;
+                    case 'battery':
+                        if (node.bat){
+                            battery(node, msg)
                         }
-                    })
                     break
+                    default:
+                        if (!(hasProperty(msg.payload, 'mode') || hasProperty(msg.payload, 'setPoint') || hasProperty(msg.payload, 'temperature'))){
+                            node.error('Invalid input')
+                            break;
+                        }
+                        var newData = {thermostat : {}}
+                        await sysMode(msg, newData)
+                        .then((systemMode) => setPoint(msg, newData, systemMode))
+                        .then(() => temperature(msg, newData))
+                        .then(() => {
+                            //If values are changed then set them & wait for callback otherwise send msg on
+                            if (willUpdate.call(node.device, newData)) {
+                                this.debug('WILL UPDATE')
+                                node.pending = true
+                                node.pendingmsg = msg
+                                return node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                            } else {
+                                this.debug('WONT UPDATE')
+                                if (node.passthrough){
+                                    node.send(msg);
+                                }
+                            }
+                        });
+                        break
+                }
+            } catch (err) {
+                node.error(err, msg);
             }
+        };
+
+        this.on('input', function(msg) {
+            if (!inputReady) {
+                if (pendingInputs.length >= 100) {
+                    pendingInputs.shift();
+                    node.warn('Matter is not ready; discarded oldest queued thermostat message');
+                }
+                pendingInputs.push(RED.util.cloneMessage(msg));
+                return;
+            }
+            void processInput(msg);
         });
 
-        this.on('serverReady', function() {
+        this.on('serverReady', async function() {
             var node = this
             node.device.events.identify.startIdentifying.on(node.identifyEvt)
             node.device.events.identify.stopIdentifying.on(node.identifyEvt)
@@ -203,7 +222,10 @@ module.exports = function(RED) {
             if (node.cool){
                 node.device.events.thermostat.occupiedCoolingSetpoint$Changed.on(node.coolSetpointEvt)
             }
-            node.status({fill:"green",shape:"dot",text:"ready"});    
+            node.status({fill:"green",shape:"dot",text:"ready"});
+            // Replay sequentially so partial updates use the preceding message's state.
+            while (pendingInputs.length) await processInput(pendingInputs.shift());
+            inputReady = true;
         })
 
         this.on('close', async function(removed, done) {

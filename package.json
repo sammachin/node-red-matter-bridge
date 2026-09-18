@@ -7,11 +7,11 @@
   "license": "MIT",
   "repository": "https://github.com/sammachin/node-red-matter-bridge",
   "dependencies": {
-    "@matter/main": "^0.15.3",
+    "@matter/main": "^0.16.10",
     "traverse": "^0.6.10"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.19.0"
   },
   "keywords": [
     "node-red"

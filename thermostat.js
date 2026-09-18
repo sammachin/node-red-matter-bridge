@@ -1,5 +1,3 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
-
 const { hasProperty, isNumber, willUpdate } = require('./utils');
 const {battery} = require('./battery')
 
@@ -319,4 +317,3 @@ module.exports = function(RED) {
     }
     RED.nodes.registerType("matterthermostat",MatterThermostat)
 }
-

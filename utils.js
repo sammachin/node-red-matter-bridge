@@ -14,11 +14,11 @@ function isBoolean(value) {
 
 function willUpdate(data) {
     var device = this
+    if (!device || !device.state) return false
     var changed = false
     traverse(data).map(function (x) {
         if (this.isLeaf) {
-            let path = this.path.join(".")
-            let currVal = eval('device.state.'+path)
+            const currVal = this.path.reduce((value, key) => value?.[key], device.state)
             if (currVal != x) {changed = true}
         }
     })

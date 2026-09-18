@@ -7,6 +7,15 @@ const {NetworkCommissioningServer} = require("@matter/main/behaviors")
 const os = require('os');
 var pjson = require('./package.json');
 
+// Prevent Node-RED from crashing on uncaught Matter errors
+process.on('uncaughtException', (err) => {
+    console.error("Node-RED Matter Bridge Uncaught:", err);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error("Node-RED Matter Bridge Unhandled:", reason);
+});
+
 const doorlock = require("./devices/doorlock").doorlock;
 const thermostat = require("./devices/thermostat").thermostat;
 const contactsensor = require("./devices/contactsensor").contactsensor
@@ -24,25 +33,26 @@ const occupancysensor = require("./devices/occupancysensor").occupancysensor;
 const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
 const fan = require("./devices/fan").fan;
 
-
-
-
-function genPasscode(){
+function genPasscode() {
     let x = Math.floor(Math.random() * (99999998-1) +1)
     invalid = [11111111,22222222,33333333,44444444,55555555,66666666,77777777,88888888,12345678,87654321]
     if (invalid.includes(x)){
         x += 1
     }
-    let xx =  x.toString().padStart(8, '0')
+    const xx =  x.toString().padStart(8, '0')
     return +xx
 }
-
 
 module.exports =  function(RED) {
     function MatterBridge(config) {
         RED.nodes.createNode(this, config);
         var node = this;
-        if (node.restart){
+        const safeStatus = (s) => { if (!node.__closing) { try { node.status(s); } catch {} } };
+        const safeError  = (e) => { if (!node.__closing) { try { node.error(e);  } catch {} } };
+
+        global.bridgeNode = node;
+        safeStatus({ fill: "yellow", shape: "ring", text: "initializing..." });
+        if (node.restart) {
             this.log('Bridge Node Restarted')
         }
         node.restart = false
@@ -58,12 +68,13 @@ module.exports =  function(RED) {
                 break;
             case "INFO":
                 Logger.defaultLogLevel = 1;
-                break;1
+                break;
             case "DEBUG":
                 Logger.defaultLogLevel = 0;
                 break;
         }
-        this.log(`Loading Bridge node ${node.id}`)
+        this.log(`Loading Bridge node ${node.id}`);
+
         //Params
         node.users = config._users
         node.name = config.name
@@ -79,16 +90,18 @@ module.exports =  function(RED) {
         const networkId = new Uint8Array(32);
         node.serverReady = false;
         Environment.default.vars.set('mdns.networkInterface', node.networkInterface);
+
         //Storage
         const environment = Environment.default;
-        let ss = environment.get(StorageService);
-        if (node.storageLocation){
+        const ss = environment.get(StorageService);
+        if (node.storageLocation) {
             ss.location = node.storageLocation;
-            environment.set(StorageService, ss)
-            node.log(`Using Custom Storage Location: ${ss.location}`)
+            environment.set(StorageService, ss);
+            node.log(`Using Custom Storage Location: ${ss.location}`);
         } else {
-            node.log(`Using Default Storage Location: ${ss.location}`)
+            node.log(`Using Default Storage Location: ${ss.location}`);
         }
+
         //Servers
         ServerNode.create(ServerNode.RootEndpoint.with(NetworkCommissioningServer.with("EthernetNetworkInterface")),{
             id: node.id,
@@ -126,12 +139,18 @@ module.exports =  function(RED) {
         })
         .then((matterServer) =>{
             node.aggregator = new Endpoint(AggregatorEndpoint, { id: "aggregator" });
-            node.matterServer = matterServer
+            node.matterServer = matterServer;
             node.matterServer.add(node.aggregator);
-            this.log("Bridge Created, awaiting child nodes")
-            this.log('Server Ready')
-            node.serverReady = true
+            this.log("Bridge Created, awaiting child nodes");
+            this.log('Server Ready');
+            node.serverReady = true;
         })
+        .catch((err) => {
+            safeError(err);
+            console.error('An error occurred while initializing the server:', err);
+            safeStatus({ fill: "red", shape: "ring", text: "Matter init failed" });
+        });
+
         this.log('Trying..')
         if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
             this.log('Starting Bridge..')
@@ -139,24 +158,27 @@ module.exports =  function(RED) {
                 node.registered.forEach(x => {
                     x.emit('serverReady')
                 });
-                this.log('Server Started..')
+                this.log('Server Started..');
+                safeStatus({ fill: "green", shape: "dot", text: "ready" });
             }).catch((err) => {
-                console.error('An error occurred while starting the server..:', err);
-            })
+                console.error('An error occurred while starting the server...:', err);
+                safeStatus({ fill: "red", shape: "ring", text: "start failed" });
+                this.error(err);
+            });
         } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
             node.registered.forEach(x => {
-                x.emit('serverReady')
+                x.emit('serverReady');
             });
-            this.log('Server already running..')
+            this.log('Server already running..');
         } 
         else {
-            this.log('Not Starting..')
+            this.log('Not Starting..');
         }
 
        
         node.registered = []
 
-        this.on('registerChild', function(child){
+        this.on('registerChild', function(child) {
             this.log(`Registering ${child.id} with ${node.id}`)
             const index = node.users.indexOf(child.id);
             if (index > -1) { 
@@ -232,9 +254,12 @@ module.exports =  function(RED) {
                     node.registered.forEach(x => {
                         x.emit('serverReady')
                     });
-                    this.log('Server Started')
+                    this.log('Server Started');
+                    safeStatus({ fill: "green", shape: "dot", text: "ready" });
                 }).catch((err) => {
                     this.error('An error occurred while starting the server:', err);
+                    safeStatus({ fill: "red", shape: "ring", text: "start failed" });
+                    this.error(err);
                 })
             } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
                 node.registered.forEach(x => {
@@ -247,12 +272,13 @@ module.exports =  function(RED) {
         this.on('close', async function(removed, done) {
             if (removed) {
                 this.log("Bridge Removed")
-                await node.matterServer.close()
+                try { await node.matterServer?.close(); } catch(e) { node.warn(e); }
             } else {
                 this.log("Bridge Restarted")
                 node.restart = true
-                await node.matterServer.close()
+                try { await node.matterServer?.close(); } catch(e) { node.warn(e); }
             }
+            if (global.bridgeNode === node) global.bridgeNode = null;
             done();
         });
 

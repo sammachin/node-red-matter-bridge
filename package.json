@@ -56,5 +56,11 @@
     "resources/",
     "examples/",
     "CHANGELOG.md"
+  ],
+  "contributors": [
+    {
+      "name": "Slyke",
+      "url": "https://github.com/Slyke"
+    }
   ]
 }

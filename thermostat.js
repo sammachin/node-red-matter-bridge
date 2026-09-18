@@ -138,8 +138,8 @@ module.exports = function(RED) {
                 data.setPoint = node.device.state.thermostat.occupiedCoolingSetpoint
             }
             if ((node.pending && node.passthrough)) {
-                msg.eventSource = eventSource
                 var msg = node.pendingmsg
+                msg.eventSource = eventSource
                 msg.payload = data
                 node.send(msg);
             }

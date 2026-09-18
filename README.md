@@ -1,5 +1,33 @@
 # Node-RED Matter Bridge
 
+`@sammachin/node-red-matter-bridge` exposes virtual Matter devices from Node-RED
+to controllers such as Google Home, Apple Home, and Alexa.
+
+## Requirements
+
+- Node.js 20.19–21.x, or 22.13 or later.
+- Node-RED 3 or later.
+- Matter controllers and a network with working IPv6 and multicast.
+
+This release uses Matter.js `^0.17.9`. Automated tests cover the node logic and
+offline Matter endpoints; controller compatibility needs testing in your setup.
+
+## Installation
+
+From your Node-RED user directory (`~/.node-red`, or `/data` in the Docker image):
+
+```bash
+npm install @sammachin/node-red-matter-bridge
+```
+
+Restart Node-RED after installation.
+
+When upgrading, keep the same Matter
+storage directory and bridge configuration to retain the commissioned identity.
+Back up your data before upgrading Matter.js so you can restore it for rollback.
+
+## About the bridge
+
 This package is designed to allow users to create a Matter Bridge and within that Bridge expose various virtual devices to their Matter controller (eg Apple Home, Google Home, Alexa etc)
 
 The device nodes can then be used to connect to whatever non matter devices the user has in their home and translate the commands and data between them.

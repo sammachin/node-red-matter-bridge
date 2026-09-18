@@ -32,7 +32,7 @@ module.exports = function(RED) {
                 msg.payload.mode = node.device.state.fanControl.fanMode
                 msg.payload.percent = node.device.state.fanControl.percentSetting
                 msg.payload.direction = node.device.state.fanControl.airflowDirection
-                msg.payload.rock = node.device.fanControl.state.fanControl.rockSetting.rockLeftRight
+                msg.payload.rock = node.device.state.fanControl.rockSetting.rockLeftRight
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
@@ -76,22 +76,24 @@ module.exports = function(RED) {
                     }
                 break
                 default:
-                    node.pending = true
-                    node.pendingmsg = msg
+                    if (!msg.payload || typeof msg.payload !== 'object' || Array.isArray(msg.payload)) {
+                        node.error('Invalid Input: expected a fan control object', msg)
+                        break
+                    }
+                    if (msg.payload.percent === undefined && hasProperty(msg.payload, 'level')) {
+                        msg.payload.percent = msg.payload.level
+                    }
                     if (msg.payload.mode == undefined) {
                         msg.payload.mode = node.device.state.fanControl.fanMode
                     }
                     if (hasProperty(msg.payload, 'increaseLevel')){
-                        msg.payload.percent = node.device.state.fanControl.percentSetting+node.levelstep
+                        msg.payload.percent = Math.min(100, (node.device.state.fanControl.percentSetting ?? 0)+node.levelstep)
                     }
                     if (hasProperty(msg.payload, 'decreaseLevel')){
-                        msg.payload.percent = node.device.state.fanControl.percentSetting-node.levelstep
+                        msg.payload.percent = Math.max(0, (node.device.state.fanControl.percentSetting ?? 0)-node.levelstep)
                     }
                     if (msg.payload.percent == undefined) {
                         msg.payload.percent = node.device.state.fanControl.percentSetting
-                    }
-                    if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
-                        msg.payload = state = {state: msg.payload}
                     }
                     if (msg.payload.direction == undefined) {
                         msg.payload.direction = node.device.state.fanControl.airflowDirection
@@ -112,7 +114,7 @@ module.exports = function(RED) {
                         node.debug(`WILL update, ${newData}`)
                         node.pending = true
                         node.pendingmsg = msg
-                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                        node.device.set(newData).catch((err) => {node.pending = false; node.debug(err); node.error('Invalid Input')})
                     } else {
                         node.debug(`WONT update, ${newData}`)
                         if (node.passthrough){

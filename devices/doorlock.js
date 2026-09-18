@@ -2,7 +2,7 @@
 const {Endpoint}  = require("@matter/main")
 const {BridgedDeviceBasicInformationServer, PowerSourceServer}  = require("@matter/main/behaviors")
 const {DoorLockDevice} = require("@matter/main/devices")
-const  {PowerSource}  = require( "@matter/main/clusters")
+const  {PowerSource, DoorLock}  = require( "@matter/main/clusters")
 const { batFeatures, batCluster } = require("../battery");
 
 
@@ -27,6 +27,9 @@ module.exports = {
                 },
                 doorLock: {
                     lockType: 2,
+                    operatingMode: DoorLock.OperatingMode.Normal,
+                    wrongCodeEntryLimit: 3,
+                    userCodeTemporaryDisableTime: 30,
                     actuatorEnabled: true,
                     lockState: child.lockState ? child.lockState : 1
                 },

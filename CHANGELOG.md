@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.0] -- 2026-09-18
+
+### Changed
+
+- Update Matter.js to `^0.17.9` and traverse to `^0.6.11`.
+- Match the Node.js engine requirement of the new Matter runtime.
+- Test initialization of all 16 device types with the new runtime.
+
+### Fixed
+
+- Configure custom storage through `storage.path`; Matter.js 0.17 no longer accepts
+  assigning `StorageService.location`. Existing flat-file stores remain readable
+  at the configured path.
+- Initialize the fan rocking bitmap with valid attribute values.
+- Set explicit color-temperature limits for color-temperature and full-color lights.
+- Initialize the required door-lock operating mode and valid wrong-code defaults.
+
+## [0.13.0] -- 2026-09-18
+
+### Changed
+
+- Include PR #67: bridge initialization error handling and status reporting.
+- Include PR #82: clean up flow listeners and update Matter.js to `^0.16.10`.
+- Require Node.js 20.19 or later.
+
+### Fixed
+
+- #84: safely compare attributes when Matter device or cluster state is unavailable.
+- #83: preserve fan percentage output and read the correct passthrough state path.
+- #80: accept fan percentage payloads and correct the fan control documentation.
+- Queue thermostat startup input and replay it sequentially after Matter is ready.
+- Initialize thermostat passthrough messages before assigning event metadata.
+
 ## [0.12.3] -- 2025-08-03
 Bug fix
 

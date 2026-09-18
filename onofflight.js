@@ -1,4 +1,3 @@
-const {logEndpoint, EndpointServer} = require( "@matter/main")
 const { hasProperty, willUpdate } = require('./utils');
 const {battery} = require('./battery')
 

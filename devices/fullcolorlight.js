@@ -33,6 +33,8 @@ module.exports = {
                     reachable: true,
                 },
                 colorControl: {
+                    colorTempPhysicalMinMireds: 1,
+                    colorTempPhysicalMaxMireds: 0xFEFF,
                     coupleColorTempToLevelMinMireds: 0x00FA,
                     startUpColorTemperatureMireds: 0x00FA,
                     colorMode: 0

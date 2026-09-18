@@ -100,3 +100,6 @@ repllightdevice.js
 lib/diff.js
 scratch.js
 replfan.js
+
+# macOS Finder metadata
+.DS_Store

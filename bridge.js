@@ -1,11 +1,17 @@
 const { Endpoint, Environment, ServerNode, Logger, VendorId, StorageService } = require("@matter/main");
 const {AggregatorEndpoint} = require( "@matter/main/endpoints")
-const {DeviceCommisioner} = require("@matter/main/protocol")
-const {NetworkCommissioning} = require("@matter/main/clusters")
-const {NetworkCommissioningServer} = require("@matter/main/behaviors")
+const {DeviceCommissioner} = require("@matter/main/protocol")
 
 const os = require('os');
-var pjson = require('./package.json');
+
+// Prevent Node-RED from crashing on uncaught Matter errors
+process.on('uncaughtException', (err) => {
+    console.error("Node-RED Matter Bridge Uncaught:", err);
+});
+
+process.on('unhandledRejection', (reason) => {
+    console.error("Node-RED Matter Bridge Unhandled:", reason);
+});
 
 const doorlock = require("./devices/doorlock").doorlock;
 const thermostat = require("./devices/thermostat").thermostat;
@@ -24,25 +30,26 @@ const occupancysensor = require("./devices/occupancysensor").occupancysensor;
 const temperaturesensor = require("./devices/temperaturesensor").temperaturesensor;
 const fan = require("./devices/fan").fan;
 
-
-
-
-function genPasscode(){
+function genPasscode() {
     let x = Math.floor(Math.random() * (99999998-1) +1)
     invalid = [11111111,22222222,33333333,44444444,55555555,66666666,77777777,88888888,12345678,87654321]
     if (invalid.includes(x)){
         x += 1
     }
-    let xx =  x.toString().padStart(8, '0')
+    const xx =  x.toString().padStart(8, '0')
     return +xx
 }
-
 
 module.exports =  function(RED) {
     function MatterBridge(config) {
         RED.nodes.createNode(this, config);
         var node = this;
-        if (node.restart){
+        const safeStatus = (s) => { if (!node.__closing) { try { node.status(s); } catch {} } };
+        const safeError  = (e) => { if (!node.__closing) { try { node.error(e);  } catch {} } };
+
+        global.bridgeNode = node;
+        safeStatus({ fill: "yellow", shape: "ring", text: "initializing..." });
+        if (node.restart) {
             this.log('Bridge Node Restarted')
         }
         node.restart = false
@@ -58,12 +65,13 @@ module.exports =  function(RED) {
                 break;
             case "INFO":
                 Logger.defaultLogLevel = 1;
-                break;1
+                break;
             case "DEBUG":
                 Logger.defaultLogLevel = 0;
                 break;
         }
-        this.log(`Loading Bridge node ${node.id}`)
+        this.log(`Loading Bridge node ${node.id}`);
+
         //Params
         node.users = config._users
         node.name = config.name
@@ -76,21 +84,20 @@ module.exports =  function(RED) {
         node.port = 5540
         node.passcode = genPasscode()
         node.discriminator = +Math.floor(Math.random() * 4095).toString().padStart(4, '0')
-        const networkId = new Uint8Array(32);
         node.serverReady = false;
         Environment.default.vars.set('mdns.networkInterface', node.networkInterface);
+
         //Storage
         const environment = Environment.default;
-        let ss = environment.get(StorageService);
-        if (node.storageLocation){
-            ss.location = node.storageLocation;
-            environment.set(StorageService, ss)
-            node.log(`Using Custom Storage Location: ${ss.location}`)
+        if (node.storageLocation) {
+            environment.vars.set('storage.path', node.storageLocation);
+            node.log(`Using Custom Storage Location: ${node.storageLocation}`);
         } else {
-            node.log(`Using Default Storage Location: ${ss.location}`)
+            node.log(`Using Default Storage Location: ${environment.get(StorageService).location}`);
         }
+
         //Servers
-        ServerNode.create(ServerNode.RootEndpoint.with(NetworkCommissioningServer.with("EthernetNetworkInterface")),{
+        ServerNode.create({
             id: node.id,
             network: {
                 port: node.port,
@@ -112,26 +119,22 @@ module.exports =  function(RED) {
                 productId: node.productId,
                 serialNumber: node.id.replace('-', ''),
                 uniqueId : node.id.replace('-', '').split("").reverse().join(""),
-                hardwareVersion: 1,
-                softwareVersion: Number(pjson.version.replaceAll('.', ''))
-            },
-            networkCommissioning: {
-                maxNetworks: 1,
-                interfaceEnabled: true,
-                lastConnectErrorValue: 0,
-                lastNetworkId: networkId,
-                lastNetworkingStatus: NetworkCommissioning.NetworkCommissioningStatus.Success,
-                networks: [{ networkId: networkId, connected: true }],
             }
         })
         .then((matterServer) =>{
             node.aggregator = new Endpoint(AggregatorEndpoint, { id: "aggregator" });
-            node.matterServer = matterServer
+            node.matterServer = matterServer;
             node.matterServer.add(node.aggregator);
-            this.log("Bridge Created, awaiting child nodes")
-            this.log('Server Ready')
-            node.serverReady = true
+            this.log("Bridge Created, awaiting child nodes");
+            this.log('Server Ready');
+            node.serverReady = true;
         })
+        .catch((err) => {
+            safeError(err);
+            console.error('An error occurred while initializing the server:', err);
+            safeStatus({ fill: "red", shape: "ring", text: "Matter init failed" });
+        });
+
         this.log('Trying..')
         if (node.users.length == 0 && node.serverReady && !node.matterServer.lifecycle.isOnline){
             this.log('Starting Bridge..')
@@ -139,24 +142,27 @@ module.exports =  function(RED) {
                 node.registered.forEach(x => {
                     x.emit('serverReady')
                 });
-                this.log('Server Started..')
+                this.log('Server Started..');
+                safeStatus({ fill: "green", shape: "dot", text: "ready" });
             }).catch((err) => {
-                console.error('An error occurred while starting the server..:', err);
-            })
+                console.error('An error occurred while starting the server...:', err);
+                safeStatus({ fill: "red", shape: "ring", text: "start failed" });
+                this.error(err);
+            });
         } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
             node.registered.forEach(x => {
-                x.emit('serverReady')
+                x.emit('serverReady');
             });
-            this.log('Server already running..')
+            this.log('Server already running..');
         } 
         else {
-            this.log('Not Starting..')
+            this.log('Not Starting..');
         }
 
        
         node.registered = []
 
-        this.on('registerChild', function(child){
+        this.on('registerChild', function(child) {
             this.log(`Registering ${child.id} with ${node.id}`)
             const index = node.users.indexOf(child.id);
             if (index > -1) { 
@@ -232,9 +238,12 @@ module.exports =  function(RED) {
                     node.registered.forEach(x => {
                         x.emit('serverReady')
                     });
-                    this.log('Server Started')
+                    this.log('Server Started');
+                    safeStatus({ fill: "green", shape: "dot", text: "ready" });
                 }).catch((err) => {
                     this.error('An error occurred while starting the server:', err);
+                    safeStatus({ fill: "red", shape: "ring", text: "start failed" });
+                    this.error(err);
                 })
             } else if (node.users.length == 0 && node.serverReady && node.matterServer.lifecycle.isOnline){
                 node.registered.forEach(x => {
@@ -244,20 +253,7 @@ module.exports =  function(RED) {
             }
         })
 
-        this.on('close', async function(removed, done) {
-            if (removed) {
-                this.log("Bridge Removed")
-                await node.matterServer.close()
-            } else {
-                this.log("Bridge Restarted")
-                node.restart = true
-                await node.matterServer.close()
-            }
-            done();
-        });
-
-        //Remove disabled nodes (and nodes on disabled tabs) from the users list so server isn't waiting for them to start.
-        RED.events.on("flows:started", function(flow) {
+        node.onFlowsStarted = function(flow) {
             let disabledflows = []
             flow.config.flows.forEach(x => {
                 if (x.type =='tab' && x.disabled){
@@ -272,7 +268,24 @@ module.exports =  function(RED) {
                     }
                 }
             })
-        })
+        }
+
+        this.on('close', async function(removed, done) {
+            RED.events.removeListener("flows:started", node.onFlowsStarted)
+            if (removed) {
+                this.log("Bridge Removed")
+                try { await node.matterServer?.close(); } catch(e) { node.warn(e); }
+            } else {
+                this.log("Bridge Restarted")
+                node.restart = true
+                try { await node.matterServer?.close(); } catch(e) { node.warn(e); }
+            }
+            if (global.bridgeNode === node) global.bridgeNode = null;
+            done();
+        });
+
+        //Remove disabled nodes (and nodes on disabled tabs) from the users list so server isn't waiting for them to start.
+        RED.events.on("flows:started", node.onFlowsStarted)
     }  
 
     RED.nodes.registerType("matterbridge",MatterBridge);
@@ -298,7 +311,7 @@ module.exports =  function(RED) {
     RED.httpAdmin.get('/_matterbridge/reopencommisioning/:id', RED.auth.needsPermission('admin.write'), function(req,res){
         let target_node = RED.nodes.getNode(req.params.id)
         if (target_node){
-            let comm = target_node.matterServer.env.get(DeviceCommisioner)
+            let comm = target_node.matterServer.env.get(DeviceCommissioner)
             comm.allowBasicCommissioning().then(() => {
                 const pairingData = target_node.matterServer.state.commissioning.pairingCodes;
                 const { qrPairingCode, manualPairingCode } = pairingData;

@@ -76,20 +76,24 @@ module.exports = function(RED) {
                     }
                 break
                 default:
+                    if (!msg.payload || typeof msg.payload !== 'object' || Array.isArray(msg.payload)) {
+                        node.error('Invalid Input: expected a fan control object', msg)
+                        break
+                    }
+                    if (msg.payload.percent === undefined && hasProperty(msg.payload, 'level')) {
+                        msg.payload.percent = msg.payload.level
+                    }
                     if (msg.payload.mode == undefined) {
                         msg.payload.mode = node.device.state.fanControl.fanMode
                     }
                     if (hasProperty(msg.payload, 'increaseLevel')){
-                        msg.payload.percent = node.device.state.fanControl.percentSetting+node.levelstep
+                        msg.payload.percent = Math.min(100, (node.device.state.fanControl.percentSetting ?? 0)+node.levelstep)
                     }
                     if (hasProperty(msg.payload, 'decreaseLevel')){
-                        msg.payload.percent = node.device.state.fanControl.percentSetting-node.levelstep
+                        msg.payload.percent = Math.max(0, (node.device.state.fanControl.percentSetting ?? 0)-node.levelstep)
                     }
                     if (msg.payload.percent == undefined) {
                         msg.payload.percent = node.device.state.fanControl.percentSetting
-                    }
-                    if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
-                        msg.payload = state = {state: msg.payload}
                     }
                     if (msg.payload.direction == undefined) {
                         msg.payload.direction = node.device.state.fanControl.airflowDirection

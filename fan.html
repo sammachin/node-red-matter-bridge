@@ -56,73 +56,31 @@
 </script>
 
 <script type="text/x-red" data-help-name="matterfan">
-   <p>A Bridged Dimmable light</p>
-
-   <h3>Inputs</h3>
-       <dl class="message-properties">
-            <dt class="optional">
-                payload.state         
-                <span class="property-type">
-                    string | bool | number
-                </span>
-            </dt>
-            <dd> 
-                Control the state of the light, accepts either true/fase, "on/off" or "0/1",<br>
-                You can also toggle the state by setting the value to "toggle"
-            </dd>
-           <dt class="optional">
-            payload.level         
-            <span class="property-type">
-                number
-            </span>
-            </dt>
-            <dd> 
-                Control the level of the light,<br>
-                either 0-100 or 0-254 depending on the configuration of the range property
-            </dd>
-            <dt class="optional">
-                payload.increaseLevel         
- 
-            </dt>
-            <dd> 
-                If set this will increase the level by the value defined in the Level Step config
-            </dd>
-            <dt class="optional">
-                payload.decreaseLevel         
- 
-            </dt>
-            <dd> 
-                If set this will decrease the level by the value defined in the Level Step config
-            </dd>
-       </dl>
-   
-    <h3>Outputs</h3>
+    <p>A bridged Matter fan.</p>
+    <h3>Inputs</h3>
+    <p>Send an object in <code>msg.payload</code>. Omitted properties keep their
+    current values.</p>
     <dl class="message-properties">
-        <dt>
-            payload.state         
-            <span class="property-type">
-                bool 
-            </span>
-        </dt>
-        <dd> 
-            State of the light, on is true, off is false
-        </dd>
-       <dt class="optional">
-        payload.level         
-        <span class="property-type">
-            number
-        </span>
-        </dt>
-        <dd> 
-            The level of the light,<br>
-            either 0-100 or 0-254 depending on the configuration of the range property
-        </dd>
-   </dl>
-   
-   <h3>Details</h3>
-   Passthrough will control the behaviour of the node in regards to an input, 
-   if set to True then the inout msg wil be output with the new state in the payload.
-   If set to False then the output will be suppressed.
-   Where the devices state is updated by an external matter controller a new msg object will always be output. 
-   
+        <dt class="optional">payload.percent <span class="property-type">number</span></dt>
+        <dd>Fan percentage, 0-100. <code>payload.level</code> is also accepted;
+        <code>percent</code> takes precedence when both are supplied.</dd>
+        <dt class="optional">payload.mode <span class="property-type">number</span></dt>
+        <dd>Matter fan mode: 0 off, 1 low, 2 medium, 3 high, 5 auto.</dd>
+        <dt class="optional">payload.direction <span class="property-type">number</span></dt>
+        <dd>Airflow direction: 0 forward or 1 reverse.</dd>
+        <dt class="optional">payload.rock <span class="property-type">boolean</span></dt>
+        <dd>Enable or disable left/right oscillation.</dd>
+        <dt class="optional">payload.increaseLevel</dt>
+        <dd>Increase the current percentage by Level Step, up to 100.</dd>
+        <dt class="optional">payload.decreaseLevel</dt>
+        <dd>Decrease the current percentage by Level Step, down to 0.</dd>
+    </dl>
+    <p>For example: <code>msg.payload = { mode: 3, percent: 75 }</code>.</p>
+    <h3>Outputs</h3>
+    <p><code>msg.payload</code> contains <code>mode</code>, <code>percent</code>,
+    <code>direction</code> and <code>rock</code> with the values described above.</p>
+    <h3>Details</h3>
+    <p>With passthrough enabled, input messages are output with the updated state.
+    With passthrough disabled, output caused by input messages is suppressed.
+    Changes received from a Matter controller produce a new message.</p>
 </script>

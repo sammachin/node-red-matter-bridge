@@ -32,7 +32,7 @@ module.exports = function(RED) {
                 msg.payload.mode = node.device.state.fanControl.fanMode
                 msg.payload.percent = node.device.state.fanControl.percentSetting
                 msg.payload.direction = node.device.state.fanControl.airflowDirection
-                msg.payload.rock = node.device.fanControl.state.fanControl.rockSetting.rockLeftRight
+                msg.payload.rock = node.device.state.fanControl.rockSetting.rockLeftRight
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
@@ -76,8 +76,6 @@ module.exports = function(RED) {
                     }
                 break
                 default:
-                    node.pending = true
-                    node.pendingmsg = msg
                     if (msg.payload.mode == undefined) {
                         msg.payload.mode = node.device.state.fanControl.fanMode
                     }
@@ -112,7 +110,7 @@ module.exports = function(RED) {
                         node.debug(`WILL update, ${newData}`)
                         node.pending = true
                         node.pendingmsg = msg
-                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                        node.device.set(newData).catch((err) => {node.pending = false; node.debug(err); node.error('Invalid Input')})
                     } else {
                         node.debug(`WONT update, ${newData}`)
                         if (node.passthrough){

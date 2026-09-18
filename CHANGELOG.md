@@ -24,14 +24,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [0.13.0] -- 2026-09-18
 
-First release of the Slyke fork, published as `@slyke/node-red-matter-bridge`.
-
 ### Changed
 
-- Include upstream PR #67: bridge initialization error handling and status reporting.
-- Include upstream PR #82: clean up flow listeners and update Matter.js to `^0.16.10`.
+- Include PR #67: bridge initialization error handling and status reporting.
+- Include PR #82: clean up flow listeners and update Matter.js to `^0.16.10`.
 - Require Node.js 20.19 or later.
-- Load the pairing QR-code resource from the new package scope.
 
 ### Fixed
 

@@ -1,13 +1,10 @@
 {
-  "name": "@slyke/node-red-matter-bridge",
+  "name": "@sammachin/node-red-matter-bridge",
   "version": "0.14.0",
-  "description": "Matter bridge nodes for Node-RED, maintained by Slyke with startup and device fixes",
+  "description": "Node red package for implementing a matter bridge",
   "author": "Sam Machin",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Slyke/node-red-matter-bridge.git"
-  },
+  "repository": "https://github.com/sammachin/node-red-matter-bridge",
   "dependencies": {
     "@matter/main": "^0.17.9",
     "traverse": "^0.6.11"
@@ -44,16 +41,10 @@
     "test": "node --test test/*.test.js",
     "prepublishOnly": "npm test"
   },
-  "homepage": "https://github.com/Slyke/node-red-matter-bridge#readme",
+  "homepage": "https://github.com/sammachin/node-red-matter-bridge#readme",
   "bugs": {
-    "url": "https://github.com/Slyke/node-red-matter-bridge/issues"
+    "url": "https://github.com/sammachin/node-red-matter-bridge/issues"
   },
-  "contributors": [
-    {
-      "name": "Slyke",
-      "url": "https://github.com/Slyke"
-    }
-  ],
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"

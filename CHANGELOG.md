@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.13.0] -- 2026-09-18
+
+First release of the Slyke fork, published as `@slyke/node-red-matter-bridge`.
+
+### Changed
+
+- Include upstream PR #67: bridge initialization error handling and status reporting.
+- Include upstream PR #82: clean up flow listeners and update Matter.js to `^0.16.10`.
+- Require Node.js 20.19 or later.
+- Load the pairing QR-code resource from the new package scope.
+
+### Fixed
+
+- #84: safely compare attributes when Matter device or cluster state is unavailable.
+- #83: preserve fan percentage output and read the correct passthrough state path.
+- #80: accept fan percentage payloads and correct the fan control documentation.
+- Queue thermostat startup input and replay it sequentially after Matter is ready.
+- Initialize thermostat passthrough messages before assigning event metadata.
+
 ## [0.12.3] -- 2025-08-03
 Bug fix
 

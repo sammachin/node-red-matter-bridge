@@ -1,4 +1,43 @@
-# Node-RED Matter Bridge
+# Node-RED Matter Bridge (Slyke fork)
+
+`@slyke/node-red-matter-bridge` is a fork of
+[Sam Machin's Node-RED Matter Bridge](https://github.com/sammachin/node-red-matter-bridge).
+It includes upstream PRs [#67](https://github.com/sammachin/node-red-matter-bridge/pull/67)
+and [#82](https://github.com/sammachin/node-red-matter-bridge/pull/82), plus fixes
+for thermostat startup, fan input/output and initialization errors.
+
+## Requirements
+
+- Node.js 20.19 or later.
+- Node-RED 3 or later.
+- Matter controllers and a network with working IPv6 and multicast.
+
+This release uses Matter.js `^0.16.10`. Automated tests cover the node logic and
+offline Matter endpoints; controller compatibility needs testing in your setup.
+
+## Installation
+
+From your Node-RED user directory (`~/.node-red`, or `/data` in the Docker image):
+
+```bash
+npm install @slyke/node-red-matter-bridge
+```
+
+Restart Node-RED after installation.
+
+When replacing `@sammachin/node-red-matter-bridge`, stop Node-RED first and run:
+
+```bash
+npm uninstall @sammachin/node-red-matter-bridge
+npm install @slyke/node-red-matter-bridge
+```
+
+Then restart Node-RED. Install only one of these packages: they register the same
+node types. Existing flow node types and IDs are preserved. Keep the same Matter
+storage directory and bridge configuration to retain the commissioned identity.
+Back up your data before upgrading Matter.js so you can restore it for rollback.
+
+## About the bridge
 
 This package is designed to allow users to create a Matter Bridge and within that Bridge expose various virtual devices to their Matter controller (eg Apple Home, Google Home, Alexa etc)
 
@@ -54,4 +93,4 @@ Note: This package is for creating virtual devices to control from a Matter Cont
 This is not a certified Matter device and is for development and experimentation only, for more information about Matter and to download the standards goto https://handbook.buildwithmatter.com
 
 
-See the [CHANGELOG](https://github.com/sammachin/node-red-matter-bridge/blob/main/CHANGELOG.md) for details of each release
+See the [CHANGELOG](https://github.com/Slyke/node-red-matter-bridge/blob/matter-bridge-prs-and-fixes/CHANGELOG.md) for details of each release

@@ -9,6 +9,11 @@ const { createRequire } = require('node:module');
 const matter = require('@matter/main');
 
 test('bridge reuses legacy file storage at its configured path', async t => {
+    // Loopback is named 'lo' on Linux but 'lo0' on macOS; find it by flag.
+    const interfaces = os.networkInterfaces();
+    const loopback = Object.keys(interfaces).find(name =>
+        interfaces[name].some(addr => addr.internal)
+    ) || 'lo';
     const root = await fs.mkdtemp(path.join(os.tmpdir(), 'matter-storage-test-'));
     const id = 'legacy-test-bridge';
     const directory = path.join(root, id);
@@ -65,7 +70,7 @@ test('bridge reuses legacy file storage at its configured path', async t => {
     // An unregistered child keeps this test offline: never start or advertise.
     node = new Constructor({
         _users: ['offline-child'], name: 'Storage test', vendorId: 0xfff1,
-        productId: 0x8000, networkInterface: 'lo', storageLocation: root, logLevel: 'ERROR'
+        productId: 0x8000, networkInterface: loopback, storageLocation: root, logLevel: 'ERROR'
     });
     await creation;
     await node.aggregator.construction;

@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   250 mireds (above 4000 K). Keep the color/level coupling minimum aligned with
   the physical minimum so valid cool-white settings survive a restart.
 
+- Clamp light brightness, hue, saturation and color-temperature inputs to their
+  supported limits, warning in the Node-RED Debug sidebar when clamping occurs.
+  Reject non-finite inputs and round Matter attributes to whole values.
+- Honor mired output units for controller changes on full-color lights, preserve
+  zero hue/saturation inputs, and clear pending state after failed updates.
+
 ## [0.14.0] -- 2026-09-18
 
 ### Changed

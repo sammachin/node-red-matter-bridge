@@ -1,5 +1,6 @@
 const { hasProperty, willUpdate } = require('./utils');
 const {battery} = require('./battery')
+const { lightInput } = require('./light-input');
 
 
 module.exports = function(RED) {
@@ -76,30 +77,10 @@ module.exports = function(RED) {
                     }
                 break
                 default:
-                    if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
+                    const input = lightInput(node, msg, 'dimmable');
+                    if (!input) return;
                     if (msg.payload.state == undefined) {
                         msg.payload.state = node.device.state.onOff.onOff
-                    }
-                    if (hasProperty(msg.payload, 'increaseLevel')){
-                        if (node.range == "100") { 
-                            msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
-                        } else {
-                            msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
-                        }
-                    }
-                    if (hasProperty(msg.payload, 'decreaseLevel')){
-                        if (node.range == "100") {
-                            msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
-                        } else {
-                            msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
-                        }
-                    }
-                    if (msg.payload.level == undefined) {
-                        msg.payload.level = node.device.state.levelControl.currentLevel
-                    }
-                    msg.payload.level=Math.max(2, Math.min(254, msg.payload.level))
-                    if (msg.payload.state == undefined || typeof(msg.payload) != "object"){
-                        msg.payload = state = {state: msg.payload}
                     }
                     if (typeof msg.payload.state != "boolean") {
                         switch (msg.payload.state){
@@ -123,7 +104,7 @@ module.exports = function(RED) {
                             onOff: msg.payload.state,
                         },
                         levelControl: {
-                            currentLevel: msg.payload.level
+                            currentLevel: input.level
                         }
                     }
                     //If values are changed then set them & wait for callback otherwise send msg on
@@ -131,7 +112,12 @@ module.exports = function(RED) {
                         node.debug(`WILL update, ${newData}`)
                         node.pending = true
                         node.pendingmsg = msg
-                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                        node.device.set(newData).catch((err) => {
+                            node.pending = false;
+                            node.pendingmsg = null;
+                            node.debug(err);
+                            node.error('Invalid Input', msg);
+                        })
                     } else {
                         node.debug(`WONT update, ${newData}`)
                         if (node.passthrough){

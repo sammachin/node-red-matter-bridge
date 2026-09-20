@@ -163,6 +163,8 @@
    </dl>
    <i>Note: Color Temp cannot be set at the same time as Hue or Saturation</i>
    <h3>Details</h3>
+   <p>Controller XY color commands are converted to the existing 0–254 hue and
+   saturation output values, so the same flow handles both color command formats.</p>
    <p>Finite out-of-range light values are clamped to the supported limits, with a
    warning in the Debug sidebar. Brightness uses the selected range; hue and
    saturation use 0–254. Color temperature uses the selected Kelvin/Mired units

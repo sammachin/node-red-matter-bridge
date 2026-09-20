@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.1] -- 2026-09-20
+
+### Fixed
+
+- Forward XY color commands as hue/saturation messages and keep multi-attribute
+  local updates suppressed when passthrough is disabled.
+- Advertise full-color lights as Extended Color Light (0x010D), rather than
+  Color Temperature Light (0x010C), so controllers can identify their color support.
+
+- Restore full-color and color-temperature lights with saved temperatures below
+  250 mireds (above 4000 K). Keep the color/level coupling minimum aligned with
+  the physical minimum so valid cool-white settings survive a restart.
+
+- Clamp light brightness, hue, saturation and color-temperature inputs to their
+  supported limits, warning in the Node-RED Debug sidebar when clamping occurs.
+  Reject non-finite inputs and round Matter attributes to whole values.
+- Honor mired output units for controller changes on full-color lights, preserve
+  zero hue/saturation inputs, and clear pending state after failed updates.
+
 ## [0.14.0] -- 2026-09-18
 
 ### Changed

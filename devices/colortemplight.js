@@ -36,7 +36,7 @@ module.exports = {
                 colorControl: {
                     colorTempPhysicalMinMireds: 1,
                     colorTempPhysicalMaxMireds: 0xFEFF,
-                    coupleColorTempToLevelMinMireds: 0x00FA,
+                    coupleColorTempToLevelMinMireds: 1,
                     startUpColorTemperatureMireds: 0x00FA,
                     colorMode: 2
                 },

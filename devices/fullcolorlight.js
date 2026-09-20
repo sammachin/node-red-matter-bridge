@@ -1,6 +1,6 @@
 const  { Endpoint }  = require("@matter/main");
 const  { BridgedDeviceBasicInformationServer, IdentifyServer}  = require("@matter/main/behaviors")
-const  { ColorTemperatureLightDevice }  = require( "@matter/main/devices")
+const  { ExtendedColorLightDevice }  = require( "@matter/main/devices")
 const  { ColorControlServer } = require( "@matter/main/behaviors")
 const  { ColorControl }  = require( "@matter/main/clusters")
 const { batFeatures, batCluster } = require("../battery");
@@ -18,7 +18,7 @@ class NewIdentifyServer extends IdentifyServer {
 module.exports = {
     fullcolorlight: function(child) {
         const device = new Endpoint(
-            ColorTemperatureLightDevice.with(BridgedDeviceBasicInformationServer, NewIdentifyServer, ColorControlServer.with(
+            ExtendedColorLightDevice.with(BridgedDeviceBasicInformationServer, NewIdentifyServer, ColorControlServer.with(
                 ColorControl.Feature.HueSaturation,
                 ColorControl.Feature.Xy,
                 ColorControl.Feature.ColorTemperature,
@@ -35,7 +35,7 @@ module.exports = {
                 colorControl: {
                     colorTempPhysicalMinMireds: 1,
                     colorTempPhysicalMaxMireds: 0xFEFF,
-                    coupleColorTempToLevelMinMireds: 0x00FA,
+                    coupleColorTempToLevelMinMireds: 1,
                     startUpColorTemperatureMireds: 0x00FA,
                     colorMode: 0
                 },

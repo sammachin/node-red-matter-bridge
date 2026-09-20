@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Restore full-color and color-temperature lights with saved temperatures below
+  250 mireds (above 4000 K). Keep the color/level coupling minimum aligned with
+  the physical minimum so valid cool-white settings survive a restart.
+
 ## [0.14.0] -- 2026-09-18
 
 ### Changed

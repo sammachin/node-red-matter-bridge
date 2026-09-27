@@ -6,7 +6,7 @@
         inputs:1,
         outputs:0,
         defaults: {
-            name: {value:""},
+            name: {value:"", validate: function(v) { return (!v || v.length <= 32) ? true : "Name must be 32 characters or fewer"; }},
             bridge: { value: "", type: "matterbridge", required: true },
             minlevel: {value: -3276.7},
             maxlevel: {value: 3276.7},

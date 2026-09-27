@@ -3,11 +3,11 @@
     RED.nodes.registerType('matterbridge',{
         category: 'config',
         defaults: {
-            name: {},
+            name: {value:"", validate: function(v) { return (!v || v.length <= 32) ? true : "Name must be 32 characters or fewer"; }},
             vendorId : {value: "0xFFF1"},
             productId : {value: "0x8000"},
             vendorName : {value: "Node-RED-Matter"},
-            productName : {value: "Node-RED-Bridge"},
+            productName : {value: "Node-RED-Bridge", validate: function(v) { return (!v || v.length <= 32) ? true : "Product Name must be 32 characters or fewer"; }},
             storageLocation: {required: true},
             networkInterface : {required: true},
             logLevel: {value: "ERROR"}

@@ -1,4 +1,5 @@
 const { Endpoint, Environment, ServerNode, Logger, VendorId, StorageService } = require("@matter/main");
+const { clampName, MAX_NAME_LENGTH } = require("./utils");
 const {AggregatorEndpoint} = require( "@matter/main/endpoints")
 const {DeviceCommissioner} = require("@matter/main/protocol")
 
@@ -113,9 +114,9 @@ module.exports =  function(RED) {
             basicInformation: {
                 vendorName : 'Node-RED Matter Bridge',
                 vendorId: VendorId(node.vendorId),
-                nodeLabel: node.name,
-                productName: node.name,
-                productLabel: node.name,
+                nodeLabel: clampName(node.name),
+                productName: clampName(node.name),
+                productLabel: clampName(node.name),
                 productId: node.productId,
                 serialNumber: node.id.replace('-', ''),
                 uniqueId : node.id.replace('-', '').split("").reverse().join(""),
@@ -164,6 +165,13 @@ module.exports =  function(RED) {
 
         this.on('registerChild', function(child) {
             this.log(`Registering ${child.id} with ${node.id}`)
+            // Safety net: Matter rejects names longer than MAX_NAME_LENGTH and the
+            // resulting validation error crashes the bridge. Editor validation should
+            // prevent this, but truncate here in case an over-length name slips through.
+            if (typeof child.name === 'string' && child.name.length > MAX_NAME_LENGTH) {
+                this.warn(`Device name "${child.name}" exceeds ${MAX_NAME_LENGTH} characters and has been truncated`)
+                child.name = clampName(child.name)
+            }
             const index = node.users.indexOf(child.id);
             if (index > -1) { 
                 node.users.splice(index, 1); 

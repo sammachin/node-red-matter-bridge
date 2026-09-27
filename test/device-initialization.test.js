@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const test = require('node:test');
 const { createMatterBridge } = require('./matter-helper');
+const { clampName } = require('../utils');
 
 const devices = [
     'onofflight', 'onoffsocket', 'dimmablelight', 'fullcolorlight', 'colortemplight',
@@ -27,4 +28,19 @@ test('all device types initialize on the current Matter runtime', async t => {
             assert.equal(aggregator.parts.get(device.id), device);
         });
     }
+});
+
+// An over-length device name failed BridgedDeviceBasicInformation validation and
+// crashed the bridge with an unhandled rejection. The bridge clamps names before
+// building the endpoint; this proves a clamped long name passes Matter validation.
+test('a clamped over-length device name initializes without crashing', async t => {
+    const aggregator = await createMatterBridge(t);
+    const longName = 'Aussenfühler Norden, Aussenthermostat Norden';
+    const device = require('../devices/temperaturesensor').temperaturesensor({
+        id: 'test-longname', name: clampName(longName), bat: false,
+        minlevel: 0, maxlevel: 10000, measuredValue: 0
+    });
+    await aggregator.add(device);
+    assert.equal(aggregator.parts.get(device.id), device);
+    assert.equal(device.state.bridgedDeviceBasicInformation.productName.length, 32);
 });

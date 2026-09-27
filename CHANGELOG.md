@@ -5,7 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [0.14.1] -- 2026-09-27
+
+### Fixed
+- Fixed a bug with Occupancy Sensor where the device type required the specific features to be setup
+- Clamped device names to 32 chars as per matter spec to avoid errors with long names
+
+
 ## [0.14.0] -- 2026-09-18
+
 
 ### Changed
 

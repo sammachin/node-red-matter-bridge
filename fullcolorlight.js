@@ -1,6 +1,32 @@
 const { hasProperty, willUpdate } = require('./utils');
 const {battery} = require('./battery')
+const { lightInput, temperatureOutput } = require('./light-input');
+const { xyToHsv } = require('@matter/main/behaviors/color-control');
 
+
+
+
+function outputColor(node, payload) {
+    const color = node.device.state.colorControl;
+    // A reused passthrough message must not retain values from the previous mode.
+    delete payload.hue;
+    delete payload.sat;
+    delete payload.temp;
+    if (color.colorMode === 0) {
+        payload.hue = color.currentHue;
+        payload.sat = color.currentSaturation;
+    } else if (color.colorMode === 1) {
+        // Matter represents CIE x/y as fractions of 65536. Preserve the existing
+        // Node-RED hue/saturation payload contract (both on the 0-254 scale).
+        const [hue, saturation] = xyToHsv(color.currentX / 65536, color.currentY / 65536);
+        payload.hue = Math.max(0, Math.min(254, Math.round(hue * 254 / 360)));
+        payload.sat = Math.max(0, Math.min(254, Math.round(saturation * 254)));
+    } else if (color.colorMode === 2) {
+        payload.temp = temperatureOutput(node);
+    } else {
+        node.error(`Unknown color mode: ${color.colorMode}`);
+    }
+}
 
 module.exports = function(RED) {
     function MatterFullColorLight(config) {
@@ -46,53 +72,11 @@ module.exports = function(RED) {
                     battery(node, msg)
                 }
                 break
-                default:    
+                default:
+                    const input = lightInput(node, msg, 'fullcolor');
+                    if (!input) return;
                     if (msg.payload.state == undefined) {
                         msg.payload.state = node.device.state.onOff.onOff
-                    }
-                    if (hasProperty(msg.payload, 'level') && node.range == "100"){ msg.payload.level = Math.round(msg.payload.level*2.54)}
-                    if (hasProperty(msg.payload, 'increaseLevel')){
-                        if (node.range == "100") { 
-                            msg.payload.level = node.device.state.levelControl.currentLevel+Math.round(node.levelstep*2.54)
-                        } else {
-                            msg.payload.level = node.device.state.levelControl.currentLevel+node.levelstep
-                        }
-                    }
-                    if (hasProperty(msg.payload, 'decreaseLevel')){
-                        if (node.range == "100") {
-                            msg.payload.level = node.device.state.levelControl.currentLevel-Math.round(node.levelstep*2.54)
-                        } else {
-                            msg.payload.level = node.device.state.levelControl.currentLevel-node.levelstep
-                        }
-                    }
-                    if (msg.payload.level == undefined) {
-                        msg.payload.level = node.device.state.levelControl.currentLevel
-                    }
-                    if ((hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')) && hasProperty(msg.payload, 'temp')) {
-                        node.error("Can't set Colour Temp and Hue/Sat at same time")
-                    } else {
-                        if (hasProperty(msg.payload, 'hue') || hasProperty(msg.payload, 'sat')){
-                            msg.payload.hue = msg.payload.hue ? msg.payload.hue : node.device.state.colorControl.currentHue
-                            msg.payload.sat = msg.payload.sat ? msg.payload.sat : node.device.state.colorControl.currentSaturation
-                            newcolor = {
-                                colorMode: 0,
-                                currentHue: msg.payload.hue,
-                                currentSaturation: msg.payload.sat
-                            }
-                        } else if (hasProperty(msg.payload, 'temp')) {
-                            if (node.tempformat == 'kelvin'){
-                                var mireds = 1000000/msg.payload.temp
-                            } else {
-                                var mireds = msg.payload.temp
-                            } 
-                            newcolor = {
-                                colorMode: 2,
-                                colorTemperatureMireds : mireds
-                            }
-                        }
-                        else {
-                                newcolor = {colorMode: node.device.state.colorControl.colorMode}
-                        }
                     }
                     if (typeof msg.payload.state != "boolean") {
                         switch (msg.payload.state){
@@ -116,16 +100,24 @@ module.exports = function(RED) {
                             onOff: msg.payload.state,
                         },
                         levelControl: {
-                            currentLevel: Math.max(2, Math.min(254, msg.payload.level))
+                            currentLevel: input.level
                         },
-                        colorControl: newcolor
+                        colorControl: input.color
                     }
                     //If values are changed then set them & wait for callback otherwise send msg on
                     if (willUpdate.call(node.device, newData)) {
                         node.debug(`WILL update, ${newData}`)
                         node.pending = true
                         node.pendingmsg = msg
-                        node.device.set(newData).catch((err) => {node.debug(err); node.error('Invalid Input')})
+                        node.device.set(newData).then(() => {
+                            node.pending = false;
+                            node.pendingmsg = null;
+                        }).catch((err) => {
+                            node.pending = false;
+                            node.pendingmsg = null;
+                            node.debug(err);
+                            node.error('Invalid Input', msg);
+                        })
                     } else {
                         node.debug(`WONT update, ${newData}`)
                         if (node.passthrough){
@@ -146,6 +138,9 @@ module.exports = function(RED) {
             node.device.events.colorControl.colorTemperatureMireds$Changed.on(node.stateEvt)
             node.device.events.colorControl.currentHue$Changed.on(node.stateEvt)
             node.device.events.colorControl.currentSaturation$Changed.on(node.stateEvt)
+            node.device.events.colorControl.currentX$Changed.on(node.stateEvt)
+            node.device.events.colorControl.currentY$Changed.on(node.stateEvt)
+            node.device.events.colorControl.colorMode$Changed.on(node.stateEvt)
             node.status({fill:"green",shape:"dot",text:"ready"});    
         })
 
@@ -165,19 +160,7 @@ module.exports = function(RED) {
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-                if (node.device.state.colorControl.colorMode == 0){
-                    msg.payload.hue = node.device.state.colorControl.currentHue
-                    msg.payload.sat = node.device.state.colorControl.currentSaturation
-                }
-                else if (node.device.state.colorControl.colorMode == 2){
-                    if (node.tempformat == 'kelvin'){
-                        msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
-                    } else {
-                        msg.payload.temp = node.device.state.colorControl.colorTemperatureMireds
-                    } 
-                } else {
-                    node.error(`Unknown color mode: ${node.device.state.colorControl.colorMode}`)
-                }
+                outputColor(node, msg.payload);
                 node.send(msg);
             } else if (!node.pending){
                 var msg = {payload : {}};
@@ -186,19 +169,9 @@ module.exports = function(RED) {
                 msg.payload.state = node.device.state.onOff.onOff
                 msg.payload.level = node.device.state.levelControl.currentLevel
                 if (node.range == "100"){ msg.payload.level = Math.round(msg.payload.level/2.54)}
-                if (node.device.state.colorControl.colorMode == 0){
-                    msg.payload.hue = node.device.state.colorControl.currentHue
-                    msg.payload.sat = node.device.state.colorControl.currentSaturation
-                }
-                else if (node.device.state.colorControl.colorMode == 2){
-                    msg.payload.temp = Math.floor(1000000/node.device.state.colorControl.colorTemperatureMireds)
-                } else {
-                    node.error(`Unknown color mode: ${node.device.state.colorControl.colorMode}`)
-                }
-                
+                outputColor(node, msg.payload);
                 node.send(msg);
             }
-            node.pending = false
         }
 
     
@@ -215,6 +188,9 @@ module.exports = function(RED) {
             await node.device.events.colorControl.colorTemperatureMireds$Changed.off(node.stateEvt)
             await node.device.events.colorControl.currentHue$Changed.off(node.stateEvt)
             await node.device.events.colorControl.currentSaturation$Changed.off(node.stateEvt)
+            node.device.events.colorControl.currentX$Changed.off(node.stateEvt)
+            node.device.events.colorControl.currentY$Changed.off(node.stateEvt)
+            node.device.events.colorControl.colorMode$Changed.off(node.stateEvt)
             //Remove Node-RED Custom  Events
             node.removeAllListeners('serverReady')
             //Remove from Bridge Node Registered

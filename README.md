@@ -61,6 +61,28 @@ The behaviour is as folllows:
 Whenever a Matter Nodes state is changed from outside of Node-RED, eg using the Apple/Google/Amazon app then the node will output a new status value as a brand new message.
 Whenever the node receives an input from another node then the node will only output the status if passthrough is set to true and will use the original message with an updated payload. This is consistent regardless of whether the device actual state changes so sending multiple ON messages will output multiple ON messages even if the device only updates once.
 
+### Light values
+
+The light's Range setting controls brightness only: select 1–100 for percentages
+or 1–254 for Matter levels. Hue and saturation always use 0–254. Temperature is
+an absolute Kelvin or mired value, according to Color Temperature Units; do not
+rescale it to the brightness range.
+
+Finite values outside the supported limits are clamped and reported using
+`node.warn`, which appears in the editor's Debug sidebar. Brightness follows the
+endpoint's level limits; temperature follows its physical mired limits. Matter
+attributes are rounded to whole values. Non-finite or non-numeric inputs are
+rejected. The raw `state` topic still uses Matter's attribute validation.
+
+The virtual endpoint advertises a broad temperature range. A flow controlling a
+physical bulb should also apply that bulb's actual limits. For Home Assistant,
+convert a 1–254 level to `brightness_pct` with `Math.round(level * 100 / 254)`,
+convert saturation with the same scale, and send Kelvin directly to
+`color_temp_kelvin`.
+
+A device's `ready` status reports local bridge startup, not confirmation of a
+controller connection or subscription.
+
 ### Battery 
 Each device has the option of setting a Replacable or Rechargeable battery, or None. 
 This will then show a battery in the controller app (apple only shows the state if its low/critial nothing if its Ok)

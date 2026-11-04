@@ -102,6 +102,13 @@ module.exports =  function(RED) {
             id: node.id,
             network: {
                 port: node.port,
+                // Disable BLE commissioning for the bridge. The bridge is reachable
+                // over IP (mDNS), so it does not need the BLE peripheral — and when a
+                // Matter Controller node runs in the same Node-RED process it enables
+                // BLE on the shared Environment, which would otherwise make every bridge
+                // server grab the single BLE adapter and fail with
+                // "onData listener already set".
+                ble: false,
             },
             commissioning: {
                 passcode: node.passcode,
